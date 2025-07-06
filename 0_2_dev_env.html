@@ -1,0 +1,280 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>* 开发环境准备 - 飞腾派驱动开发指导书</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="preface.html"><strong aria-hidden="true">1.</strong> 前言</a></li><li class="chapter-item expanded "><a href="chapter_0.html"><strong aria-hidden="true">2.</strong> 第零章：环境配置与预备知识</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="0_1_hardware_intro.html"><strong aria-hidden="true">2.1.</strong> * 硬件平台介绍</a></li><li class="chapter-item expanded "><a href="0_2_dev_env.html" class="active"><strong aria-hidden="true">2.2.</strong> * 开发环境准备</a></li><li class="chapter-item expanded "><a href="0_3_prerequisites.html"><strong aria-hidden="true">2.3.</strong> 前置知识引导</a></li></ol></li><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">3.</strong> 第一章：硬件控制类驱动</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="1_1_gpio_driver.html"><strong aria-hidden="true">3.1.</strong> * GPIO驱动开发</a></li><li class="chapter-item expanded "><a href="1_2_pwm_driver.html"><strong aria-hidden="true">3.2.</strong> PWM驱动开发</a></li><li class="chapter-item expanded "><a href="1_3_reset_pinmux.html"><strong aria-hidden="true">3.3.</strong> 复位与引脚复用驱动</a></li></ol></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">4.</strong> 第二章：时钟管理类驱动</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="2_1_noc_clock.html"><strong aria-hidden="true">4.1.</strong> NOC时钟驱动</a></li><li class="chapter-item expanded "><a href="2_2_clock_source.html"><strong aria-hidden="true">4.2.</strong> 时钟源驱动</a></li><li class="chapter-item expanded "><a href="2_3_watchdog.html"><strong aria-hidden="true">4.3.</strong> * 看门狗驱动</a></li></ol></li><li class="chapter-item expanded "><a href="chapter_3.html"><strong aria-hidden="true">5.</strong> 第三章：外设协议类驱动</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="3_1_uart_driver.html"><strong aria-hidden="true">5.1.</strong> UART串口驱动</a></li><li class="chapter-item expanded "><a href="3_2_i2c_driver.html"><strong aria-hidden="true">5.2.</strong> I2C驱动开发</a></li><li class="chapter-item expanded "><a href="3_3_spi_driver.html"><strong aria-hidden="true">5.3.</strong> SPI驱动开发</a></li></ol></li><li class="chapter-item expanded "><a href="chapter_4.html"><strong aria-hidden="true">6.</strong> 第四章：高速传输类驱动</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="4_1_dma_driver.html"><strong aria-hidden="true">6.1.</strong> DMA驱动开发</a></li><li class="chapter-item expanded "><a href="4_2_pci_controller.html"><strong aria-hidden="true">6.2.</strong> PCI控制器驱动</a></li><li class="chapter-item expanded "><a href="4_3_pcie_interconnect.html"><strong aria-hidden="true">6.3.</strong> PCIe互联驱动</a></li></ol></li><li class="chapter-item expanded "><a href="chapter_5.html"><strong aria-hidden="true">7.</strong> 第五章：网络通信类驱动</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="5_1_unit_testing.html"><strong aria-hidden="true">7.1.</strong> 单元测试与调试</a></li><li class="chapter-item expanded "><a href="5_2_pcie_nic_basic.html"><strong aria-hidden="true">7.2.</strong> PCIe网卡驱动基础</a></li><li class="chapter-item expanded "><a href="5_3_igb_driver.html"><strong aria-hidden="true">7.3.</strong> IGB网卡驱动实现</a></li><li class="chapter-item expanded "><a href="5_4_gmac_ethernet.html"><strong aria-hidden="true">7.4.</strong> GMAC以太网基础</a></li><li class="chapter-item expanded "><a href="5_5_yt8521_driver.html"><strong aria-hidden="true">7.5.</strong> YT8521驱动实现</a></li><li class="chapter-item expanded "><a href="5_6_net_device.html"><strong aria-hidden="true">7.6.</strong> net_device实现</a></li></ol></li><li class="chapter-item expanded "><a href="chapter_6.html"><strong aria-hidden="true">8.</strong> 第六章：存储驱动实现</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="6_1_sd_driver.html"><strong aria-hidden="true">8.1.</strong> Micro SD驱动</a></li><li class="chapter-item expanded "><a href="6_2_emmc_driver.html"><strong aria-hidden="true">8.2.</strong> eMMC驱动</a></li><li class="chapter-item expanded "><a href="6_3_flash_driver.html"><strong aria-hidden="true">8.3.</strong> Flash驱动</a></li></ol></li><li class="chapter-item expanded "><a href="chapter_7.html"><strong aria-hidden="true">9.</strong> 第七章：多媒体方向</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="7_1_usb_camera.html"><strong aria-hidden="true">9.1.</strong> USB摄像头驱动</a></li><li class="chapter-item expanded "><a href="7_2_usb_serial.html"><strong aria-hidden="true">9.2.</strong> * USB串口驱动</a></li></ol></li><li class="chapter-item expanded "><a href="chapter_8.html"><strong aria-hidden="true">10.</strong> 第八章：无线通讯方向</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="8_1_wifi6_driver.html"><strong aria-hidden="true">10.1.</strong> WiFi6驱动开发</a></li><li class="chapter-item expanded "><a href="8_2_bluetooth_driver.html"><strong aria-hidden="true">10.2.</strong> 蓝牙驱动开发</a></li></ol></li><li class="chapter-item expanded "><a href="chapter_9.html"><strong aria-hidden="true">11.</strong> 第九章：实时工业总线方向</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="9_1_canfd_driver.html"><strong aria-hidden="true">11.1.</strong> CANFD驱动</a></li><li class="chapter-item expanded "><a href="9_2_ethercat_driver.html"><strong aria-hidden="true">11.2.</strong> EtherCAT驱动</a></li></ol></li><li class="chapter-item expanded "><a href="appendix.html"><strong aria-hidden="true">12.</strong> 附录：训练营资源</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="A_1_schedule.html"><strong aria-hidden="true">12.1.</strong> 训练营课表</a></li><li class="chapter-item expanded "><a href="A_2_project_guide.html"><strong aria-hidden="true">12.2.</strong> 项目选题指南</a></li><li class="chapter-item expanded "><a href="A_3_case_studies.html"><strong aria-hidden="true">12.3.</strong> 优秀项目案例</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="02-开发环境准备"><a class="header" href="#02-开发环境准备">0.2 开发环境准备</a></h1>
+<h2 id="021-运行环境"><a class="header" href="#021-运行环境">0.2.1 运行环境</a></h2>
+<p>基础运行环境可以参考如下网址,搭建wsl+qemu的开发环境</p>
+<p><a href="https://rcore-os.cn/arceos-tutorial-book/ch01-00.html">https://rcore-os.cn/arceos-tutorial-book/ch01-00.html</a></p>
+<h3 id="vscode使用"><a class="header" href="#vscode使用">vscode使用</a></h3>
+<p>由于是使用的wsl（inux子系统）作为基础编译环境，默认提供的是命令行搭配vim的方式来编辑文件。这可能并不是大部分人喜欢的开发环境，所以推荐使用vscode搭配remote-ssh插件来进行开发，并且该插件对于wsl是有很好的兼容性的，安装插件后直接选择连接wsl即可使用。
+<img src="./img/0_2_1_1_install_remote_ssh.png" alt="安装remote-ssh插件" />
+<img src="./img/0_2_1_2_connect_wsl.png" alt="连接到wsl" />
+<img src="./img/0_2_1_3_open_remote_folder.png" alt="打开远程文件夹" /></p>
+<h3 id="qemu-补充"><a class="header" href="#qemu-补充">qemu 补充</a></h3>
+<p>在第一节的指导手册上使用的qemu版本是7.0.2，而很多模拟的外设是在后续版本才加到qemu中的。所以推荐从官网安装最新版或指定版本<a href="https://www.qemu.org/download">qemu官网</a></p>
+<p>以10.0.2 版本为例子，使用如下命令即可完成qemu的安装。</p>
+<pre><code class="language-bash">wget https://download.qemu.org/qemu-10.0.2.tar.xz
+tar xvJf qemu-10.0.2.tar.xz
+cd qemu-10.0.2
+make
+make install
+</code></pre>
+<h2 id="022-飞腾派上运行arceos"><a class="header" href="#022-飞腾派上运行arceos">0.2.2 飞腾派上运行Arceos</a></h2>
+<p>首先运行Arceos需要依赖其他系统来提供uboot,所以运行Arceos第一步是先烧录提供的飞腾派OS。</p>
+<h3 id="烧录飞腾派os"><a class="header" href="#烧录飞腾派os">烧录飞腾派OS</a></h3>
+<p><a href="https://pan.baidu.com/s/1pStiyqohrB3SxHAFFk8R6Q">https://pan.baidu.com/s/1pStiyqohrB3SxHAFFk8R6Q</a>  (提取码：dzdv)</p>
+<blockquote>
+<p><strong>注释：</strong> 5-系统镜像/1-PhytiumPIOS（基于Debian）/phytiumpiosv2.1资料包/4G内存-optee版/sdcard.img.7z，解压缩。</p>
+</blockquote>
+<p>下载解压后使用烧录工具将系统镜像烧录到TF卡，之后将TF插到飞腾派的卡槽中，最后连接电源线上电。
+烧录工具推荐使用 balenaEtcher<br />
+下载地址 https://etcher.balena.io/
+也可以使用win32 disk image 
+下载地址 https://sourceforge.net/projects/win32diskimager/</p>
+<blockquote>
+<p><strong>注释：</strong> 常用的手机以及派上的小卡正式名叫做TF或者说microSD 大的是SD卡当然统称为sd卡也是可以的  具体区别可查看这个链接https://www.sd-nand.com/news/technology/312.html</p>
+</blockquote>
+<p>注意引导方式选择从sd卡启动！！！
+<img src="./img/0_2_2_1_start_mode_table.png" alt="启动模式" /></p>
+<blockquote>
+<p><strong>注释：</strong>  如果使用的是带emmc的版本可以直接从emmc启动，是当前版本的麒麟os启动会禁用风扇请注意，过热可能会损坏飞腾派。</p>
+</blockquote>
+<p>启动后连接串口，可以看到如下打印即说明系统成功启动，
+<img src="./img/0_2_2_4_start_phyiumpios.png" alt="phyiumpi" />
+账号:root
+密码:root</p>
+<h3 id="编译及运行"><a class="header" href="#编译及运行">编译及运行</a></h3>
+<p>首先快速验证请参考这个链接，可以通过ostool来快速验证当前开发环境是完整可用的，避免后面在进行了较多code后因为难以验证而放弃。</p>
+<p><a href="https://github.com/qclic/phytium-mci/blob/main/docs/%E9%A3%9E%E8%85%BE%E6%B4%BESDMMC%E5%BC%80%E5%8F%91.md#%E6%9C%80%E7%AE%80%E4%BB%A3%E7%A0%81%E6%B5%8B%E8%AF%95%E6%96%B9%E5%BC%8F">最快速验证</a></p>
+<p>下载Arceos</p>
+<pre><code class="language-bash">git clone  https://github.com/rcore-os/arceos.git
+</code></pre>
+<p>编译Arceos</p>
+<pre><code class="language-bash">make A=examples/helloworld ARCH=aarch64 PLATFORM=aarch64-phytium-pi  FEARURES=&quot;irq&quot; SMP=4 LOG=info
+</code></pre>
+<p>之后会在example/helloword 文件夹内生成对应的可执行文件helloworld_aarch64-phytium-pi.bin
+将该文件拷贝到u盘中后将u盘插入飞腾派，之后重启飞腾派并在重启过程中在串口工具中输入enter以进入cmd模式，成功进入后串口打印如下图所示。
+<img src="./img/0_2_2_2_enter_cmd_mode.png" alt="命令行模式" /></p>
+<p>执行如下指令即可将本地编译的Arceos部署到飞腾派上运行</p>
+<pre><code class="language-bash">usb start
+fatload usb 0 0x90000000 helloworld_aarch64-phytium-pi.bin
+go 0x90000000
+</code></pre>
+<p><img src="./img/0_2_2_3_start_Arceos.png" alt="运行Arceos" /></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="0_1_hardware_intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="0_3_prerequisites.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="0_1_hardware_intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="0_3_prerequisites.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
