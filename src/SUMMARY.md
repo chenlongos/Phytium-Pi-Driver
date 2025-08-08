@@ -3,26 +3,26 @@
 - [前言](preface.md)
 
 - [第零章：环境配置与预备知识](chapter0/chapter_0.md)
-  * [* 硬件平台介绍](chapter0/0_1_hardware_intro.md)
-  * [* 开发环境准备](chapter0/0_2_dev_env.md)
-  * [* 前置知识引导](chapter0/0_3_prerequisites.md)
+  * [硬件平台介绍](chapter0/0_1_hardware_intro.md)
+  * [开发环境准备](chapter0/0_2_dev_env.md)
+  * [前置知识引导](chapter0/0_3_prerequisites.md)
 
 - [第一章：硬件控制类驱动](chapter1/chapter_1.md)
-  * [* GPIO驱动开发](chapter1/1_1_gpio_driver.md)
+  * [GPIO驱动开发](chapter1/1_1_gpio_driver.md)
   * [PWM驱动开发](chapter1/1_2_pwm_driver.md)
   * [复位与引脚复用驱动](chapter1/1_3_reset_pinmux.md)
 
 - [第二章：时钟管理类驱动](chapter2/chapter_2.md)
-  * [* 时钟设备驱动](chapter2/2_1_clock.md)
-  * [* Timer驱动](chapter2/2_2_timer.md)
-  * [* 看门狗驱动](chapter2/2_3_watchdog.md)
+  * [时钟设备驱动](chapter2/2_1_clock.md)
+  * [Timer驱动](chapter2/2_2_timer.md)
+  * [看门狗驱动](chapter2/2_3_watchdog.md)
 
 - [第三章：外设协议类驱动](chapter3/chapter_3.md)
-  * [* UART串口驱动](chapter3/3_1_uart_driver.md)
-  * [* I2C驱动开发](chapter3/3_2_i2c_driver.md)
-  * [* SPI驱动开发](chapter3/3_3_spi_driver.md)
+  * [UART串口驱动](chapter3/3_1_uart_driver.md)
+  * [I2C驱动开发](chapter3/3_2_i2c_driver.md)
+  * [SPI驱动开发](chapter3/3_3_spi_driver.md)
   
-- [* 第四章：中断](chapter4/chapter_4.md)
+- [第四章：中断](chapter4/chapter_4.md)
   * [GIC驱动](chapter4/4_1_gic.md)
   * [i2c的中断实现](chapter4/4_2_i2c_interrupt.md)
   * [spi的中断实现](chapter4/4_3_spi_interrupt.md)
@@ -46,7 +46,7 @@
   * [Flash驱动](chapter7/7_3_flash_driver.md)
 
 - [第八章：多媒体方向](chapter8/chapter_8.md)
-  * [* USB串口驱动](chapter8/8_1_usb_serial.md)
+  * [USB串口驱动](chapter8/8_1_usb_serial.md)
   * [USB摄像头驱动](chapter8/8_2_usb_camera.md)
   
 - [第九章：无线通讯方向](chapter9/chapter_9.md)
@@ -58,6 +58,6 @@
   * [EtherCAT驱动](chapter10/10_2_ethercat_driver.md)
 
 - [附录](appendix/appendix.md)
-  * [* 测试驱动开发](appendix/A_1_TDD.md)
-  * [* 设计模式](appendix/A_2_design_patterns.md)
-  * [* 注意事项](appendix/A_3_precautions.md)
+  * [测试驱动开发](appendix/A_1_TDD.md)
+  * [设计模式](appendix/A_2_design_patterns.md)
+  * [注意事项](appendix/A_3_precautions.md)
