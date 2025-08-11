@@ -25,7 +25,63 @@
 
 ### 1.2 硬件接口介绍
 
+- **扩展头**：飞腾派（Phytium Pi）开发板提供 40-pin GPIO 扩展头（双排引脚，间距 2.54mm），位于板边，兼容类树莓派布局。引脚涵盖通用 GPIO、电源、GND 和专用信号（如 I2C、UART）。
+- **引脚数量**：最多暴露 29 个通用 GPIO（来自 6 个控制器，总 96 个信号，受板上限制）。其他引脚支持多路复用（MUX）为 I2C、SPI、UART、CAN 等。
+- **电平标准**：3.3V TTL 逻辑电平（高电平 >2V，低电平 <0.8V）。每个引脚最大电流约 16mA，总电流限制 50-100mA（依版本）。
+- **颜色区分**：
+  - 电源：红（3.3V/5V，Pin 1/2 等）。
+  - GND：黑（Pin 6/9 等）。
+  - GPIO：橙（e.g., Pin 7: GPIO2_10）。
+  - 专用信号：绿（e.g., Pin 3/5: I2C1_SDA/SCL）。
+
+示例引脚（部分）：
+- Pin 7: GPIO2_10（MUX 为 UART2_TXD、DP1_HPD 等）。
+- Pin 11: GPIO3_1（MUX 为 UART2_CTS_N、SPIM2_CSN2）。
+- Pin 3/5: I2C1_SDA/SCL（MUX 为 CAN1_RX/TX）。
+
+![1_1_PhytiumPiGPIO](./../resource/img/1_1_PhytiumPiGPIO.png)
+
 ### 1.3 时序图
+
+飞腾派（Phytium Pi）GPIO 设备支持异步数字输入/输出和中断触发，无固定时钟信号。以下为 GPIO 的典型时序图，展示输出控制（如 LED 点亮/熄灭）和中断触发（如按钮按下检测）。时序图基于 3.3V 电平，切换时间 <10ns，支持上升/下降沿中断。
+
+**GPIO 输出时序（LED 控制示例）**
+
+描述：驱动程序通过寄存器（如 GPIO 输出寄存器）设置引脚电平（高/低），控制外部 LED。假设使用 Pin 7（GPIO2_10）点亮/熄灭 LED。
+
+```mermaid
+sequenceDiagram
+    participant D as 驱动
+    participant G as GPIO控制器
+    participant L as LED
+    D->>G: 写寄存器（0x28034000，设高电平）
+    G->>L: 输出 3.3V（点亮）
+    Note over G,L: 切换时间 <10ns
+    D->>G: 写寄存器（设低电平）
+    G->>L: 输出 0V（熄灭）
+```
+
+**GPIO 中断时序（按钮触发示例）**
+
+描述：配置 GPIO 为输入模式，启用中断（上升沿触发），检测按钮按下。假设使用 Pin 11（GPIO3_1）连接按钮。
+
+```mermaid
+sequenceDiagram
+    participant B as 按钮
+    participant G as GPIO控制器
+    participant D as 驱动
+    B->>G: 按钮按下（电平 0V->3.3V）
+    G->>D: 触发中断（GIC_SPI，上升沿）
+    Note over G,D: 响应时间 <10ns
+    D->>G: 读取状态寄存器，处理事件
+    D->>G: 清除中断（IC_CLR_INTR）
+```
+
+### 说明
+
+- **输出时序**：GPIO 无固定时钟，驱动通过寄存器直接控制电平。LED 响应为瞬时（<10ns），需串联 330Ω 电阻防止过流。
+- **中断时序**：中断通过 GIC（Generic Interrupt Controller）处理，需配置 PAD 寄存器（0x32B30000）启用上下拉和中断模式。
+- **异常情况**：电平不稳定可能导致中断误触发，建议检查上下拉配置（x_reg0 寄存器）。
 
 ## 2.接口表
 
@@ -115,7 +171,7 @@ IoError::InvChn 不合法的通道
         rust-objcopy --binary-architecture=aarch64 examples/helloworld/helloworld_aarch64-qemu-virt.elf --strip-all -O binary examples/helloworld/helloworld_aarch64-qemu-virt.bin
         Running on qemu...
         qemu-system-aarch64 -m 128M -smp 1 -cpu cortex-a72 -machine virt -kernel examples/helloworld/helloworld_aarch64-qemu-virt.bin -nographic
-
+      
             d8888                            .d88888b.   .d8888b.
             d88888                           d88P" "Y88b d88P  Y88b
             d88P888                           888     888 Y88b.
@@ -124,14 +180,14 @@ IoError::InvChn 不合法的通道
         d88P   888 888     888      88888888 888     888       "888
         d8888888888 888     Y88b.    Y8b.     Y88b. .d88P Y88b  d88P
         d88P     888 888      "Y8888P  "Y8888   "Y88888P"   "Y8888P"
-
+      
         arch = aarch64
         platform = aarch64-qemu-virt
         target = aarch64-unknown-none-softfloat
         build_mode = release
         log_level = debug
         smp = 1
-
+      
         [  0.001902 0 axruntime:130] Logging is enabled.
         [  0.002488 0 axruntime:131] Primary CPU 0 started, dtb = 0x44000000.
         [  0.002738 0 axruntime:133] Found physcial memory regions:
@@ -178,7 +234,7 @@ IoError::InvChn 不合法的通道
         let gpio_ie = base_addr.add(0x410);
         *gpio_ie = 0;
         *gpio_ie = *gpio_ie | (1 << pin);
-
+    
         # fn shut_down() {
         #    println!("shutdown function called");
         #    unsafe {
@@ -221,7 +277,7 @@ IoError::InvChn 不合法的通道
     # let gpio_ie = base_addr.add(0x410);
     # *gpio_ie = 0;
     # *gpio_ie = *gpio_ie | (1 << pin);
-
+    
         fn shut_down() {
             println!("shutdown function called");
             unsafe {
@@ -302,7 +358,7 @@ IoError::InvChn 不合法的通道
   use bitflags::bitflags;
   use safe_mmio::fields::ReadWrite;
   use zerocopy::{FromBytes, Immutable, IntoBytes, KnownLayout};
-
+  
   #[derive(Clone, Eq, FromBytes, Immutable, IntoBytes, KnownLayout, PartialEq)]
   #[repr(C, align(4))]
   pub struct PhitiumGpio {
@@ -311,11 +367,11 @@ IoError::InvChn 不合法的通道
     dir: ReadWrite<GpioPins>,
     resv2: ReadWrite<u16>,
   }
-
+  
   #[repr(transparent)]
   #[derive(Copy, Clone, Debug, Eq, FromBytes, Immutable, IntoBytes, KnownLayout, PartialEq)]
   pub struct GpioPins(u16);
-
+  
   bitflags! {
     impl GpioPins: u16 {
         const p0 = 1<<0;
@@ -336,7 +392,7 @@ IoError::InvChn 不合法的通道
         const p15 = 1<<15;
     }
   }
-
+  
   impl PhitiumGpio {
     pub fn new(base: usize) -> &'static mut Self {
         let b = base as *mut PhitiumGpio;
@@ -369,23 +425,23 @@ IoError::InvChn 不合法的通道
   }
   pub use crate::mem::phys_to_virt;
   pub use memory_addr::PhysAddr;
-
+  
   pub const BASE1: PhysAddr = pa!(0x28035000);
   ```
 - 由于我们目前暂时没有文件系统，无法通过读写文件的方式来控制GPIO。这里直接在main.rs中实例一个GPIO控制器进行相关初始化。
   ```rust
   // examples/helloworld/src/main.rs
-
+  
   #![cfg_attr(feature = "axstd", no_std)]
   #![cfg_attr(feature = "axstd", no_main)]
-
+  
   # use core::time;
-
+  
   #[cfg(feature = "axstd")]
   use axstd::println;
-
+  
   # use axstd::thread::sleep;
-
+  
   #[cfg_attr(feature = "axstd", unsafe(no_mangle))]
   fn main() {
       println!("Hello, world!");
@@ -402,7 +458,7 @@ IoError::InvChn 不合法的通道
       #    data = !data;
       # }
   }
-
+  
   ```
 - 创建一个大loop，在这个loop中，我们不停的将pin 8的值进行反转，反转一次，sleep 1s，这样就实现了1s灭，1s亮的效果。
 ```rust
@@ -451,14 +507,14 @@ IoError::InvChn 不合法的通道
       d88P   888 888     888      88888888 888     888       "888
     d8888888888 888     Y88b.    Y8b.     Y88b. .d88P Y88b  d88P
     d88P     888 888      "Y8888P  "Y8888   "Y88888P"   "Y8888P"
-
+    
     arch = aarch64
     platform = aarch64-phytium-pi
     target = aarch64-unknown-none-softfloat
     build_mode = release
     log_level = trace
     smp = 1
-
+    
     [ 13.461312 0 axruntime:130] Logging is enabled.
     [ 13.467040 0 axruntime:131] Primary CPU 0 started, dtb = 0xf9c29000.
     [ 13.474591 0 axruntime:133] Found physcial memory regions:

@@ -4,26 +4,26 @@
 - [前言](src/preface.md)
 
 - [第零章：环境配置与预备知识](src/chapter0/chapter_0.md)
-  * [* 硬件平台介绍](src/chapter0/0_1_hardware_intro.md)
-  * [* 开发环境准备](src/chapter0/0_2_dev_env.md)
-  * [* 前置知识引导](src/chapter0/0_3_prerequisites.md)
+  * [硬件平台介绍](src/chapter0/0_1_hardware_intro.md)
+  * [开发环境准备](src/chapter0/0_2_dev_env.md)
+  * [前置知识引导](src/chapter0/0_3_prerequisites.md)
 
 - [第一章：硬件控制类驱动](src/chapter1/chapter_1.md)
-  * [* GPIO驱动开发](src/chapter1/1_1_gpio_driver.md)
+  * [GPIO驱动开发](src/chapter1/1_1_gpio_driver.md)
   * [PWM驱动开发](src/chapter1/1_2_pwm_driver.md)
   * [复位与引脚复用驱动](src/chapter1/1_3_reset_pinmux.md)
 
 - [第二章：时钟管理类驱动](src/chapter2/chapter_2.md)
-  * [* 时钟设备驱动](src/chapter2/2_1_clock.md)
-  * [* Timer驱动](src/chapter2/2_2_timer.md)
-  * [* 看门狗驱动](src/chapter2/2_3_watchdog.md)
+  * [时钟设备驱动](src/chapter2/2_1_clock.md)
+  * [Timer驱动](src/chapter2/2_2_timer.md)
+  * [看门狗驱动](src/chapter2/2_3_watchdog.md)
 
 - [第三章：外设协议类驱动](src/chapter3/chapter_3.md)
-  * [* UART串口驱动](src/chapter3/3_1_uart_driver.md)
-  * [* I2C驱动开发](src/chapter3/3_2_i2c_driver.md)
-  * [* SPI驱动开发](src/chapter3/3_3_spi_driver.md)
+  * [UART串口驱动](src/chapter3/3_1_uart_driver.md)
+  * [I2C驱动开发](src/chapter3/3_2_i2c_driver.md)
+  * [SPI驱动开发](src/chapter3/3_3_spi_driver.md)
   
-- [* 第四章：中断](src/chapter4/chapter_4.md)
+- [第四章：中断](src/chapter4/chapter_4.md)
   * [GIC驱动](src/chapter4/4_1_gic.md)
   * [i2c的中断实现](src/chapter4/4_2_i2c_interrupt.md)
   * [spi的中断实现](src/chapter4/4_3_spi_interrupt.md)
@@ -47,7 +47,7 @@
   * [Flash驱动](src/chapter7/7_3_flash_driver.md)
 
 - [第八章：多媒体方向](src/chapter8/chapter_8.md)
-  * [* USB串口驱动](src/chapter8/8_1_usb_serial.md)
+  * [USB串口驱动](src/chapter8/8_1_usb_serial.md)
   * [USB摄像头驱动](src/chapter8/8_2_usb_camera.md)
   
 - [第九章：无线通讯方向](src/chapter9/chapter_9.md)
@@ -59,6 +59,6 @@
   * [EtherCAT驱动](src/chapter10/10_2_ethercat_driver.md)
 
 - [附录](src/appendix/appendix.md)
-  * [* 测试驱动开发](src/appendix/A_1_TDD.md)
-  * [* 设计模式](src/appendix/A_2_design_patterns.md)
-  * [* 注意事项](src/appendix/A_3_precautions.md)
+  * [测试驱动开发](src/appendix/A_1_TDD.md)
+  * [设计模式](src/appendix/A_2_design_patterns.md)
+  * [注意事项](src/appendix/A_3_precautions.md)
