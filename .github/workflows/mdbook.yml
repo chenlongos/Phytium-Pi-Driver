@@ -21,6 +21,7 @@ jobs:
           source $HOME/.cargo/env
           cargo install mdbook
           cargo install mdbook-mermaid
+          cargo install mdbook-katex
 
       - name: Build
         run: mdbook build
