@@ -1,0 +1,906 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>复位与引脚复用驱动 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="13-复位与引脚复用驱动"><a class="header" href="#13-复位与引脚复用驱动">1.3 复位与引脚复用驱动</a></h1>
+<h2 id="硬件原理"><a class="header" href="#硬件原理">硬件原理</a></h2>
+<p><strong>复位</strong></p>
+<p>复位是嵌入式系统中将硬件模块或整个系统恢复到已知初始状态的过程，用于初始化硬件、清除错误状态或恢复系统运行。复位机制通常包括以下类型：</p>
+<ul>
+<li><strong>上电复位（Power-on Reset, POR）</strong>：系统上电时由硬件自动触发，初始化所有寄存器和模块到默认状态。</li>
+<li><strong>软件复位（Software Reset）</strong>：通过软件写入特定控制寄存器触发，针对系统或特定模块。</li>
+<li><strong>看门狗复位（Watchdog Reset）</strong>：由看门狗定时器在检测到系统超时或故障时触发，重启系统。</li>
+<li><strong>外部复位</strong>：通过外部引脚输入信号（如低电平脉冲）触发，通常用于调试或手动重置。</li>
+</ul>
+<p>复位过程通常涉及以下步骤：</p>
+<ol>
+<li><strong>触发信号</strong>：硬件或软件生成复位信号（如寄存器写入或外部引脚电平变化）。</li>
+<li><strong>寄存器清零</strong>：相关寄存器（如计数器、状态寄存器）被设置为默认值（通常为0x0）。</li>
+<li><strong>模块初始化</strong>：硬件模块（如CPU、定时器、外设）恢复到初始状态，准备重新运行。</li>
+</ol>
+<p><strong>复位类型比较</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>复位类型</th><th>触发方式</th><th>作用范围</th><th>典型应用场景</th></tr></thead><tbody>
+<tr><td>上电复位</td><td>硬件上电自动触发</td><td>整个系统</td><td>系统启动初始化</td></tr>
+<tr><td>软件复位</td><td>写入控制寄存器</td><td>系统或特定模块</td><td>模块错误恢复</td></tr>
+<tr><td>看门狗复位</td><td>定时器超时</td><td>整个系统</td><td>系统故障恢复</td></tr>
+<tr><td>外部复位</td><td>外部引脚信号</td><td>整个系统或模块</td><td>调试或手动重置</td></tr>
+</tbody></table>
+</div><pre class="mermaid">sequenceDiagram
+    participant S as 软件
+    participant R as 复位寄存器
+    participant M as 硬件模块
+    S-&gt;&gt;R: 写入复位控制位（如write_load=1）
+    R-&gt;&gt;M: 发送复位信号
+    M--&gt;&gt;M: 清零寄存器，重置状态
+    M-&gt;&gt;R: 完成复位
+    R-&gt;&gt;S: 返回复位完成状态
+</pre>
+<p><strong>引脚复用</strong></p>
+<p>引脚复用（Pin Multiplexing）是嵌入式系统中优化引脚资源的技术，允许一个物理引脚支持多种功能（如GPIO、UART、SPI、I2C等）。由于SoC引脚数量有限，引脚复用通过配置寄存器动态选择引脚的功能和电气特性（如驱动强度、上下拉电阻、延迟）。</p>
+<p>引脚复用机制的工作原理：</p>
+<ul>
+<li><strong>功能选择</strong>：通过控制寄存器（如功能选择寄存器）的位字段选择引脚功能。例如，3位字段可支持8种功能（如000=GPIO，001=UART）。</li>
+<li><strong>电气特性配置</strong>：调整驱动强度（mA）、上下拉电阻（上拉/下拉/无）以及输入/输出延迟，以适配不同外设的信号要求。</li>
+<li><strong>设备树映射</strong>：在嵌入式系统中，引脚复用通常通过设备树（Device Tree）定义，映射到具体寄存器配置。</li>
+</ul>
+<p><strong>引脚复用功能示例</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>功能选择位</th><th>功能</th><th>描述</th></tr></thead><tbody>
+<tr><td>000</td><td>GPIO</td><td>通用输入输出</td></tr>
+<tr><td>001</td><td>UART</td><td>串口通信</td></tr>
+<tr><td>010</td><td>SPI</td><td>串行外设接口</td></tr>
+<tr><td>011</td><td>I2C</td><td>两线串行总线</td></tr>
+</tbody></table>
+</div><pre class="mermaid">sequenceDiagram
+    participant D as 设备驱动
+    participant P as 引脚控制器
+    participant R as PAD寄存器
+    D-&gt;&gt;P: 请求引脚功能（如UART）
+    P-&gt;&gt;R: 写入功能选择位（如001）
+    R--&gt;&gt;R: 配置驱动强度、上下拉
+    R-&gt;&gt;P: 确认配置完成
+    P-&gt;&gt;D: 返回配置成功
+
+</pre>
+<h2 id="飞腾派复位与引脚复用系统"><a class="header" href="#飞腾派复位与引脚复用系统">飞腾派复位与引脚复用系统</a></h2>
+<p>飞腾派开发板基于飞腾E2000处理器（ARMv8架构，2个FTC664核@1.8GHz和2个FTC310核@1.5GHz），其复位和引脚复用系统由Timer、RAS和PAD模块支持。以下详细介绍飞腾派的实现。</p>
+<h3 id="飞腾派复位系统"><a class="header" href="#飞腾派复位系统">飞腾派复位系统</a></h3>
+<p>飞腾派的复位系统由Timer和RAS模块实现，支持系统级和模块级复位。</p>
+<h4 id="timer模块"><a class="header" href="#timer模块">Timer模块</a></h4>
+<p>Timer模块用于定时功能，同时支持复位操作。其关键特性包括：</p>
+<ul>
+<li><strong>全局恢复位</strong>：通过控制寄存器（如ctrl_reg）的write_load位，重置计数器到默认值（通常0x0）。</li>
+<li><strong>重启/自由运行模式</strong>：复位后可选择重新计数或进入自由运行状态。</li>
+<li><strong>应用场景</strong>：初始化Timer模块或触发系统软复位。</li>
+</ul>
+<p><strong>Timer模块复位功能</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>功能</th><th>描述</th><th>触发方式</th></tr></thead><tbody>
+<tr><td>计数器复位</td><td>将计数器寄存器清零</td><td>写入ctrl_reg的write_load位</td></tr>
+<tr><td>模块初始化</td><td>重置Timer模块到初始状态</td><td>软件控制或上电复位</td></tr>
+</tbody></table>
+</div>
+<h4 id="ras模块"><a class="header" href="#ras模块">RAS模块</a></h4>
+<p>RAS（可靠性、可用性和可服务性）模块通过错误重置寄存器管理错误状态恢复，增强系统可靠性。其关键特性包括：</p>
+<ul>
+<li><strong>错误重置</strong>：通过err_reset寄存器（偏移0x0D0，32位）清除错误状态或计数器。</li>
+<li><strong>安全属性配置</strong>：通过err_reset_set寄存器（偏移0x0B0，64位）设置安全状态（1为安全，0为非安全）。</li>
+<li><strong>错误注入</strong>：通过err_inject_num寄存器模拟错误状态，用于调试。</li>
+</ul>
+<p><strong>RAS模块复位功能</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>功能</th><th>描述</th><th>触发方式</th></tr></thead><tbody>
+<tr><td>错误状态清除</td><td>清除错误计数器或状态</td><td>写入err_reset</td></tr>
+<tr><td>安全属性配置</td><td>设置复位操作的安全性</td><td>写入err_reset_set</td></tr>
+<tr><td>错误注入</td><td>模拟错误触发复位</td><td>写入err_inject_num</td></tr>
+</tbody></table>
+</div><pre class="mermaid">sequenceDiagram
+    participant S as 软件驱动
+    participant R as err_reset寄存器
+    participant M as RAS模块
+    S-&gt;&gt;R: 写入err_reset（0x0D0，置1）
+    R-&gt;&gt;M: 清除错误状态
+    M--&gt;&gt;M: 重置计数器，恢复运行
+    M-&gt;&gt;R: 返回复位完成
+    R-&gt;&gt;S: 通知驱动复位成功
+</pre>
+<h4 id="看门狗支持"><a class="header" href="#看门狗支持">看门狗支持</a></h4>
+<p>飞腾派支持看门狗定时器，通过 watchdog_ctrl 寄存器配置超时时间，触发系统级复位，适用于故障恢复场景。</p>
+<h3 id="飞腾派引脚复用系统"><a class="header" href="#飞腾派引脚复用系统">飞腾派引脚复用系统</a></h3>
+<p>飞腾派的引脚复用由PAD模块管理，支持10个复用引脚，每个引脚通过两个寄存器（x_reg0和x_reg1）配置，基地址为0x32830000。每个引脚可动态切换功能（如GPIO、UART、SPI、I2C）和电气特性。</p>
+<h4 id="pad模块功能"><a class="header" href="#pad模块功能">PAD模块功能</a></h4>
+<ul>
+<li><strong>功能选择</strong>：x_reg0的位[2:0]选择引脚功能（如000=GPIO，001=UART）。</li>
+<li><strong>驱动强度</strong>：x_reg0的位[7:4]设置驱动电流（默认4mA）。</li>
+<li><strong>上下拉电阻</strong>：x_reg0的位[9:8]配置上拉、下拉或无电阻。</li>
+<li><strong>输入/输出延迟</strong>：x_reg1配置输入延迟（位[7:0]，粒度100ps）和输出延迟（位[15:8]，粒度366ps，最大3.7ns）。</li>
+</ul>
+<p><strong>飞腾派引脚复用配置</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>配置项</th><th>寄存器</th><th>位字段</th><th>功能描述</th></tr></thead><tbody>
+<tr><td>功能选择</td><td>x_reg0</td><td>[2:0]</td><td>选择引脚功能（如GPIO、UART）</td></tr>
+<tr><td>驱动强度</td><td>x_reg0</td><td>[7:4]</td><td>设置驱动电流（默认4mA）</td></tr>
+<tr><td>上下拉电阻</td><td>x_reg0</td><td>[9:8]</td><td>配置上拉/下拉/无电阻</td></tr>
+<tr><td>输入延迟</td><td>x_reg1</td><td>[7:0]</td><td>启用延迟，粒度100ps</td></tr>
+<tr><td>输出延迟</td><td>x_reg1</td><td>[15:8]</td><td>启用延迟，粒度366ps，最大3.7ns</td></tr>
+</tbody></table>
+</div>
+<p><strong>飞腾派引脚复用配置</strong></p>
+<pre class="mermaid">sequenceDiagram
+    participant D as 设备驱动
+    participant P as PAD控制器
+    participant R as x_reg0/x_reg1
+    D-&gt;&gt;P: 请求配置引脚AN59为UART
+    P-&gt;&gt;R: 写入x_reg0[2:0]=001
+    P-&gt;&gt;R: 写入x_reg0[7:4]=4mA
+    P-&gt;&gt;R: 写入x_reg1[7:0]=延迟级别
+    R--&gt;&gt;R: 更新引脚配置
+    R-&gt;&gt;P: 配置完成
+    P-&gt;&gt;D: 返回成功
+</pre>
+<h4 id="引脚复用示例"><a class="header" href="#引脚复用示例">引脚复用示例</a></h4>
+<p>飞腾派40Pin接口支持多种功能（如GPIO、UART、I2C），通过设备树定义引脚组。例如，引脚AN59可配置为：</p>
+<ul>
+<li><strong>GPIO</strong>：x_reg0[2:0]=000，用于通用输入输出。</li>
+<li><strong>UART</strong>：x_reg0[2:0]=001，用于串口通信。</li>
+<li><strong>I2C</strong>：x_reg0[2:0]=011，用于两线总线。</li>
+</ul>
+<p>配置时需确保功能有效，并根据外设需求调整电气特性。</p>
+<h2 id="驱动-api-调用表"><a class="header" href="#驱动-api-调用表">驱动 API 调用表</a></h2>
+<h3 id="reset-驱动-api-调用表"><a class="header" href="#reset-驱动-api-调用表"><strong>Reset 驱动 API 调用表</strong></a></h3>
+<div class="table-wrapper"><table><thead><tr><th><strong>API 函数</strong></th><th><strong>描述</strong></th><th><strong>参数</strong></th><th><strong>返回值</strong></th></tr></thead><tbody>
+<tr><td><code>FResetInit</code></td><td>初始化 CRU 控制器，设置基址和设备状态，为复位操作准备。</td><td><code>instance_p: &amp;mut FResetCtrl</code>（CRU 控制器实例）<br><code>config_p: &amp;FResetConfig</code>（基址 0x2800_0000 等）</td><td><code>bool</code>: true（成功），false（参数错误或已初始化）</td></tr>
+<tr><td><code>FResetDeInit</code></td><td>去初始化 CRU 控制器，清除状态，标记未就绪。</td><td><code>instance_p: &amp;mut FResetCtrl</code>（CRU 控制器实例）</td><td><code>bool</code>: true（成功）</td></tr>
+<tr><td><code>FResetLookupConfig</code></td><td>根据设备 ID 查找 CRU 配置，返回基址等信息。</td><td><code>instance_id: u32</code>（设备 ID）</td><td><code>Option&lt;FResetConfig&gt;</code>: 配置结构体或 None（ID 无效）</td></tr>
+<tr><td><code>FResetSystem</code></td><td>触发系统全局复位，写入 CRU cru_rst_ok 寄存器（bit 0=1），重启 CPU 和外设。</td><td><code>instance_p: &amp;mut FResetCtrl</code>（CRU 实例）</td><td><code>bool</code>: true（成功），false（超时或寄存器错误）</td></tr>
+<tr><td><code>FResetPeripheral</code></td><td>重置指定外设（如 GPIO0~5），写入 CRU cru_rst_ok（bit 1~5）。</td><td><code>instance_p: &amp;mut FResetCtrl</code><br><code>periph_id: u32</code>（外设 ID，如 0=GPIO0）</td><td><code>bool</code>: true（成功），false（外设 ID 无效或超时）</td></tr>
+</tbody></table>
+</div>
+<h4 id="说明"><a class="header" href="#说明">说明</a></h4>
+<ul>
+<li><strong>调用顺序</strong>：
+<ol>
+<li>调用 <code>FResetInit</code> 和 <code>FResetLookupConfig</code> 初始化 CRU，设置基址（0x2800_0000）。</li>
+<li>使用 <code>FResetSystem</code> 或 <code>FResetPeripheral</code> 触发复位。</li>
+<li>可选调用 <code>FResetDeInit</code> 清理状态。</li>
+</ol>
+</li>
+<li><strong>硬件依赖</strong>：
+<ul>
+<li><strong>基址</strong>：CRU 0x2800_0000。</li>
+<li><strong>寄存器</strong>：
+<ul>
+<li><code>cru_rst_ok</code> (偏移 0x100)：bit 0=系统复位，bit 1~5=外设复位（如 GPIO0~5）。</li>
+<li><code>cru_rst_status</code> (偏移 0x104)：bit 9=复位完成。</li>
+</ul>
+</li>
+<li><strong>硬件接口</strong>：SW4 按钮（低电平，&gt;10ms）或 Pin 33（GPIO2_8，CRU_RST_OK）。</li>
+</ul>
+</li>
+</ul>
+<h3 id="pinmux-驱动-api-调用表"><a class="header" href="#pinmux-驱动-api-调用表">Pinmux 驱动 API 调用表</a></h3>
+<div class="table-wrapper"><table><thead><tr><th><strong>API 函数</strong></th><th><strong>描述</strong></th><th><strong>参数</strong></th><th><strong>返回值</strong></th></tr></thead><tbody>
+<tr><td><code>FIOPadCfgInitialize</code></td><td>初始化 PAD 控制器，设置基址和设备 ID，为引脚功能配置准备。</td><td><code>instance_p: &amp;mut FIOPadCtrl</code>（PAD 控制器实例）<br><code>input_config_p: &amp;FIOPadConfig</code>（基址 0x32B30000）</td><td><code>bool</code>: true（成功），false（参数错误或已初始化）</td></tr>
+<tr><td><code>FIOPadDeInitialize</code></td><td>去初始化 PAD 控制器，清除状态，标记未就绪。</td><td><code>instance_p: &amp;mut FIOPadCtrl</code>（PAD 控制器实例）</td><td><code>bool</code>: true（成功）</td></tr>
+<tr><td><code>FIOPadLookupConfig</code></td><td>根据设备 ID 查找 PAD 配置，返回基址等信息。</td><td><code>instance_id: u32</code>（设备 ID）</td><td><code>Option&lt;FIOPadConfig&gt;</code>: 配置结构体或 None（ID 无效）</td></tr>
+<tr><td><code>FIOPadSetFunc</code></td><td>设置指定引脚功能，写入 PAD x_reg0（如 0x00D0，bit 0~3 值 5=I2C）。</td><td><code>instance_p: &amp;mut FIOPadCtrl</code><br><code>offset: u32</code>（偏移，如 0x00D0）<br><code>func: u32</code>（功能值，如 5=I2C）</td><td><code>bool</code>: true（成功），false（偏移或功能值无效）</td></tr>
+<tr><td><code>FMioFuncInit</code></td><td>初始化 MIO 控制器，设置功能（如 0b00=I2C），写入 creg_mio_func_sel。</td><td><code>instance_p: &amp;mut PhitiumMio</code><br><code>func: u32</code>（功能值，如 0=I2C）</td><td><code>bool</code>: true（成功），false（功能值无效）</td></tr>
+<tr><td><code>FMioFuncGetAddress</code></td><td>获取 MIO 控制器基址（如 0x2801_4000 for MIO0）。</td><td><code>instance_p: &amp;PhitiumMio</code><br><code>func: u32</code>（功能值）</td><td><code>u64</code>: 基址或 0（失败）</td></tr>
+<tr><td><code>FMioFuncGetIrqNum</code></td><td>获取 MIO 功能的中断编号（如 I2C/UART IRQ，假设 24）。</td><td><code>instance_p: &amp;PhitiumMio</code><br><code>func: u32</code>（功能值）</td><td><code>u32</code>: 中断号（24）或 0（失败）</td></tr>
+</tbody></table>
+</div>
+<h4 id="说明-1"><a class="header" href="#说明-1">说明</a></h4>
+<ul>
+<li><strong>调用顺序</strong>：
+<ol>
+<li>调用 <code>FIOPadCfgInitialize</code> 和 <code>FIOPadLookupConfig</code> 初始化 PAD（基址 0x32B30000）。</li>
+<li>调用 <code>FMioFuncInit</code> 设置 MIO 功能（如 MIO0 0x2801_4000 为 I2C，creg_mio_func_sel=0b00）。</li>
+<li>调用 <code>FIOPadSetFunc</code> 配置引脚功能（如 Pin 3/5 I2C1_SDA/SCL，x_reg0=5）。</li>
+<li>可选调用 <code>FIOPadDeInitialize</code> 清理。</li>
+</ol>
+</li>
+<li><strong>硬件依赖</strong>：
+<ul>
+<li><strong>PAD 基址</strong>：0x32B30000。
+<ul>
+<li><code>x_reg0</code>（偏移 e.g., 0x00D0 for SCL）：bit 0~3=功能（0=GPIO，5=I2C，1=UART，2=CAN，3=SPI，4=PWM）；bit 4~6=驱动强度（2~12mA）；bit 7=上下拉（1=上拉）。</li>
+<li><code>x_reg1</code>（偏移 e.g., 0x00DC）：bit 0~3=延迟（100ps/366ps）。</li>
+</ul>
+</li>
+<li><strong>MIO 基址</strong>：0x2801_4000~0x2803_2000（MIO0~15）。
+<ul>
+<li><code>creg_mio_func_sel</code>（偏移 0x1000）：bit 0~1=功能（0=I2C，1=UART）。</li>
+</ul>
+</li>
+<li><strong>引脚</strong>：40-pin 扩展头（如 Pin 7: GPIO2_10 MUX UART2_TXD，Pin 3: I2C1_SDA）。</li>
+</ul>
+</li>
+</ul>
+<h2 id="寄存器信息"><a class="header" href="#寄存器信息">寄存器信息</a></h2>
+<h3 id="reset-驱动寄存器信息"><a class="header" href="#reset-驱动寄存器信息">Reset 驱动寄存器信息</a></h3>
+<h4 id="基地址"><a class="header" href="#基地址">基地址</a></h4>
+<ul>
+<li><strong>CRU (Clock and Reset Unit)</strong>：0x2800_0000</li>
+</ul>
+<h4 id="寄存器表"><a class="header" href="#寄存器表">寄存器表</a></h4>
+<div class="table-wrapper"><table><thead><tr><th><strong>寄存器名称</strong></th><th><strong>偏移地址</strong></th><th><strong>描述</strong></th></tr></thead><tbody>
+<tr><td><code>cru_rst_ok</code></td><td>0x100</td><td>复位控制寄存器，触发系统或外设复位。</td></tr>
+<tr><td><code>cru_rst_status</code></td><td>0x104</td><td>复位状态寄存器，检查复位完成状态。</td></tr>
+</tbody></table>
+</div>
+<h4 id="寄存器位域设置"><a class="header" href="#寄存器位域设置">寄存器位域设置</a></h4>
+<ul>
+<li><strong><code>cru_rst_ok</code> (偏移 0x100, 读写)</strong>
+<ul>
+<li><strong>SYSTEM_RESET</strong> (bit 0, 1 bit)：系统复位，1=触发全局复位（CPU 和外设）。
+<ul>
+<li>默认值：0</li>
+<li>描述：写入 1 触发系统复位，时序 &gt;10ms。</li>
+</ul>
+</li>
+<li><strong>PERIPH_RESET</strong> (bit 1-5, 5 bits)：外设复位，值 0~5 对应 GPIO0~5 等外设。
+<ul>
+<li>默认值：0</li>
+<li>描述：写入外设 ID 重置指定外设（如 0=GPIO0）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong><code>cru_rst_status</code> (偏移 0x104, 只读)</strong>
+<ul>
+<li><strong>DONE</strong> (bit 9, 1 bit)：复位完成，1=复位完成，0=进行中。
+<ul>
+<li>默认值：0</li>
+<li>描述：读取确认复位状态，需轮询。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="pinmux-驱动寄存器信息"><a class="header" href="#pinmux-驱动寄存器信息">Pinmux 驱动寄存器信息</a></h3>
+<h4 id="基地址-1"><a class="header" href="#基地址-1">基地址</a></h4>
+<ul>
+<li><strong>PAD</strong>：0x32B30000</li>
+<li><strong>MIO</strong>：0x2801_4000 ~ 0x2803_2000（MIO0~15）。</li>
+</ul>
+<h4 id="寄存器表-1"><a class="header" href="#寄存器表-1">寄存器表</a></h4>
+<h4 id="pad-寄存器"><a class="header" href="#pad-寄存器">PAD 寄存器</a></h4>
+<div class="table-wrapper"><table><thead><tr><th><strong>寄存器名称</strong></th><th><strong>偏移地址</strong></th><th><strong>描述</strong></th></tr></thead><tbody>
+<tr><td><code>x_reg0_scl</code></td><td>0x00D0</td><td>SCL 引脚功能选择和电气特性配置（如 Pin 3，I2C1_SCL）。</td></tr>
+<tr><td><code>x_reg0_sda</code></td><td>0x00D4</td><td>SDA 引脚功能选择和电气特性配置（如 Pin 5，I2C1_SDA）。</td></tr>
+<tr><td><code>x_reg0_gpio</code></td><td>0x00D8</td><td>GPIO 引脚功能选择和电气特性配置（如 Pin 7，GPIO2_10）。</td></tr>
+<tr><td><code>x_reg1_scl</code></td><td>0x00DC</td><td>SCL 引脚延迟配置。</td></tr>
+<tr><td><code>x_reg1_sda</code></td><td>0x00E0</td><td>SDA 引脚延迟配置。</td></tr>
+<tr><td><code>x_reg1_gpio</code></td><td>0x00E4</td><td>GPIO 引脚延迟配置。</td></tr>
+</tbody></table>
+</div>
+<h4 id="mio-寄存器"><a class="header" href="#mio-寄存器">MIO 寄存器</a></h4>
+<div class="table-wrapper"><table><thead><tr><th><strong>寄存器名称</strong></th><th><strong>偏移地址</strong></th><th><strong>描述</strong></th></tr></thead><tbody>
+<tr><td><code>creg_mio_func_sel</code></td><td>0x1000</td><td>MIO 功能选择寄存器，设置引脚功能（如 I2C/UART）。</td></tr>
+<tr><td><code>func_sel_state</code></td><td>0x1004</td><td>MIO 功能状态寄存器，查询当前功能。</td></tr>
+<tr><td><code>version</code></td><td>0x1008</td><td>MIO 版本信息。</td></tr>
+</tbody></table>
+</div>
+<h4 id="寄存器位域设置-1"><a class="header" href="#寄存器位域设置-1">寄存器位域设置</a></h4>
+<h4 id="pad-寄存器-1"><a class="header" href="#pad-寄存器-1">PAD 寄存器</a></h4>
+<ul>
+<li><strong><code>x_reg0_scl</code>, <code>x_reg0_sda</code>, <code>x_reg0_gpio</code> (偏移 0x00D0/0x00D4/0x00D8, 读写)</strong>
+<ul>
+<li><strong>FUNC</strong> (bit 0-3, 4 bits)：功能选择。
+<ul>
+<li>值：
+<ul>
+<li>0 = GPIO</li>
+<li>1 = UART</li>
+<li>2 = CAN</li>
+<li>3 = SPI</li>
+<li>4 = PWM</li>
+<li>5 = I2C</li>
+</ul>
+</li>
+<li>默认值：0</li>
+<li>描述：设置引脚功能（如 Pin 3/5 为 I2C，值 5）。</li>
+</ul>
+</li>
+<li><strong>DRIVE_STRENGTH</strong> (bit 4-6, 3 bits)：驱动强度，2~12mA。
+<ul>
+<li>默认值：0</li>
+<li>描述：配置电流输出能力。</li>
+</ul>
+</li>
+<li><strong>PULL</strong> (bit 7, 1 bit)：上下拉，1=上拉，0=无。
+<ul>
+<li>默认值：0</li>
+<li>描述：启用上拉电阻（如 I2C 需 4.7kΩ）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong><code>x_reg1_scl</code>, <code>x_reg1_sda</code>, <code>x_reg1_gpio</code> (偏移 0x00DC/0x00E0/0x00E4, 读写)</strong>
+<ul>
+<li><strong>DELAY</strong> (bit 0-3, 4 bits)：输入/输出延迟，粒度 100ps/366ps。
+<ul>
+<li>默认值：0</li>
+<li>描述：调整信号时序。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="mio-寄存器-1"><a class="header" href="#mio-寄存器-1">MIO 寄存器</a></h4>
+<ul>
+<li><strong><code>creg_mio_func_sel</code> (偏移 0x1000, 读写)</strong>
+<ul>
+<li><strong>SEL_STATE</strong> (bit 0-1, 2 bits)：功能选择。
+<ul>
+<li>值：
+<ul>
+<li>0 = I2C</li>
+<li>1 = UART</li>
+</ul>
+</li>
+<li>默认值：0</li>
+<li>描述：设置 MIO 功能（如 MIO0 为 I2C，值 0）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong><code>func_sel_state</code> (偏移 0x1004, 只读)</strong>
+<ul>
+<li><strong>SEL_STATE</strong> (bit 0-1, 2 bits)：查询当前功能（同上）。
+<ul>
+<li>默认值：0</li>
+<li>描述：读取 MIO 配置状态。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong><code>version</code> (偏移 0x1008, 只读)</strong>
+<ul>
+<li>默认值：未知</li>
+<li>描述：MIO 硬件版本信息。</li>
+</ul>
+</li>
+</ul>
+<h2 id="驱动实现解析"><a class="header" href="#驱动实现解析">驱动实现解析</a></h2>
+<h2 id="reset-驱动实现讲解crurs"><a class="header" href="#reset-驱动实现讲解crurs">Reset 驱动实现讲解（cru.rs）</a></h2>
+<p>reset 驱动基于 CRU (Clock and Reset Unit) 控制器，实现系统和外设复位。代码定义寄存器、结构体和 API 函数，使用 SpinNoIrq 锁确保多核安全，依赖 phys_to_virt 进行地址转换。</p>
+<p><strong>寄存器定义部分</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>register_structs! {
+    pub CruRegs {
+        (0x00 =&gt; _reserved0),
+        (0x100 =&gt; cru_rst_ok: ReadWrite&lt;u32, RST_OK::Register&gt;),
+        (0x104 =&gt; cru_rst_status: ReadOnly&lt;u32, RST_STATUS::Register&gt;),
+        (0x108 =&gt; @END),
+    }
+}
+
+register_bitfields![u32,
+    RST_OK [
+        SYSTEM_RESET OFFSET(0) NUMBITS(1) [], // 1=触发系统复位
+        PERIPH_RESET OFFSET(1) NUMBITS(5) [], // bit 1-5: GPIO0~5 等外设
+    ],
+    RST_STATUS [
+        DONE OFFSET(9) NUMBITS(1) [], // 1=复位完成
+    ],
+];
+<span class="boring">}</span></code></pre></pre>
+<p>使用 tock_registers 宏定义 CRU 寄存器布局（基址 0x2800_0000）。cru_rst_ok (偏移 0x100) 是读写寄存器，用于触发复位（bit 0: 系统复位，bit 1-5: 外设复位，如 GPIO0~5）。cru_rst_status (偏移 0x104) 是只读寄存器，检查复位完成（bit 9: DONE=1 表示完成）。位域定义确保类型安全访问，避免手动掩码操作。</p>
+<p><strong>结构体和全局定义部分</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct CruCtrl {
+    regs: NonNull&lt;CruRegs&gt;,
+}
+
+unsafe impl Send for CruCtrl {}
+
+impl CruCtrl {
+    pub const fn new(base: *mut u8) -&gt; Self {
+        Self {
+            regs: NonNull::new(base).unwrap().cast(),
+        }
+    }
+    const fn regs(&amp;self) -&gt; &amp;CruRegs {
+        unsafe { self.regs.as_ref() }
+    }
+    const fn regs_mut(&amp;mut self) -&gt; &amp;mut CruRegs {
+        unsafe { self.regs.as_mut() }
+    }
+}
+
+// API 结构体
+#[derive(Debug, Clone, Copy, Default)]
+pub struct FResetConfig {
+    pub instance_id: u32,
+    pub base_address: usize,
+}
+
+pub struct FResetCtrl {
+    pub config: FResetConfig,
+    pub is_ready: u32,
+}
+
+static CRU_CONFIG: [FResetConfig; 1] = [FResetConfig {
+    instance_id: 0,
+    base_address: 0x2800_0000usize,
+}];
+
+pub static CRU: SpinNoIrq&lt;FResetCtrl&gt; = SpinNoIrq::new(FResetCtrl {
+    config: FResetConfig {
+        instance_id: 0,
+        base_address: 0,
+    },
+    is_ready: 0,
+});
+<span class="boring">}</span></code></pre></pre>
+<p>CruCtrl 封装寄存器指针，使用 NonNull 确保非空，regs/regs_mut 方法通过 unsafe 提供访问（const fn 允许常量上下文）。unsafe impl Send 允许跨线程传递。FResetConfig 和 FResetCtrl 是 API 结构体，存储配置和状态（is_ready=0x11111111 表示初始化）。全局 CRU 使用 SpinNoIrq 锁保护多核访问，静态配置表 CRU_CONFIG 定义基址 0x2800_0000。</p>
+<p><strong>API 函数部分</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FResetInit(instance_p: &amp;mut FResetCtrl, config_p: &amp;FResetConfig) -&gt; bool {
+    assert!(Some(*instance_p).is_some() &amp;&amp; Some(*config_p).is_some());
+    let mut ret = true;
+    if instance_p.is_ready == 0x11111111u32 {
+        info!("CRU already initialized.");
+        return false;
+    }
+    FResetDeInit(instance_p);
+    instance_p.config = *config_p;
+    instance_p.is_ready = 0x11111111u32;
+    ret
+}
+
+pub fn FResetDeInit(instance_p: &amp;mut FResetCtrl) -&gt; bool {
+    if instance_p.is_ready == 0 {
+        return true;
+    }
+    instance_p.is_ready = 0;
+    unsafe {
+        core::ptr::write_bytes(instance_p as *mut FResetCtrl, 0, core::mem::size_of::&lt;FResetCtrl&gt;());
+    }
+    true
+}
+
+pub fn FResetLookupConfig(instance_id: u32) -&gt; Option&lt;FResetConfig&gt; {
+    if instance_id &gt;= 1 {
+        return None;
+    }
+    Some(CRU_CONFIG[instance_id as usize])
+}
+
+pub fn FResetSystem(instance_p: &amp;mut FResetCtrl) -&gt; bool {
+    let base = instance_p.config.base_address;
+    let cru = CruCtrl::new(phys_to_virt(PhysAddr::from(base)).as_mut_ptr());
+    cru.regs().cru_rst_ok.modify(RST_OK::SYSTEM_RESET::SET);
+    let mut timeout = 0;
+    while cru.regs().cru_rst_status.read(RST_STATUS::DONE) != 1 &amp;&amp; timeout &lt; 500 {
+        timeout += 1;
+        crate::time::busy_wait(core::time::Duration::from_millis(1));
+    }
+    timeout &lt; 500
+}
+
+pub fn FResetPeripheral(instance_p: &amp;mut FResetCtrl, periph_id: u32) -&gt; bool {
+    if periph_id &gt; 5 {
+        return false;
+    }
+    let base = instance_p.config.base_address;
+    let cru = CruCtrl::new(phys_to_virt(PhysAddr::from(base)).as_mut_ptr());
+    cru.regs().cru_rst_ok.modify(RST_OK::PERIPH_RESET.val(periph_id));
+    let mut timeout = 0;
+    while cru.regs().cru_rst_status.read(RST_STATUS::DONE) != 1 &amp;&amp; timeout &lt; 500 {
+        timeout += 1;
+        crate::time::busy_wait(core::time::Duration::from_millis(1));
+    }
+    timeout &lt; 500
+}
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>FResetInit：检查指针和状态（is_ready=0x11111111 表示已初始化），调用 FResetDeInit 清理，设置 config 和 is_ready。效果是准备 CRU 控制器。</li>
+<li>FResetDeInit：清除 is_ready 并零初始化结构体（unsafe write_bytes），释放状态。</li>
+<li>FResetLookupConfig：根据 ID 从静态表返回配置（基址 0x2800_0000），支持多实例扩展。</li>
+<li>FResetSystem：创建 CruCtrl 实例（phys_to_virt 转换虚拟地址），修改 cru_rst_ok 的 SYSTEM_RESET bit=1 触发复位。轮询 cru_rst_status 的 DONE bit（超时 500ms），返回成功。</li>
+<li>FResetPeripheral：类似系统复位，但设置 PERIPH_RESET bit=periph_id (0~5，如 GPIO0），轮询完成。ID &gt;5 返回 false，限制外设范围。</li>
+</ul>
+<p><strong>硬件关联</strong>：CRU 基址 0x2800_0000，寄存器偏移 0x100/0x104（推测，手册定义）。SW4 按钮或 Pin 33（GPIO2_8）可触发外部复位，但代码未处理。</p>
+<p><strong>ArceOS 上下文</strong>：使用 SpinNoIrq 锁保护全局 CRU，busy_wait 来自 crate::time。兼容 axhal 的平台初始化（如 platform_init）。</p>
+<h2 id="pinmux-驱动实现讲解pinctrlrs"><a class="header" href="#pinmux-驱动实现讲解pinctrlrs">Pinmux 驱动实现讲解（pinctrl.rs）</a></h2>
+<p>pinmux 驱动基于 PAD 和 MIO 控制器，实现引脚功能复用和配置。代码扩展 mio.rs 的 PhitiumMio，依赖 phys_to_virt 和 SpinNoIrq。</p>
+<p><strong>寄存器定义部分</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// PAD 寄存器定义（基址 0x32B30000）
+register_structs! {
+    pub PadRegs {
+        (0x00 =&gt; _reserved0),
+        (0x00D0 =&gt; x_reg0_scl: ReadWrite&lt;u32, X_REG0::Register&gt;),
+        (0x00D4 =&gt; x_reg0_sda: ReadWrite&lt;u32, X_REG0::Register&gt;),
+        (0x00D8 =&gt; x_reg0_gpio: ReadWrite&lt;u32, X_REG0::Register&gt;),
+        (0x00DC =&gt; x_reg1_scl: ReadWrite&lt;u32, X_REG1::Register&gt;),
+        (0x00E0 =&gt; x_reg1_sda: ReadWrite&lt;u32, X_REG1::Register&gt;),
+        (0x00E4 =&gt; x_reg1_gpio: ReadWrite&lt;u32, X_REG1::Register&gt;),
+        (0x1000 =&gt; @END),
+    }
+}
+
+register_bitfields![u32,
+    X_REG0 [
+        FUNC OFFSET(0) NUMBITS(4) [
+            GPIO = 0,
+            I2C = 5,
+            UART = 1,
+            CAN = 2,
+            SPI = 3,
+            PWM = 4,
+        ],
+        DRIVE_STRENGTH OFFSET(4) NUMBITS(3) [], // 2~12mA
+        PULL OFFSET(7) NUMBITS(1) [], // 1=上拉
+    ],
+    X_REG1 [
+        DELAY OFFSET(0) NUMBITS(4) [], // 100ps/366ps 粒度
+    ],
+];
+<span class="boring">}</span></code></pre></pre>
+<p>使用 tock_registers 宏定义 PAD 寄存器布局（基址 0x32B30000）。x_reg0_* (偏移 0x00D0~0x00D8) 为读写寄存器，用于功能选择（如 SCL/SDA/GPIO）。x_reg1_* (偏移 0x00DC~0x00E4) 配置延迟。位域定义 FUNC (bit 0-3) 支持 GPIO/I2C/UART/CAN/SPI/PWM（值 0~5），DRIVE_STRENGTH (bit 4-6) 电流，PULL (bit 7) 上拉，DELAY (bit 0-3) 时序调整。</p>
+<p><strong>结构体和全局定义部分</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// PAD 控制器结构体
+pub struct PadCtrl {
+    regs: NonNull&lt;PadRegs&gt;,
+}
+
+unsafe impl Send for PadCtrl {}
+
+impl PadCtrl {
+    pub const fn new(base: *mut u8) -&gt; Self {
+        Self {
+            regs: NonNull::new(base).unwrap().cast(),
+        }
+    }
+    const fn regs(&amp;self) -&gt; &amp;PadRegs {
+        unsafe { self.regs.as_ref() }
+    }
+    const fn regs_mut(&amp;mut self) -&gt; &amp;mut PadRegs {
+        unsafe { self.regs.as_mut() }
+    }
+}
+
+// API 结构体（复用 I2C 模式）
+use super::mio::{PhitiumMio, MIO0, MIO1};
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct FIOPadConfig {
+    pub instance_id: u32,
+    pub base_address: usize,
+}
+
+pub struct FIOPadCtrl {
+    pub config: FIOPadConfig,
+    pub is_ready: u32,
+}
+
+static PAD_CONFIG: [FIOPadConfig; 1] = [FIOPadConfig {
+    instance_id: 0,
+    base_address: 0x32B30000usize,
+}];
+
+pub static PAD: SpinNoIrq&lt;FIOPadCtrl&gt; = SpinNoIrq::new(FIOPadCtrl {
+    config: FIOPadConfig {
+        instance_id: 0,
+        base_address: 0,
+    },
+    is_ready: 0,
+});
+<span class="boring">}</span></code></pre></pre>
+<p>PadCtrl 封装寄存器指针，使用 NonNull 确保非空，regs/regs_mut 方法通过 unsafe 提供访问。unsafe impl Send 允许跨线程。FIOPadConfig 和 FIOPadCtrl 是 API 结构体，存储配置和状态（is_ready=0x11111111 表示初始化）。全局 PAD 使用 SpinNoIrq 锁保护多核访问，静态配置表 PAD_CONFIG 定义基址 0x32B30000。复用 mio.rs 的 PhitiumMio 和 MIO0/MIO1，整合 MIO 配置。</p>
+<p><strong>API 函数部分</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FIOPadCfgInitialize(instance_p: &amp;mut FIOPadCtrl, input_config_p: &amp;FIOPadConfig) -&gt; bool {
+    assert!(Some(*instance_p).is_some() &amp;&amp; Some(*input_config_p).is_some());
+    let mut ret = true;
+    if instance_p.is_ready == 0x11111111u32 {
+        info!("PAD already initialized.");
+        return false;
+    }
+    FIOPadDeInitialize(instance_p);
+    instance_p.config = *input_config_p;
+    instance_p.is_ready = 0x11111111u32;
+    ret
+}
+
+pub fn FIOPadDeInitialize(instance_p: &amp;mut FIOPadCtrl) -&gt; bool {
+    if instance_p.is_ready == 0 {
+        return true;
+    }
+    instance_p.is_ready = 0;
+    unsafe {
+        core::ptr::write_bytes(instance_p as *mut FIOPadCtrl, 0, core::mem::size_of::&lt;FIOPadCtrl&gt;());
+    }
+    true
+}
+
+pub fn FIOPadLookupConfig(instance_id: u32) -&gt; Option&lt;FIOPadConfig&gt; {
+    if instance_id &gt;= 1 {
+        return None;
+    }
+    Some(PAD_CONFIG[instance_id as usize])
+}
+
+pub fn FIOPadSetFunc(instance_p: &amp;mut FIOPadCtrl, offset: u32, func: u32) -&gt; bool {
+    if ![0x00D0, 0x00D4, 0x00D8].contains(&amp;offset) {
+        return false;
+    }
+    let base = instance_p.config.base_address;
+    let pad = PadCtrl::new(phys_to_virt(PhysAddr::from(base)).as_mut_ptr());
+    match offset {
+        0x00D0 =&gt; pad.regs_mut().x_reg0_scl.modify(X_REG0::FUNC.val(func)),
+        0x00D4 =&gt; pad.regs_mut().x_reg0_sda.modify(X_REG0::FUNC.val(func)),
+        0x00D8 =&gt; pad.regs_mut().x_reg0_gpio.modify(X_REG0::FUNC.val(func)),
+        _ =&gt; return false,
+    }
+    true
+}
+
+pub fn FMioFuncInit(instance_p: &amp;mut PhitiumMio, func: u32) -&gt; bool {
+    match func {
+        0 =&gt; instance_p.set_i2c(),
+        1 =&gt; instance_p.set_uart(),
+        _ =&gt; return false,
+    }
+    true
+}
+
+pub fn FMioFuncGetAddress(instance_p: &amp;PhitiumMio, func: u32) -&gt; u64 {
+    let base = instance_p.regs().func_sel.get() as u64;
+    match func {
+        0 | 1 =&gt; base, // I2C/UART 使用 MIO 基址
+        _ =&gt; 0,
+    }
+}
+
+pub fn FMioFuncGetIrqNum(_instance_p: &amp;PhitiumMio, _func: u32) -&gt; u32 {
+    24 
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>讲解</strong>：</p>
+<ul>
+<li>FIOPadCfgInitialize：检查指针和状态（is_ready=0x11111111 表示已初始化），调用 FIOPadDeInitialize 清理，设置 config 和 is_ready。效果是准备 PAD 控制器。</li>
+<li>FIOPadDeInitialize：清除 is_ready 并零初始化结构体（unsafe write_bytes），释放状态。</li>
+<li>FIOPadLookupConfig：根据 ID 从静态表返回配置（基址 0x32B30000），支持多实例扩展。</li>
+<li>FIOPadSetFunc：检查偏移（如 0x00D0 SCL），创建 PadCtrl 实例（phys_to_virt 转换虚拟地址），匹配偏移修改 x_reg0_* 的 FUNC bit (val(func)，如 5=I2C)。返回成功或失败。</li>
+<li>FMioFuncInit：调用 PhitiumMio 的 set_i2c/set_uart（从 mio.rs），设置 creg_mio_func_sel bit 0-1 (0=I2C, 1=UART)。</li>
+<li>FMioFuncGetAddress：读取 func_sel 作为基址（u64），限制于 func 0/1（I2C/UART）。</li>
+<li>FMioFuncGetIrqNum：返回固定中断号</li>
+</ul>
+<p><strong>硬件关联</strong>：PAD 基址 0x32B30000，偏移 0x00D0~0x00E4（SCL/SDA/GPIO 示例）。MIO 基址 0x2801_4000~0x2803_2000，creg_mio_func_sel (0x1000) 配置 MUX。</p>
+<p><strong>ArceOS 上下文</strong>：使用 SpinNoIrq 锁保护全局 PAD，info! 来自 ArceOS 日志。兼容 axhal 的 pinctrl trait。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter1/1_2_pwm_driver.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter2/chapter_2.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter1/1_2_pwm_driver.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter2/chapter_2.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

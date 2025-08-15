@@ -1,0 +1,510 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>SPI驱动开发 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="33-spi驱动开发"><a class="header" href="#33-spi驱动开发">3.3 SPI驱动开发</a></h1>
+<h2 id="spi-介绍"><a class="header" href="#spi-介绍"><em>SPI</em> 介绍</a></h2>
+<h3 id="11-模块概述"><a class="header" href="#11-模块概述">1.1 模块概述</a></h3>
+<p><strong>SPI（Serial Peripheral Interface）串行外围设备接口</strong>是一种单主多从模式、<strong>高速</strong>、<strong>全双工</strong>同步串行总线，通常用在一些 flash、LCD 屏幕等设备的通信上。SPI总线相较于UART和IIC有以下两个显著的区别。</p>
+<hr />
+<p><strong>1. 传输方式：数据交换</strong><br />
+SPI 工作在主从模式下，但在每个时钟周期（Clock）内，主从设备都会<strong>同时发送和接收 1 bit 数据</strong>，实现真正的<strong>全双工数据交换</strong>。无论是主设备还是从设备，每个时钟周期都会有数据交换。<br />
+主机进行写操作时，只需忽略接收到的字节；主机要读取从机的一个字节时，必须发送一个空字节来引发从机的传输。</p>
+<div align="center">
+  <img src="../resource/img/3_3_3_spi_transfer_mode.webp" alt="传输模型" width="400"/>
+</div>
+<hr />
+<p><strong>2. 传输规范：无速率限制无格式要求</strong><br />
+SPI 没有严格的速度限制，一般实现通常能达到甚至超过 <strong>100Mbps</strong>，适合高速数据传输场景。<br />
+SPI 没有指定的流控制，没有应答机制确认是否接收到数据。不像其他协议会有协议头、设备地址以及各种指令。只要四根信号线连接正确，SPI模式相同，将CS/SS信号线拉低，即可以直接通信。一次一个字节的传输，读写数据同时操作。<br />
+所以 SPI 设备更适合一些适用流数据的设备，比如 LCD 屏幕、AD 转换器等。</p>
+<hr />
+<h3 id="12-硬件接口介绍"><a class="header" href="#12-硬件接口介绍">1.2 硬件接口介绍</a></h3>
+<ul>
+<li><strong>SPI连接图</strong>
+<strong>1. 四线制：SPI通信需要四根线：</strong></li>
+<li><strong>MISO</strong>：主设备输入/从设备输出引脚。该引脚在从模式下发送数据，在主模式下接收数据。</li>
+<li><strong>MOSI</strong>：主设备输出/从设备输入引脚。该引脚在主模式下发送数据，在从模式下接收数据。</li>
+<li><strong>SCK</strong>：串行时钟信号，由主设备产生。</li>
+<li><strong>CS/SS</strong>：从设备片选信号，由主设备控制。它的功能是用来作为“片选引脚”，也就是选择指定的从设备，让主设备可以单独地与特定从设备通讯，避免数据线上的冲突。</li>
+</ul>
+<div align="center">
+  <img src="../resource/img/3_3_1_spi_one_link.webp" alt="单个spi设备连接" width="400"/>
+</div>
+<div align="center">
+  <img src="../resource/img/3_3_2_spi_many_link.webp" alt="多个spi设备连接" width="400"/>
+</div>
+<p>常见的连接方法有上面两种，还有一种额外电路所能实现的片选方案。众所周知三个引脚其实是存在8种状态，所以实际上可以利用译码器实现三个CS/SS控制8个SPI设备。</p>
+<div align="center">
+  <img src="../resource/img/3_3_4_3-8译码器.png" alt="3-8译码器" width="400"/>
+</div>
+<h3 id="13-时序图"><a class="header" href="#13-时序图">1.3 时序图</a></h3>
+<p>SPI 有四种模式简单理解就是上升沿下降沿采样和空闲时高电平与低电平，两两组合而出现的四种模式</p>
+<ul>
+<li>模式0：CPOL= 0，CPHA=0。SCK串行时钟线空闲是为低电平，数据在SCK时钟的上升沿被采样</li>
+<li>模式1：CPOL= 0，CPHA=1。SCK串行时钟线空闲是为低电平，数据在SCK时钟的下降沿被采样</li>
+<li>模式2：CPOL= 1，CPHA=0。SCK串行时钟线空闲是为高电平，数据在SCK时钟的下降沿被采样</li>
+<li>模式3：CPOL= 1，CPHA=1。SCK串行时钟线空闲是为高电平，数据在SCK时钟的上升沿被采样</li>
+</ul>
+<p>以模式0为例子，下图为模式0下的SPI时序图</p>
+<div align="center">
+  <img src="../resource/img/3_3_4_SPI_time.png" alt="SPI时序图" width="400"/>
+</div>
+<h2 id="2-接口表"><a class="header" href="#2-接口表">2. 接口表</a></h2>
+<ul>
+<li><strong>接口表</strong></li>
+</ul>
+<div class="table-wrapper"><table><thead><tr><th>API函数</th><th>描述</th><th>参数</th><th>返回值</th></tr></thead><tbody>
+<tr><td>PhytiumSPI::new</td><td>新的飞腾派SPI实例</td><td>base:uart控制器基地址</td><td>SPI控制器</td></tr>
+<tr><td>PhytiumSPI::init</td><td>创建非irq模式的uart控制器</td><td>self, baude_rate: spi传输频率，test_mode: 1打开回路测试 0 正常模式</td><td>none</td></tr>
+<tr><td>PhytiumSPI::recv</td><td>轮询的方式读取一个字节</td><td>self</td><td>u8，一个读取的字节</td></tr>
+<tr><td>PhytiumSPI::send</td><td>轮询的方式输出一个字节</td><td>self, data:输出的字节</td><td>none</td></tr>
+</tbody></table>
+</div>
+<ul>
+<li><strong>调用顺序</strong>
+首先进行 new -&gt; init, 之后可以按照需求进行读取或者写入字节。</li>
+<li><strong>硬件依赖</strong>：
+<ul>
+<li>SPI寄存器基地址：0x2803A000</li>
+</ul>
+</li>
+</ul>
+<h2 id="3-寄存器结构"><a class="header" href="#3-寄存器结构">3. 寄存器结构</a></h2>
+<p>我们主要关注下面几个SPI寄存器，这些寄存器的定义可以在<a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99">飞腾派软件开发手册</a>里找到。</p>
+<ul>
+<li><strong>SPICTRL0</strong>：控制寄存器0，配置数据位宽、帧格式、时钟极性/相位、主从模式、测试模式等。</li>
+<li><strong>SPICTRL1</strong>：控制寄存器1，主要用于配置连续接收的数据量等。</li>
+<li><strong>SPIEN</strong>：使能寄存器，控制SPI控制器的开启和关闭。</li>
+<li><strong>SPIMWCR</strong>：Microwire控制寄存器，配置Microwire模式相关参数。</li>
+<li><strong>SPISER</strong>：从机选择寄存器，选择与主机通信的从设备。</li>
+<li><strong>SPIBAUDR</strong>：波特率寄存器，设置SPI时钟分频系数，决定通信速率。</li>
+<li><strong>SPITXFTLR</strong>：发送FIFO阈值寄存器，设置发送FIFO的阈值。</li>
+<li><strong>SPIRXFTLR</strong>：接收FIFO阈值寄存器，设置接收FIFO的阈值。</li>
+<li><strong>SPITXFLR</strong>：发送FIFO等级寄存器，指示当前发送FIFO中的数据量。</li>
+<li><strong>SPIRXFLR</strong>：接收FIFO等级寄存器，指示当前接收FIFO中的数据量。</li>
+<li><strong>SPISR</strong>：状态寄存器，包含SPI忙、FIFO状态、错误等标志位。</li>
+<li><strong>SPIIMR</strong>：中断屏蔽寄存器，控制各类中断的使能。</li>
+<li><strong>SPIISR</strong>：中断状态寄存器，显示当前中断状态。</li>
+<li><strong>SPIRISR</strong>：原始中断状态寄存器，显示未屏蔽的中断状态。</li>
+<li><strong>SPIDMACR</strong>：DMA控制寄存器，配置DMA相关功能。</li>
+<li><strong>SPIDR</strong>：数据寄存器，进行数据的收发操作。</li>
+<li><strong>SPIRXSAMPLEDLY</strong>：接收采样延迟寄存器，调整接收数据的采样时序。</li>
+<li><strong>SPICS</strong>：片选寄存器，控制片选信号。</li>
+</ul>
+<div class="table-wrapper"><table><thead><tr><th>寄存器名称</th><th>偏移</th><th>寄存器定义</th></tr></thead><tbody>
+<tr><td>SPICTRL0</td><td>0x000</td><td>控制寄存器0</td></tr>
+<tr><td>SPICTRL1</td><td>0x004</td><td>控制寄存器1</td></tr>
+<tr><td>SPIEN</td><td>0x008</td><td>使能寄存器</td></tr>
+<tr><td>SPIMWCR</td><td>0x00C</td><td>Microwire控制寄存器</td></tr>
+<tr><td>SPISER</td><td>0x010</td><td>从机选择寄存器</td></tr>
+<tr><td>SPIBAUDR</td><td>0x014</td><td>波特率寄存器</td></tr>
+<tr><td>SPITXFTLR</td><td>0x018</td><td>发送FIFO阈值寄存器</td></tr>
+<tr><td>SPIRXFTLR</td><td>0x01C</td><td>接收FIFO阈值寄存器</td></tr>
+<tr><td>SPITXFLR</td><td>0x020</td><td>发送FIFO等级寄存器</td></tr>
+<tr><td>SPIRXFLR</td><td>0x024</td><td>接收FIFO等级寄存器</td></tr>
+<tr><td>SPISR</td><td>0x028</td><td>状态寄存器</td></tr>
+<tr><td>SPIIMR</td><td>0x02C</td><td>中断屏蔽寄存器</td></tr>
+<tr><td>SPIISR</td><td>0x030</td><td>中断状态寄存器</td></tr>
+<tr><td>SPIRISR</td><td>0x034</td><td>原始中断状态寄存器</td></tr>
+<tr><td>SPIICR</td><td>0x048</td><td>中断清除寄存器</td></tr>
+<tr><td>SPIDMACR</td><td>0x04C</td><td>DMA控制寄存器</td></tr>
+<tr><td>SPIDR</td><td>0x060</td><td>数据寄存器</td></tr>
+<tr><td>SPIRXSAMPLEDLY</td><td>0x0FC</td><td>接收采样延迟寄存器</td></tr>
+<tr><td>SPICS</td><td>0x100</td><td>片选寄存</td></tr>
+</tbody></table>
+</div>
+<h2 id="4-飞腾派-spi-驱动实验"><a class="header" href="#4-飞腾派-spi-驱动实验">4. 飞腾派 <em>SPI</em> 驱动实验</a></h2>
+<h3 id="41-实验目标"><a class="header" href="#41-实验目标">4.1 实验目标</a></h3>
+<ul>
+<li>编写代码实现SPI驱动</li>
+<li>验证SPI通信的基本原理</li>
+</ul>
+<h3 id="42-实验原理"><a class="header" href="#42-实验原理">4.2 实验原理</a></h3>
+<p>驱动支持测试模式，使能spi控制器的测试模式，这个模式下控制器内部会短接MISO和MOSI，无需额外连线。</p>
+<h3 id="43-实验步骤"><a class="header" href="#43-实验步骤">4.3 实验步骤</a></h3>
+<ul>
+<li>根据数据手册，先使用tock-register库将寄存器定义好，将初始化函数实现。使用者通过传入一个 基地址 指向SPI寄存器。</li>
+<li>飞腾派默认是打开SPI0 基地址为 0x2803_A000
+如果未找到dts文件可以进入uboot后执行</li>
+</ul>
+<pre><code class="language-bash">bdinfo
+#找到fdt_blob = 0x00000000f9c3ae70
+fdt addr 0xf9c3ae70
+fdt print
+# 打印dts 可以直接保存后查看
+</code></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// modules/axhal/src/platform/aarch64_phytium_pi/spi.rs
+use core::ptr::NonNull;
+
+use tock_registers::{
+    interfaces::{Readable, Writeable},
+    register_bitfields, register_structs,
+    registers::{ReadOnly, ReadWrite, WriteOnly},
+};
+
+register_structs! {
+    /// SPI registers mapping
+    SPIRegs {
+        (0x00 =&gt; ctrl_r0: ReadWrite&lt;u32&gt;),      // 控制寄存器0
+        (0x04 =&gt; ctrl_r1: ReadWrite&lt;u32&gt;),      // 控制寄存器1
+        (0x08 =&gt; ssienr: ReadWrite&lt;u32&gt;),       // SPI使能
+        (0x0C =&gt; mwcr: ReadWrite&lt;u32&gt;),         // Microwire控制
+        (0x10 =&gt; ser: ReadWrite&lt;u32&gt;),          // 从机选择
+        (0x14 =&gt; baudr: ReadWrite&lt;u32&gt;),        // 波特率
+        (0x18 =&gt; txftlr: ReadWrite&lt;u32&gt;),       // 发送FIFO阈值
+        (0x1C =&gt; rxftlr: ReadWrite&lt;u32&gt;),       // 接收FIFO阈值
+        (0x20 =&gt; txflr: ReadWrite&lt;u32&gt;),        // 发送FIFO等级
+        (0x24 =&gt; rxflr: ReadWrite&lt;u32&gt;),        // 接收FIFO等级
+        (0x28 =&gt; sr: ReadWrite&lt;u32&gt;),           // 状态寄存器
+        (0x2C =&gt; imr: ReadWrite&lt;u32&gt;),          // 中断屏蔽
+        (0x30 =&gt; isr: ReadWrite&lt;u32&gt;),          // IRQ状态
+        (0x34 =&gt; risr: ReadWrite&lt;u32&gt;),         // 原始中断状态
+        (0x38 =&gt; txoicr: ReadWrite&lt;u32&gt;),       // TX FIFO溢出清除
+        (0x3C =&gt; rxoicr: ReadWrite&lt;u32&gt;),       // RX FIFO溢出清除
+        (0x40 =&gt; rxuicr: ReadWrite&lt;u32&gt;),       // TX FIFO下溢清除
+        (0x44 =&gt; msti_cr: ReadWrite&lt;u32&gt;),      // 多从机中断清除
+        (0x48 =&gt; icr: ReadWrite&lt;u32&gt;),          // 中断清除
+        (0x4C =&gt; dma_cr: ReadWrite&lt;u32&gt;),       // DMA控制
+        (0x50 =&gt; dma_tdlr: ReadWrite&lt;u32&gt;),     // DMA TX数据等级
+        (0x54 =&gt; dma_rdlr: ReadWrite&lt;u32&gt;),     // DMA RX数据等级
+        (0x58 =&gt; idr: ReadWrite&lt;u32&gt;),          // 识别寄存器
+        (0x5C =&gt; _reserved0),                   // 0x5C ~ 0x5F 保留
+        (0x60 =&gt; dr: ReadWrite&lt;u32&gt;),           // 数据寄存器
+        (0x64 =&gt; _reserved1),                   // 0x64 ~ 0xFB 保留
+        (0xFC =&gt; rx_sample_dly: ReadWrite&lt;u32&gt;),// RX数据延迟
+        (0x100 =&gt; cs: ReadWrite&lt;u32&gt;),          // 片选
+        (0x104 =&gt; @END),
+    }
+}
+
+/// SPI驱动结构体
+pub struct SPI {
+    base: NonNull&lt;SPIRegs&gt;,
+}
+
+unsafe impl Send for SPI {}
+unsafe impl Sync for SPI {}
+
+impl SPI {
+    /// 创建SPI实例
+    pub const fn new(base: *mut u8) -&gt; Self {
+        Self {
+            base: NonNull::new(base).unwrap().cast(),
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>将飞腾派spi暴露给上层应用</li>
+</ul>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// modules/axhal/src/platform/aarch64_phytium_pi/uart.rs
+use kspin::SpinNoIrq;
+use memory_addr::PhysAddr;
+use crate::mem::phys_to_virt;
+
+const SPI_BASE: PhysAddr = pa!(axconfig::devices::SPI0_PADDR);
+
+pub static SPI0: SpinNoIrq&lt;SPI&gt; =
+    SpinNoIrq::new(SPI::new(phys_to_virt(SPI_BASE).as_mut_ptr()));
+
+pub fn spi_init(baude_rate:u32, test_mode:bool) {
+    info!("SPI0 start initialized");
+    SPI0.lock().init(baude_rate, test_mode);
+    info!("SPI0 initialized");
+}
+
+/// 测试收发
+pub fn spi_test() {
+    let mut spi = SPI0.lock();
+    for data in [0x55, 0xAA, 0xFF, 0x00] {
+        spi.send(data);
+        let recv = spi.recv();
+        info!("SPI loopback: send={:#x}, recv={:#x}", data, recv);
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// modules/axhal/src/platform/aarch64_phytium_pi/mod.rs
+...
+
+pub mod misc {
+    pub fn terminate() -&gt; ! {
+        info!("Shutting down...");
+        loop {
+            crate::arch::halt();
+        }
+    }
+    pub use crate::platform::spi::*;
+}
+...
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>在应用层代码中使用 SPI，进行初始化，读取接收数据，并将结果通过*println!*进行输出。由于默认的Cargo没有添加axhal为依赖需要额外添加。</li>
+</ul>
+<pre><pre class="playground"><code class="language-rust">// examples/helloworld/Cargo.toml
+[dependencies]
+axstd = { workspace = true, optional = true , features = ["irq"]}
+axhal = { path = "../../modules/axhal" }
+// examples/helloworld/src/main.rs
+#![cfg_attr(feature = "axstd", no_std)]
+#![cfg_attr(feature = "axstd", no_main)]
+
+use core::time;
+
+use axstd::time;
+
+use axhal::misc::*;
+#[cfg_attr(feature = "axstd", unsafe(no_mangle))]
+fn main() {
+    println!("Hello, world!");
+    spi_init(16, true);
+    loop {
+        sleep(time::Duration::from_secs(1));
+        println!("in loop");
+        spi_test();
+    }
+}
+</code></pre></pre>
+<ul>
+<li>烧入飞腾派开发板，运行结果如下图。</li>
+</ul>
+<div align="center">
+  <img src="../resource/img/3_3_5_SPI_test.png" alt="运行结果" width="800"/>
+</div>
+<h3 id="44-实验结论"><a class="header" href="#44-实验结论">4.4 实验结论</a></h3>
+<p>本实验验证了spi无中断，poll mode的通信模型，实现了相应的驱动代码。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter3/3_2_i2c_driver.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter4/chapter_4.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter3/3_2_i2c_driver.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter4/chapter_4.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

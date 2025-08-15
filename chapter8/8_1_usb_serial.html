@@ -1,0 +1,444 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>USB串口驱动 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="81-usb转串口驱动情境分析"><a class="header" href="#81-usb转串口驱动情境分析">8.1 USB转串口驱动情境分析</a></h1>
+<p>USB转串口测试过程请阅读此文档：<a href="https://github.com/Jasonhonghh/arceos_experiment/blob/usb-camera-base/doc/USB_TO_SERIAL/README.md">USB转串口测试流程</a></p>
+<h4 id="usb协议栈的初始化"><a class="header" href="#usb协议栈的初始化">usb协议栈的初始化</a></h4>
+<ol>
+<li>
+<p><strong>把usb协议栈编译进内核空间</strong>。编译的命令是<code>make A=apps/usb-hid ...</code>，在<code>usb-hid</code>程序的配置文件<code>Cargo.toml</code>命令里指定了要依赖<code>driver_usb</code>，这样就决定了会把USB协议栈<code>driver_usb</code>编译进内核空间。</p>
+</li>
+<li>
+<p><strong>初始化XHCI控制器</strong>。在<code>usb-hid</code>的<code>main</code>函数会执行<code>USBSystem::new().init()</code>，这样就会进一步调用<code>USBHostSystem::init()</code>初始化XHCI控制器。执行流程如下：</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// host/data_structures/host_controllers/xhci/mod.rs
+fn init(&amp;mut self) -&gt; &amp;mut Self {
+    // 1. 硬件重置XHCI控制器
+    self.chip_hardware_reset()
+    // 2. 设置设备槽数量与内存映射
+    .set_max_device_slots()
+    .set_dcbaap()  // 设置设备上下文基地址
+    // 3. 配置命令环与事件环
+    .set_cmd_ring()
+    .init_ir()      // 初始化中断
+    // 4. 分配 scratchpad 缓冲区
+    .setup_scratchpads()
+    // 5. 启动控制器
+    .start()
+    .test_cmd()     // 测试命令环
+    .reset_ports(); // 重置所有USB端口
+    self
+}
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p><strong>XHCI控制器检测USB设备的接入</strong>。使用<code>probe()</code>方法扫描所有USB端口，检测物理连接的设备。执行流程如下：</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// host/data_structures/host_controllers/xhci/mod.rs
+fn probe(&amp;mut self) -&gt; Vec&lt;usize&gt; {
+    let mut founded = Vec::new();
+    let port_len = self.regs.port_register_set.len();
+    // 1. 检查所有端口的连接状态
+    for i in 0..port_len {
+        let portsc = self.regs.port_register_set.read_volatile_at(i).portsc;
+        if portsc.current_connect_status() {
+            founded.push(i);
+        }
+    }
+    // 2. 为每个连接的设备分配slot ID并初始化
+    for port_idx in founded {
+        let slot_id = self.device_slot_assignment();       // 分配slot ID
+        self.dev_ctx.new_slot(slot_id as usize, 0, port_idx + 1, 32);
+        self.address_device(slot_id, port_idx + 1);       // 分配设备地址
+        self.set_ep0_packet_size(slot_id, self.control_fetch_control_point_packet_size(slot_id));
+        founded.push(slot_id);
+    }
+    founded
+}
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p><strong>获取USB设备的设备描述符</strong>。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// host/data_structures/host_controllers/xhci/mod.rs
+fn control_fetch_control_point_packet_size(&amp;mut self, slot_id: usize) -&gt; u8 {
+    // 发送GET_DESCRIPTOR请求获取设备描述符
+    let mut buffer = DMA::new_vec(0u8, 8, 64, self.config.lock().os.dma_alloc());
+    self.control_transfer(
+        slot_id,
+        ControlTransfer {
+            request_type: bmRequestType::new(
+                Direction::In,
+                DataTransferType::Standard,
+                Recipient::Device,
+            ),
+            request: bRequest::GetDescriptor,
+            value: DescriptorType::Device.forLowBit(0).bits(),
+            data: Some((buffer.addr() as usize, buffer.length_for_bytes())),
+        },
+    ).unwrap();
+    // 解析描述符获取最大包大小
+    let data = buffer.to_vec();
+    data.last().copied().unwrap_or(8)
+}
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p><strong>USB驱动的匹配</strong>。在<code>usb-hid</code>的<code>main</code>函数会执行<code>USBSystem::new().init()</code>，这样也会进一步调用<code>USBDriverSystem::init()</code>注册所有的USB驱动模块。例如<code>CdcSerialDriverModule</code>的<code>should_active()</code>方法，其主要功能是判断是否应该激活 CDC（通用串行总线控制设备类）串口驱动。具体步骤如下：</p>
+<blockquote>
+<ol>
+<li><strong>设备描述符检查</strong>：检查传入的独立设备实例的描述符是否已初始化。</li>
+<li><strong>设备类、厂商 ID 和产品 ID 检查</strong>：如果描述符已初始化，获取设备的类、厂商 ID 和产品 ID，判断是否为特定的厂商和产品（厂商 ID 为 <code>0x1a86</code>，产品 ID 为 <code>0x7523</code>，对应沁恒电子的 CH340 串口转换器）。</li>
+<li><strong>端点信息收集</strong>：若匹配成功，收集设备的端点信息。</li>
+<li><strong>驱动初始化</strong>：使用收集到的信息初始化 <code>CdcSerialDriver</code> 实例，并将其封装在 <code>Option&lt;Vec&lt;Arc&lt;SpinNoIrq&lt;dyn USBSystemDriverModuleInstance&lt;'a, O&gt;&gt;&gt;&gt;</code> 中返回。</li>
+<li><strong>不匹配处理</strong>：若不匹配，则返回 <code>None</code>。</li>
+</ol>
+</blockquote>
+</li>
+<li>
+<p><strong>驱动实例的创建</strong>。匹配成功后创建驱动实例，调用<code>new_and_init</code>方法初始化设备功能。例如<code>CdcSerialDriver</code>的<code>new_and_init</code>方法，其具体的初始化过程如下：</p>
+<blockquote>
+<ol>
+<li><strong>为读缓冲区分配空间</strong>。</li>
+<li><strong>查找输入端点和输出端点</strong>。</li>
+<li><strong>创建写缓冲区并对其进行初始化</strong>。</li>
+<li><strong>创建控制缓冲区和状态缓冲区</strong>。</li>
+<li><strong>创建CdcSerialDriver实例</strong>。</li>
+</ol>
+</blockquote>
+</li>
+<li>
+<p><strong>驱动实例初始化设备</strong>。在<code>usb-hid</code>的<code>main</code>函数会执行<code>USBSystem::new().init().init_probe()</code>，驱动实例最终就可以调用<code>prepare_for_drive</code>方法通过 URB 请求配置设备接口、端点等。例如<code>CdcSerialDriver</code>的<code>prepare_for_drive</code>方法，其具体的初始化过程如下：</p>
+<blockquote>
+<ol>
+<li><strong>初始化一个空向量todo_list以保存URB</strong>。</li>
+<li><strong>设置配置描述符</strong>。</li>
+<li><strong>厂商自定义配置流程</strong>。这些代码创建了多个控制传输的URB，包括输出和输入操作，涉及不同的命令（如CH341_CMD_C3, CH341_CMD_C1, CH341_CMD_W, CH341_CMD_R等）、索引和值，这些操作参考了Linux源码里的drivers/usb/serial/ch341.h中的<code>ch341_configure</code>函数以及wireshark抓包数据。</li>
+<li><strong>配置115200波特率</strong>。创建了一系列控制传输的URB，用于将设备的波特率配置为115200。</li>
+<li><strong>返回配置所需的URB列表</strong>。将todo_list封装在some中返回。</li>
+</ol>
+</blockquote>
+</li>
+<li>
+<p><strong>通过事件系统通知初始化完成</strong>。驱动初始化完成后通过事件总线通知上层系统：</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// usb系统主循环
+pub fn drive_all(mut self) -&gt; Self {
+    loop {
+        let tick = self.usb_driver_layer.tick();  // 收集URB请求
+        if tick.len() != 0 {
+            self.host_driver_layer.tock(tick);  // 处理URB并获取UCB
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+</li>
+</ol>
+<h4 id="用户向串口发送数据"><a class="header" href="#用户向串口发送数据">用户向串口发送数据</a></h4>
+<ol>
+<li>
+<p><strong>用户把数据写入发送缓冲区</strong>。用户需要调用<code>CdcSerialDriver</code>的<code>write</code>方法，把数据写入发送缓冲区。当前的测试流程，是在<code>CdcSerialDriver</code>的<code>new_and_init</code>方法里，把<code>hello,world</code>硬写入发送缓冲区。</p>
+</li>
+<li>
+<p><strong>生成URB并发送</strong>。<code>gather_urb</code>方法会检查<code>write_data_bnuffer</code>队列，若队列中有数据，就生成用于批量传输的URB并发送。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>    fn gather_urb(&amp;mut self) -&gt; Option&lt;Vec&lt;crate::usb::urb::URB&lt;'a, O&gt;&gt;&gt; {
+        // 总的逻辑是遍历写入数据缓冲区，如果有数据就发送，如果没有数据就接收
+        let mut todo_list = Vec::new();
+
+        if self.write_data_buffer.len() &gt; 0 {
+            // 如果写入数据缓冲区有数据，就发送数据
+            let write_buffer = if let Some(buffer) = self.write_data_buffer.front() {
+                buffer
+            } else {
+                panic!("write_data_buffer is empty, but write_data_buffer.len() &gt; 0");
+            };
+
+            todo_list.push(URB::new(
+                self.device_slot_id,
+                RequestedOperation::Bulk(BulkTransfer {
+                    endpoint_id: self.out_endpoint as usize,
+                    buffer_addr_len: write_buffer.lock().addr_len_tuple(),
+                }),
+            ));
+            self.driver_state_machine = StateMachine::Writing;
+            Some(todo_list)
+        } else {
+            // ... 接收数据逻辑 ...
+        }
+    }
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p><strong>USB转串口转换器转换并发送数据</strong>。USB 转串口驱动把 URB 封装成符合 USB 协议的数据包，经 USB 总线传给 USB 转串口转换器。转换器解析数据包，将数据转为串口信号（如 UART 信号），再通过串口引脚发送出去。</p>
+</li>
+</ol>
+<h4 id="串口数据传给用户"><a class="header" href="#串口数据传给用户">串口数据传给用户</a></h4>
+<ol>
+<li>
+<p><strong>USB 转串口转换器接收并转换信号</strong>。USB 转串口转换器检测到串口引脚的信号变化，按串口协议解码信号，提取原始数据，接着封装成 USB 数据包，通过 USB 总线传给计算机。</p>
+</li>
+<li>
+<p><strong>生成URB并发送</strong>。<code>gather_urb</code>方法生成用于接收数据的URB。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>    fn gather_urb(&amp;mut self) -&gt; Option&lt;Vec&lt;crate::usb::urb::URB&lt;'a, O&gt;&gt;&gt; {
+        // ... 发送数据逻辑 ...
+
+        } else {
+            // 如果写入数据缓冲区没有数据，就接收数据
+            todo_list.push(URB::new(
+                self.device_slot_id,
+                RequestedOperation::Bulk(BulkTransfer {
+                    endpoint_id: self.in_endpoint as usize,
+                    buffer_addr_len: self.read_data_buffer.as_ref().unwrap().lock().addr_len_tuple(),
+                }),
+            ));
+            self.driver_state_machine = StateMachine::Reading;
+            Some(todo_list)
+        }
+    }
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p><strong>处理接收完成事件</strong>。USB 转串口驱动收到数据后，触发接收完成事件，调用 <code>CdcSerialDriver</code> 的 <code>receive_complete_event</code> 方法。该方法把接收到的数据存储在<code>accepted_date</code>中。</p>
+</li>
+<li>
+<p><strong>用户应用程序接收数据</strong>。如果是进行测试，可以在Arceos的日志中看到<code>accepted data: xxx</code>，其中<code>xxx</code>为串口接收到的数据，这表明串口数据接收成功。如果用户需要串口数据，则应用程序应从<code>accepted_data</code>读取数据。</p>
+</li>
+</ol>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter8/chapter_8.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter8/8_2_usb_camera.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter8/chapter_8.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter8/8_2_usb_camera.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

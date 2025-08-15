@@ -1,0 +1,662 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>I2C驱动开发 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="32-i2c驱动开发"><a class="header" href="#32-i2c驱动开发">3.2 I2C驱动开发</a></h1>
+<h2 id="i2c介绍"><a class="header" href="#i2c介绍">I2C介绍</a></h2>
+<p>I2C（Inter-Integrated Circuit）是一种两线制、低速串行通信协议，广泛用于嵌入式系统中微控制器与外设（如传感器、EEPROM）的通信，使用串行数据线（SDA）和串行时钟线（SCL）实现双向传输。</p>
+<h3 id="核心特性"><a class="header" href="#核心特性">核心特性</a></h3>
+<ul>
+<li><strong>两线制通信</strong>：SDA传输数据，SCL提供时钟同步。</li>
+<li><strong>多主机多从机</strong>：支持多个主设备发起通信，多个从设备通过唯一地址（7位或10位）响应。</li>
+<li><strong>传输模式</strong>：支持标准模式（100kbps）、快速模式（400kbps）、快速模式加（1Mbps）和高速模式（3.4Mbps）。</li>
+<li><strong>简单连接</strong>：仅需两根信号线，适合小型系统。</li>
+<li><strong>同步通信</strong>：数据传输由SCL时钟控制，确保可靠性。</li>
+</ul>
+<h3 id="数据传输过程"><a class="header" href="#数据传输过程">数据传输过程</a></h3>
+<p>I2C通信包括以下步骤：</p>
+<ol>
+<li><strong>起始信号</strong>：SCL高电平时，SDA从高到低跳变。</li>
+<li><strong>地址和数据传输</strong>：主设备发送7位/10位从设备地址和读/写位，SCL低电平时SDA传输8位数据+1位ACK/NACK。</li>
+<li><strong>应答信号</strong>：从设备在第9个SCL脉冲返回ACK（SDA低）或NACK（SDA高）。</li>
+<li><strong>数据传输</strong>：继续传输数据字节，每字节后有ACK/NACK。</li>
+<li><strong>停止信号</strong>：SCL高电平时，SDA从低到高跳变。</li>
+</ol>
+<p><strong>I2C 数据传输过程</strong></p>
+<pre class="mermaid">sequenceDiagram
+    participant M as 主设备
+    participant S as 从设备
+    M-&gt;&gt;S: SCL高，SDA高-&gt;低（起始信号）
+    M-&gt;&gt;S: 发送7位地址+读/写位
+    S-&gt;&gt;M: ACK（SDA低）
+    M-&gt;&gt;S: 发送/接收数据字节
+    S-&gt;&gt;M: ACK
+    M-&gt;&gt;S: SCL高，SDA低-&gt;高（停止信号）
+</pre>
+<p><strong>I2C传输模式</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>模式</th><th>速率</th><th>应用场景</th></tr></thead><tbody>
+<tr><td>标准模式</td><td>100kbps</td><td>低速传感器、EEPROM</td></tr>
+<tr><td>快速模式</td><td>400kbps</td><td>中速外设通信</td></tr>
+<tr><td>快速模式加</td><td>1Mbps</td><td>较高性能需求</td></tr>
+<tr><td>高速模式</td><td>3.4Mbps</td><td>高性能嵌入式设备</td></tr>
+</tbody></table>
+</div>
+<h2 id="飞腾派i2c硬件实现"><a class="header" href="#飞腾派i2c硬件实现">飞腾派I2C硬件实现</a></h2>
+<p>飞腾派的I2C功能由MIO（多路输入输出）控制器实现，每个MIO可配置为I2C或UART，通过creg_mio_func_sel寄存器选择功能（00=I2C，01=UART）。I2C通信依赖PAD模块配置SCL和SDA引脚的电气特性。</p>
+<h3 id="mio控制器"><a class="header" href="#mio控制器">MIO控制器</a></h3>
+<ul>
+<li><strong>功能</strong>：支持I2C主模式通信，管理数据传输和中断。</li>
+<li><strong>基地址</strong>：MIO0（0x28014000）至MIO15（0x28032000）。</li>
+<li><strong>配置</strong>：creg_mio_func_sel设置功能，偏移地址需参考硬件手册。</li>
+<li><strong>中断</strong>：每个MIO提供中断编号，处理传输完成或错误事件。</li>
+</ul>
+<h3 id="pad模块"><a class="header" href="#pad模块">PAD模块</a></h3>
+<ul>
+<li><strong>功能</strong>：配置引脚功能（如I2C）和电气特性（驱动强度、上下拉、延迟）。</li>
+<li><strong>基地址</strong>：0x32B30000。</li>
+<li><strong>引脚</strong>：SCL（偏移0x00D0）和SDA（偏移0x00D4）配置为I2C功能（值5）。</li>
+</ul>
+<p><strong>飞腾派I2C硬件模块</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>模块</th><th>功能</th><th>基地址</th></tr></thead><tbody>
+<tr><td>MIO</td><td>I2C/UART功能选择、数据传输</td><td>0x28014000–0x28032000</td></tr>
+<tr><td>PAD</td><td>引脚功能和电气特性配置</td><td>0x32B30000</td></tr>
+</tbody></table>
+</div>
+<h2 id="飞腾派i2c驱动api调用表"><a class="header" href="#飞腾派i2c驱动api调用表">飞腾派I2C驱动API调用表</a></h2>
+<div class="table-wrapper"><table><thead><tr><th><strong>API函数</strong></th><th><strong>描述</strong></th><th><strong>参数</strong></th><th><strong>返回值</strong></th></tr></thead><tbody>
+<tr><td>FIOPadCfgInitialize</td><td>初始化PAD控制器，设置引脚基地址和设备ID，为SCL/SDA引脚配置做准备。</td><td>instance_p: &amp;mut FIOPadCtrl（PAD控制器实例） input_config_p: &amp;FIOPadConfig（配置参数，包含基地址和ID）</td><td>bool：true（成功），false（已初始化或参数错误）</td></tr>
+<tr><td>FIOPadDeInitialize</td><td>去初始化PAD控制器，清除设备状态，标记未就绪。</td><td>instance_p: &amp;mut FIOPadCtrl（PAD控制器实例）</td><td>bool：true（成功）</td></tr>
+<tr><td>FIOPadLookupConfig</td><td>根据设备ID查找PAD配置，返回基地址等信息。</td><td>instance_id: u32（设备ID）</td><td>Option<FIOPadConfig>：配置结构体或None（ID无效）</td></tr>
+<tr><td>FI2cMioMasterInit</td><td>初始化MIO和I2C控制器，配置MIO为I2C模式，设置SCL/SDA引脚、基地址、中断编号、时钟频率、从设备地址和速率。</td><td>address: u32（从设备地址） speed_rate: u32（传输速率，如100kbps）</td><td>bool：true（成功），false（初始化失败）</td></tr>
+<tr><td>FI2cCfgInitialize</td><td>初始化I2C控制器，设置配置参数（如基地址、中断号），重置设备并标记就绪。</td><td>instance_p: &amp;mut FI2c（I2C实例） input_config_p: &amp;FI2cConfig（配置参数）</td><td>bool：true（成功），false（已初始化或重置失败）</td></tr>
+<tr><td>FI2cMasterWrite</td><td>发送数据到从设备（如EEPROM），检查长度和偏移限制，执行轮询写操作。</td><td>buf_p: &amp;mut [u8]（数据缓冲区） buf_len: u32（数据长度） inchip_offset: u32（从设备内部偏移）</td><td>bool：true（成功），false（长度超限或写入失败）</td></tr>
+<tr><td>FI2cMasterStartTrans</td><td>启动I2C主设备传输，设置从设备地址，向IC_DATA_CMD写入数据，配置读/写和停止标志。</td><td>instance_p: &amp;mut FI2c（I2C实例） mem_addr: u32（从设备内存地址） mem_byte_len: u8（地址字节数） flag: u16（控制标志，如停止位）</td><td>bool：true（成功），false（总线忙或FIFO错误）</td></tr>
+<tr><td>FI2cMasterRead</td><td>从设备读取数据，初始化缓冲区，执行轮询读操作。</td><td>buf_p: &amp;mut [u8]（接收缓冲区） buf_len: u32（数据长度） inchip_offset: u32（从设备内部偏移）</td><td>bool：true（成功），false（长度无效或读取失败）</td></tr>
+<tr><td>FI2cMasterStopTrans</td><td>停止I2C传输，检查停止条件，清空接收FIFO。</td><td>instance_p: &amp;mut FI2c（I2C实例）</td><td>bool：true（成功），false（超时或总线忙）</td></tr>
+</tbody></table>
+</div>
+<h3 id="说明"><a class="header" href="#说明">说明</a></h3>
+<ul>
+<li><strong>调用顺序</strong>：
+<ol>
+<li>调用FIOPadCfgInitialize和FIOPadLookupConfig初始化PAD控制器，设置SCL/SDA引脚（偏移0x00D0/0x00D4，值5）。</li>
+<li>调用FI2cMioMasterInit配置MIO为I2C模式，初始化I2C控制器。</li>
+<li>调用FI2cCfgInitialize完成I2C配置，确保设备就绪。</li>
+<li>使用FI2cMasterWrite或FI2cMasterRead进行数据传输。</li>
+<li>调用FI2cMasterStopTrans结束传输。</li>
+</ol>
+</li>
+<li><strong>硬件依赖</strong>：
+<ul>
+<li>PAD基地址：0x32B30000。</li>
+<li>MIO基地址：0x28014000（MIO0）至0x28032000（MIO15）。</li>
+<li>I2C寄存器（如IC_DATA_CMD）用于数据和命令控制。</li>
+</ul>
+</li>
+<li><strong>注意事项</strong>：
+<ul>
+<li>确保数据长度和偏移不超过从设备限制（如EEPROM的256字节）。</li>
+<li>检查总线状态（FI2cWaitBusBusy）和FIFO状态（IC_TXFLR/IC_RXFLR）。</li>
+<li>中断处理需开发者根据应用注册master_evt_handlers。</li>
+</ul>
+</li>
+</ul>
+<h2 id="arceos-的-i2c-驱动实现"><a class="header" href="#arceos-的-i2c-驱动实现">ArceOS 的 I2C 驱动实现</a></h2>
+<p>MIO是一个包含多种控制器功能的多路选择控制器,飞腾派的每个MIO均可单独当做UART/I2C。端口功能的选择，可以通过配置creg_mio_func_sel寄存器来实现，配置为00选择I2C，配置为01选择UART。</p>
+<pre><code>由MIO控制器来当作IIC来与设备通信，操作会比普通单片机中用GPIO口模拟iic时序要复杂
+</code></pre>
+<p>由MIO控制的I2C操作说明：</p>
+<h3 id="初始化"><a class="header" href="#初始化">初始化</a></h3>
+<h4 id="飞腾派-pad-引脚初始化"><a class="header" href="#飞腾派-pad-引脚初始化">飞腾派 PAD 引脚初始化：</a></h4>
+<p>配置PAD控制器，设置SCL和SDA引脚为I2C功能，确保引脚电气特性适配外设。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 定义PAD配置结构体
+#[derive(Debug, Clone, Copy, Default)]
+pub struct FIOPadConfig {
+    pub instance_id: u32,    // 设备实例ID
+    pub base_address: usize, // PAD基地址
+}
+
+// 定义PAD控制器结构体
+#[feature(const_trait_impl)]
+#[derive(Debug, Clone, Copy, Default)]
+pub struct FIOPadCtrl {
+    pub config: FIOPadConfig, // 配置信息
+    pub is_ready: u32,        // 设备就绪状态
+}
+
+// 全局PAD控制器实例
+pub static mut iopad_ctrl: FIOPadCtrl = FIOPadCtrl {
+    config: FIOPadConfig {
+        instance_id: 0,
+        base_address: 0,
+    },
+    is_ready: 0,
+};
+
+// PAD配置表
+static FIO_PAD_CONFIG_TBL: [FIOPadConfig; 1] = [FIOPadConfig {
+    instance_id: 0,
+    base_address: 0x32B30000usize,
+}];
+
+// 初始化PAD控制器
+pub fn FIOPadCfgInitialize(instance_p: &amp;mut FIOPadCtrl, input_config_p: &amp;FIOPadConfig) -&gt; bool {
+    assert!(Some(instance_p.clone()).is_some(), "instance_p should not be null");
+    assert!(
+        Some(input_config_p.clone()).is_some(),
+        "input_config_p should not be null"
+    );
+    let mut ret: bool = true;
+    if instance_p.is_ready == 0x11111111u32 {
+        debug!("Device is already initialized.");
+    }
+    // 去初始化并设置配置
+    FIOPadDeInitialize(instance_p);
+    instance_p.config = *input_config_p;
+    instance_p.is_ready = 0x11111111u32;
+    ret
+}
+
+// 去初始化PAD控制器
+pub fn FIOPadDeInitialize(instance_p: &amp;mut FIOPadCtrl) -&gt; bool {
+    if instance_p.is_ready == 0 {
+        return true;
+    }
+    instance_p.is_ready = 0;
+    unsafe {
+        core::ptr::write_bytes(instance_p as *mut FIOPadCtrl, 0, size_of::&lt;FIOPadCtrl&gt;());
+    }
+    true
+}
+
+// 查找PAD配置
+pub fn FIOPadLookupConfig(instance_id: u32) -&gt; Option&lt;FIOPadConfig&gt; {
+    if instance_id as usize &gt;= 1 {
+        return None;
+    }
+    for config in FIO_PAD_CONFIG_TBL.iter() {
+        if config.instance_id == instance_id {
+            return Some(*config);
+        }
+    }
+    None
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>说明</strong>：</p>
+<ul>
+<li>FIOPadCfgInitialize：设置PAD基地址（0x32B30000），标记设备就绪（is_ready=0x11111111）。</li>
+<li>FIOPadDeInitialize：清除设备状态，防止重复初始化。</li>
+<li>FIOPadLookupConfig：根据实例ID查找配置，确保正确映射硬件资源。</li>
+<li>SCL（偏移0x00D0）和SDA（偏移0x00D4）通过FIOPadSetFunc配置为I2C功能（值5）。</li>
+</ul>
+<h4 id="mio和i2c控制器初始化"><a class="header" href="#mio和i2c控制器初始化">MIO和I2C控制器初始化</a></h4>
+<p>配置MIO为I2C模式，初始化I2C控制器，包括基地址、中断编号、时钟频率等。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 初始化MIO和I2C控制器
+pub unsafe fn FI2cMioMasterInit(address: u32, speed_rate: u32) -&gt; bool {
+    let mut input_cfg: FI2cConfig = FI2cConfig::default();
+    let mut config_p: FI2cConfig = FI2cConfig::default();
+    let mut status: bool = true;
+    // 初始化MIO控制器
+    master_mio_ctrl.config = FMioLookupConfig(1).unwrap();
+    status = FMioFuncInit(&amp;mut master_mio_ctrl, 0b00); // 设置为I2C模式
+    if status != true {
+        debug!("MIO initialize error.");
+        return false;
+    }
+    // 配置SCL和SDA引脚
+    FIOPadSetFunc(&amp;iopad_ctrl, 0x00D0u32, 5); /* scl */
+    FIOPadSetFunc(&amp;iopad_ctrl, 0x00D4u32, 5); /* sda */
+    unsafe {
+        core::ptr::write_bytes(&amp;mut master_i2c_instance as *mut FI2c, 0, size_of::&lt;FI2c&gt;());
+    }
+    // 查找I2C默认配置
+    config_p = FI2cLookupConfig(1).unwrap();
+    if !Some(config_p).is_some() {
+        debug!("Config of mio instance {} not found.", 1);
+        return false;
+    }
+    // 设置I2C配置
+    input_cfg = config_p.clone();
+    input_cfg.instance_id = 1;
+    input_cfg.base_addr = FMioFuncGetAddress(&amp;master_mio_ctrl, 0b00);
+    input_cfg.irq_num = FMioFuncGetIrqNum(&amp;master_mio_ctrl, 0b00);
+    input_cfg.ref_clk_hz = 50000000;
+    input_cfg.slave_addr = address;
+    input_cfg.speed_rate = speed_rate;
+    // 初始化I2C控制器
+    status = FI2cCfgInitialize(&amp;mut master_i2c_instance, &amp;input_cfg);
+    // 设置中断处理函数
+    master_i2c_instance.master_evt_handlers[0 as usize] = None;
+    master_i2c_instance.master_evt_handlers[1 as usize] = None;
+    master_i2c_instance.master_evt_handlers[2 as usize] = None;
+    if status != true {
+        debug!("Init mio master failed, ret: {:?}", status);
+        return status;
+    }
+    debug!(
+        "Set target slave_addr: 0x{:x} with mio-{}", input_cfg.slave_addr, 1
+    );
+    status
+}
+
+// 初始化I2C配置
+pub fn FI2cCfgInitialize(instance_p: &amp;mut FI2c, input_config_p: &amp;FI2cConfig) -&gt; bool {
+    assert!(Some(instance_p.clone()).is_some() &amp;&amp; Some(input_config_p).is_some());
+    let mut ret = true;
+    if instance_p.is_ready == 0x11111111u32 {
+        debug!("Device is already initialized!!!");
+        return false;
+    }
+    FI2cDeInitialize(instance_p);
+    instance_p.config = *input_config_p;
+    ret = FI2cReset(instance_p);
+    if ret == true {
+        instance_p.is_ready = 0x11111111u32;
+    }
+    ret
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>说明</strong>：</p>
+<ul>
+<li>FI2cMioMasterInit：设置MIO为I2C模式（creg_mio_func_sel=00），配置SCL/SDA引脚，初始化I2C控制器（基地址、中断号、50MHz时钟、从设备地址、速率）。</li>
+<li>FI2cCfgInitialize：检查设备状态，设置配置，重置I2C控制器，标记就绪。</li>
+<li>中断处理函数初始化为空，开发者可根据需求注册。</li>
+</ul>
+<h3 id="收发数据"><a class="header" href="#收发数据">收发数据</a></h3>
+<h4 id="数据发送"><a class="header" href="#数据发送">数据发送</a></h4>
+<p>发送数据到从设备（如EEPROM），确保数据长度和偏移地址符合限制。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub unsafe fn FI2cMasterWrite(buf_p: &amp;mut [u8], buf_len: u32, inchip_offset: u32) -&gt; bool {
+    let mut status: bool = true;
+    if buf_len &lt; 256 &amp;&amp; inchip_offset &lt; 256 {
+        if (256 - inchip_offset) &lt; buf_len {
+            debug!("Write to eeprom failed, out of eeprom size.");
+            return false;
+        }
+    } else {
+        debug!("Write to eeprom failed, out of eeprom size.");
+        return false;
+    }
+    status = FI2cMasterWritePoll(&amp;mut master_i2c_instance, inchip_offset, 1, buf_p, buf_len);
+    if status != true {
+        debug!("Write to eeprom failed");
+    }
+    status
+}
+
+pub fn FI2cMasterStartTrans(
+    instance_p: &amp;mut FI2c,
+    mem_addr: u32,
+    mem_byte_len: u8,
+    flag: u16,
+) -&gt; bool {
+    assert!(Some(instance_p.clone()).is_some());
+    let base_addr = instance_p.config.base_addr;
+    let mut addr_len: u32 = mem_byte_len as u32;
+    let mut ret = true;
+    ret = FI2cWaitBusBusy(base_addr.try_into().unwrap());
+    if ret != true {
+        return ret;
+    }
+    ret = FI2cSetTar(base_addr.try_into().unwrap(), instance_p.config.slave_addr);
+    while addr_len &gt; 0 {
+        if FI2cWaitStatus(base_addr.try_into().unwrap(), (0x1 &lt;&lt; 1)) != true {
+            break;
+        }
+        if input_32(base_addr.try_into().unwrap(), 0x80) != 0 {
+            return false;
+        }
+        if input_32(base_addr.try_into().unwrap(), 0x70) &amp; (0x1 &lt;&lt; 1) != 0 {
+            addr_len -= 1;
+            let value = (mem_addr &gt;&gt; (addr_len * 8)) &amp; FI2C_DATA_MASK();
+            if addr_len != 0 {
+                output_32(base_addr.try_into().unwrap(), 0x10, value);
+            } else {
+                output_32(base_addr.try_into().unwrap(), 0x10, value + flag as u32);
+            }
+        }
+    }
+    ret
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>说明</strong>：</p>
+<ul>
+<li>FI2cMasterWrite：检查数据长度和偏移（&lt;256字节），调用FI2cMasterWritePoll执行轮询写操作。</li>
+<li>FI2cMasterStartTrans：检查总线空闲（FI2cWaitBusBusy），设置从设备地址（IC_TAR），向IC_DATA_CMD（偏移0x10）写入数据（bit[8]=0表示写，bit[9]=1表示停止）。</li>
+</ul>
+<h4 id="数据接收"><a class="header" href="#数据接收">数据接收</a></h4>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub unsafe fn FI2cMasterRead(buf_p: &amp;mut [u8], buf_len: u32, inchip_offset: u32) -&gt; bool {
+    let mut instance_p: FI2c = master_i2c_instance;
+    let mut status: bool = true;
+    assert!(buf_len != 0);
+    for i in 0..buf_len as usize {
+        buf_p[i] = 0;
+    }
+    status = FI2cMasterReadPoll(&amp;mut instance_p, inchip_offset, 1, buf_p, buf_len);
+    status
+}
+
+pub fn FI2cMasterStopTrans(instance_p: &amp;mut FI2c) -&gt; bool {
+    assert!(Some(instance_p.clone()).is_some());
+    let mut ret = true;
+    let base_addr = instance_p.config.base_addr;
+    let mut reg_val = 0;
+    let mut timeout = 0;
+    while true {
+        if input_32(base_addr.try_into().unwrap(), 0x34) &amp; (0x1 &lt;&lt; 9) != 0 {
+            reg_val = input_32(base_addr.try_into().unwrap(), 0x60);
+            break;
+        } else if 500 &lt; timeout {
+            break;
+        }
+        timeout += 1;
+        busy_wait(Duration::from_millis(1));
+    }
+    ret = FI2cWaitBusBusy(base_addr.try_into().unwrap());
+    if ret == true {
+        ret = FI2cFlushRxFifo(base_addr.try_into().unwrap());
+    }
+    ret
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>说明</strong>：</p>
+<ul>
+<li>FI2cMasterRead：初始化接收缓冲区，调用FI2cMasterReadPoll执行轮询读操作。</li>
+<li>FI2cMasterStopTrans：检查停止条件（IC_RAW_INTR_STAT的bit[9]），清空接收FIFO（FI2cFlushRxFifo），确保传输结束。</li>
+</ul>
+<p><strong>飞腾派I2C数据发送</strong></p>
+<pre class="mermaid">sequenceDiagram
+    participant D as 驱动
+    participant I as I2C控制器
+    participant R as IC_DATA_CMD
+    D-&gt;&gt;I: 检查总线空闲(FI2cWaitBusBusy)
+    I-&gt;&gt;D: 空闲确认
+    D-&gt;&gt;I: 设置从设备地址(IC_TAR)
+    D-&gt;&gt;R: 写入数据，bit[8]=0，bit[9]=1(停止)
+    R-&gt;&gt;I: 传输数据到从设备
+    I-&gt;&gt;D: 返回传输状态
+</pre>
+<h2 id="飞腾派-i2c-和-mio-寄存器信息"><a class="header" href="#飞腾派-i2c-和-mio-寄存器信息">飞腾派 I2C 和 MIO 寄存器信息</a></h2>
+<h3 id="i2c寄存器"><a class="header" href="#i2c寄存器">I2C寄存器</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>寄存器</th><th>偏移</th><th>描述</th></tr></thead><tbody>
+<tr><td>IC_CON</td><td>0x00</td><td>控制寄存器，配置主/从模式、速率等</td></tr>
+<tr><td>IC_TAR</td><td>0x04</td><td>主机目标地址，设置从设备地址</td></tr>
+<tr><td>IC_SAR</td><td>0x08</td><td>从机地址寄存器，配置本设备地址</td></tr>
+<tr><td>IC_HS_MADDR</td><td>0x0C</td><td>高速模式地址编码</td></tr>
+<tr><td>IC_DATA_CMD</td><td>0x10</td><td>数据和命令，bit[7:0]=数据，bit[8]=读/写，bit[9]=停止</td></tr>
+<tr><td>IC_SS_SCL_HCNT</td><td>0x14</td><td>标准模式SCL高电平计数</td></tr>
+<tr><td>IC_SS_SCL_LCNT</td><td>0x18</td><td>标准模式SCL低电平计数</td></tr>
+<tr><td>IC_FS_SCL_HCNT</td><td>0x1C</td><td>快速模式SCL高电平计数</td></tr>
+<tr><td>IC_FS_SCL_LCNT</td><td>0x20</td><td>快速模式SCL低电平计数</td></tr>
+<tr><td>IC_INTR_STAT</td><td>0x2C</td><td>中断状态寄存器</td></tr>
+<tr><td>IC_INTR_MASK</td><td>0x30</td><td>中断屏蔽寄存器</td></tr>
+<tr><td>IC_RAW_INTR_STAT</td><td>0x34</td><td>原始中断状态，bit[9]=停止检测</td></tr>
+<tr><td>IC_CLR_INTR</td><td>0x40</td><td>清除中断寄存器</td></tr>
+<tr><td>IC_STATUS</td><td>0x70</td><td>状态寄存器，检查总线状态</td></tr>
+<tr><td>IC_TXFLR</td><td>0x74</td><td>发送FIFO级别</td></tr>
+<tr><td>IC_RXFLR</td><td>0x78</td><td>接收FIFO级别</td></tr>
+<tr><td>IC_TX_ABRT_SRC</td><td>0x80</td><td>发送中止源，检查错误状态</td></tr>
+</tbody></table>
+</div>
+<h3 id="mio寄存器"><a class="header" href="#mio寄存器">MIO寄存器</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Offset</th></tr></thead><tbody>
+<tr><td>MIO0</td><td>0x000_2801_4000</td></tr>
+<tr><td>MIO1</td><td>0x000_2801_6000</td></tr>
+<tr><td>MIO2</td><td>0x000_2801_8000</td></tr>
+<tr><td>MIO3</td><td>0x000_2801_A000</td></tr>
+<tr><td>MIO4</td><td>0x000_2801_C000</td></tr>
+<tr><td>MIO5</td><td>0x000_2801_E000</td></tr>
+<tr><td>MIO6</td><td>0x000_2802_0000</td></tr>
+<tr><td>MIO7</td><td>0x000_2802_2000</td></tr>
+<tr><td>MIO8</td><td>0x000_2802_4000</td></tr>
+<tr><td>MIO9</td><td>0x000_2802_6000</td></tr>
+<tr><td>MIO10</td><td>0x000_2802_8000</td></tr>
+<tr><td>MIO11</td><td>0x000_2802_A000</td></tr>
+<tr><td>MIO12</td><td>0x000_2802_C000</td></tr>
+<tr><td>MIO13</td><td>0x000_2802_E000</td></tr>
+<tr><td>MIO14</td><td>0x000_2803_0000</td></tr>
+<tr><td>MIO15</td><td>0x000_2803_2000</td></tr>
+</tbody></table>
+</div>
+<h3 id="pad寄存器"><a class="header" href="#pad寄存器">PAD寄存器</a></h3>
+<p><strong>基地址</strong>：0x32B30000</p>
+<div class="table-wrapper"><table><thead><tr><th>寄存器</th><th>偏移</th><th>描述</th></tr></thead><tbody>
+<tr><td>x_reg0</td><td>0x00D0 (SCL), 0x00D4 (SDA)</td><td>功能选择（值5=I2C），驱动强度，上下拉</td></tr>
+<tr><td>x_reg1</td><td>0x00D0 (SCL), 0x00D4 (SDA)</td><td>输入/输出延迟，粒度100ps/366ps</td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter3/3_1_uart_driver.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter3/3_3_spi_driver.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter3/3_1_uart_driver.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter3/3_3_spi_driver.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>
