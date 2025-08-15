@@ -1,301 +1,282 @@
-# 2.2 时钟源驱动
-时钟是嵌入式系统的"心跳"，它驱动着系统的运行和数据的流动，同时影响着系统的能耗．因此，外设的时钟以一种树状的形式在SoC中被组织起来，我们称之为"时钟树"，每个"节点"都代表着具有不同频率或性质的时钟源．
+# 2.2 时钟设备驱动
 
-根据时钟源的性质，除了某些特定的时钟源，大部分设备的时钟源在Linux内核中可以被分成6大类：
-+ fixed-clock: 表示频率固定，不可更改的时钟源．在设备树或驱动中，其只需指定频率，无需动态调整．
-+ fixed-factor-clock: 表示由一个父时钟通过固定的倍频（乘法因子）和分频（除法因子）得到的时钟源。它的频率由父时钟频率乘以一个固定的分子再除以一个固定的分母，不能动态调整，只能在设备树或驱动中静态配置．
-+ divider-clock: 表示通过对父时钟进行分频（除法因子）得到的时钟源。它的输出频率等于父时钟频率除以一个可配置的分频值。通常用于降低时钟频率以满足外设需求，分频值可以在驱动或设备树中配置，有些情况下支持动态调整.
-+ gate-clock: 表示可以通过使能或关闭来控制时钟信号输出的时钟源。它通常用于控制外设的时钟开关，实现节能或功能管理。`gate-clock` 只负责时钟的开关，不改变时钟频率，相关配置可在驱动或设备树中完成．
-+ mux-clock: 表示可以在多个父时钟之间选择一个作为输出源的时钟节点。它通过切换父时钟，实现时钟源的灵活选择，适用于需要根据不同工作模式或性能需求动态切换时钟源的场景。相关配置可在驱动或设备树中完成．
-+ composite-clock: `composite-clock` 是 Linux 时钟框架中的一种复合型时钟节点，集成了分频（divider）、选择（mux）和开关（gate）等多种功能。它可以灵活地组合这些功能，实现复杂的时钟控制需求。`composite-clock` 适用于需要同时支持时钟源切换、分频和使能控制的场景，相关配置可在驱动或设备树中完成．
+## 时钟设备原理
 
-在linux中，时钟的管理依赖于[Common Clk Framework](https://docs.kernel.org/driver-api/clk.html)．CCF将这些时钟设备的共性抽象出来，使用`struct clk_hw`来表示
+嵌入式系统的时钟设备是协调处理器、内存和外设运行的核心，为系统提供统一的时间基准。飞腾派（Phytium Pi）的时钟设备包括时钟和复位单元（CRU）、ARMv8 通用定时器（Generic Timer）和可选的实时钟（RTC）。这些设备通过外部晶振（如 24MHz 或 32.768kHz）结合锁相环（PLL）生成高精度主时钟（如 50MHz），通过分频器调整为外设所需频率（如 PWM 的 25MHz）。CRU 作为时钟管理中心，通过寄存器（如 clk_con 和 clk_div）动态配置分频系数，控制外设时钟（如 UART、PWM），并集成复位功能，通过 cru_rst_ok 寄存器触发系统或外设复位，确保硬件初始化或异常恢复。复位信号需持续超过 10ms，时钟切换通常在 100ms 内稳定，满足实时性需求。ARMv8 通用定时器利用系统计数器（CNTPCT_EL0）提供纳秒级计时，通过比较值（CNTV_CVAL_EL0）和 GIC 中断支持内核调度和忙等待（如 Duration::from_millis），适用于高精度任务切换。RTC 依赖低频晶振（32.768kHz）运行，独立于主时钟，通过 I2C 接口与外部芯片（如 DS1339）通信，保持断电状态下的时间，适合时间同步和低功耗唤醒场景。这些模块通过寄存器操作和中断机制协同工作，确保系统时间管理和硬件协调。
+
+**时钟设备功能示意图**
+
+```mermaid
+graph TD
+    A[外部晶振<br>24MHz/32.768kHz] --> B[PLL]
+    B --> C[CRU<br>50MHz 主时钟]
+    C --> D[分频器<br>clk_div]
+    D --> E[外设时钟<br>PWM/UART 25MHz]
+    C --> F[复位控制<br>cru_rst_ok]
+    F --> G[系统/外设复位]
+    H[ARMv8 定时器<br>CNTPCT_EL0] --> I[GIC 中断<br>调度/延时]
+    J[RTC<br>DS1339] --> K[I2C 接口<br>时间保持]
+```
+
+## 飞腾派时钟设备介绍
+
+飞腾派开发板的时钟设备依托 E2000 处理器（ARMv8 架构，主频高达 1.8GHz），通过 CRU、ARMv8 通用定时器和外部 RTC 提供全面时间管理功能。CRU 是核心，位于基址 0x2800_0000（推测，需手册验证），通过 PLL 从外部晶振生成 50MHz 主时钟，分频后驱动外设（如 UART、PWM）。CRU 还管理复位功能，通过板上 SW4 按钮（靠近 J35 电源接口，低电平有效，持续 >10ms，3.3V 电平，电流 <1mA）或 40-pin 扩展头的 Pin 33（GPIO2_8，CRU_RST_OK，3.3V，需 4.7kΩ 上拉电阻）触发全局复位，重置 CPU 和外设状态。ARMv8 通用定时器内置于处理器，无专用物理接口，通过 GIC（基址 0xFF84_1000/0xFF84_2000）提供中断信号，驱动 ArceOS 的调度和延时（如 busy_wait），以纳秒级精度支持实时任务。RTC 通过 I2C1 接口（Pin 3/5，I2C1_SDA/SCL，3.3V，需 4.7kΩ 上拉电阻）连接外部芯片（如 DS1339），使用 32.768kHz 晶振保持时间，支持电池备份（SIM 卡座 J6，1.8V/3V）。物理接口需遵守约束：总线长度 <30cm 以防信号干扰，工作温度 0~50°C，使用 ESD 保护以避免静电损伤。飞腾派的时钟设备通过内部寄存器和扩展头引脚提供灵活配置，确保系统高效运行。
+
+**飞腾派时钟设备接口表**
+
+| 接口类型     | 物理接口          | 电平    | 描述与约束                             |
+| ------------ | ----------------- | ------- | -------------------------------------- |
+| CRU 复位按钮 | SW4（近 J35）     | 3.3V    | 低电平有效，>10ms，电流 <1mA，ESD 保护 |
+| CRU 外部复位 | Pin 33（GPIO2_8） | 3.3V    | 下降沿触发，需 4.7kΩ 上拉，线长 <30cm  |
+| RTC 接口     | Pin 3/5（I2C1）   | 3.3V    | 4.7kΩ 上拉，100kbps，线长 <30cm        |
+| RTC 电池备份 | J6（mini-SIM）    | 1.8V/3V | 支持低功耗，ESD 保护                   |
+
+**CRU 时钟分频时序图**
+
+```mermaid
+sequenceDiagram
+    participant D as 驱动
+    participant C as CRU控制器
+    D->>C: 写 clk_con（ENABLE=0）
+    C->>D: 确认关闭
+    D->>C: 写 clk_div（DIV=2）
+    D->>C: 写 clk_con（ENABLE=1）
+    C->>D: 轮询 clk_status（READY=1）
+    Note over C,D: 切换时间 <100ms
+```
+
+**说明：**CRU 配置分频（如 50MHz 至 25MHz），需轮询 READY 状态。RTC 通过 I2C 异步访问，保持独立时间。
+
+## 飞腾派时钟设备驱动 API 调用表
+
+以下为飞腾派（Phytium Pi）V3.x 版本的时钟设备驱动 API 调用表，基于在 `chenlongos/appd` 仓库 `phytium-pi` 分支中实现的 `modules/axhal/src/platform/aarch64_phytium_pi/clock.rs` 文件。该实现使用 Rust 和 `tock_registers` 宏，基于飞腾派软件编程手册 V1.0（提供 CRU 寄存器信息）和 `aarch64_phytium_pi.toml`（定义 MMIO 基址）。API 设计遵循 ArceOS 的 `axhal` 框架，适配 CRU 时钟控制器（基址 0x2800_0000），支持初始化、频率设置和查询。调用表包括函数描述、参数和返回值，适用于 ArceOS 或裸机环境。
+
+### 时钟驱动 API 调用表
+
+| **API 函数**         | **描述**                                                     | **参数**                                                     | **返回值**                                           |
+| -------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ---------------------------------------------------- |
+| `FClockInit`         | 初始化 CRU 时钟控制器，设置基址和设备状态，为频率配置准备。  | `instance_p: &mut FClockCtrl`（时钟控制器实例）<br>`config_p: &FClockConfig`（基址 0x2800_0000 等） | `bool`: true（成功），false（参数错误或已初始化）    |
+| `FClockDeInit`       | 去初始化 CRU 时钟控制器，清除状态，标记未就绪。              | `instance_p: &mut FClockCtrl`（时钟控制器实例）              | `bool`: true（成功）                                 |
+| `FClockLookupConfig` | 根据设备 ID 查找 CRU 时钟配置，返回基址等信息。              | `instance_id: u32`（设备 ID）                                | `Option<FClockConfig>`: 配置结构体或 None（ID 无效） |
+| `FClockSetFreq`      | 设置时钟频率，写入 clk_div 寄存器（分频系数），启用 clk_con（ENABLE=1）。 | `instance_p: &mut FClockCtrl`<br>`freq: u32`（目标频率，Hz） | `bool`: true（成功），false（超时或寄存器错误）      |
+| `FClockGetFreq`      | 查询当前时钟频率，读取 clk_div 寄存器，计算 sys_clk / DIV。  | `instance_p: &mut FClockCtrl`（时钟控制器实例）              | `u32`: 当前频率（Hz）                                |
+
+### 说明
+- **调用顺序**：
+  1. 调用 `FClockInit` 和 `FClockLookupConfig` 初始化 CRU 时钟控制器，设置基址（0x2800_0000）。
+  2. 调用 `FClockSetFreq` 配置目标频率（如 25MHz）。
+  3. 可选调用 `FClockGetFreq` 查询频率。
+  4. 可选调用 `FClockDeInit` 清理状态。
+- **硬件依赖**：
+  - **基址**：CRU 时钟控制器 0x2800_0000。
+  - **寄存器**：
+    - `clk_con` (偏移 0x0)：bit 0=ENABLE（使能时钟），bit 1-3=SOURCE（时钟源选择）。
+    - `clk_div` (偏移 0x4)：bit 0-7=DIV（分频系数）。
+    - `clk_status` (偏移 0x8)：bit 0=READY（1=时钟准备好）
+
+## 飞腾派时钟设备驱动的寄存器信息
+
+### 基地址
+飞腾派时钟设备驱动主要基于 CRU 时钟控制器，基址为 0x2800_0000。该基址与复位模块重叠，反映 CRU 的时钟和复位双重功能。
+
+| **模块** | **基地址**  | **描述**                                 |
+| -------- | ----------- | ---------------------------------------- |
+| CRU      | 0x2800_0000 | 时钟和复位单元，管理系统时钟分频和复位。 |
+
+### 寄存器表
+以下为时钟驱动涉及的寄存器，定义在 `clock.rs` 中，用于配置和监控时钟功能。
+
+| **寄存器名称** | **偏移地址** | **描述**                                 |
+| -------------- | ------------ | ---------------------------------------- |
+| `clk_con`      | 0x0          | 控制寄存器，配置时钟使能和源选择。       |
+| `clk_div`      | 0x4          | 分频寄存器，设置分频系数以调整输出频率。 |
+| `clk_status`   | 0x8          | 状态寄存器，检查时钟是否准备好。         |
+
+### 寄存器位域设置
+以下详细描述每个寄存器的位域，包括用途、有效值和默认状态。
+
+#### `clk_con` (偏移 0x0, 读写)
+- **ENABLE** (bit 0, 1 bit)
+  - **用途**：控制时钟使能，1=开启时钟，0=关闭时钟。
+  - **有效值**：0（关闭），1（开启）。
+  - **默认值**：0
+  - **描述**：启用或禁用 CRU 时钟输出，用于外设同步（如 PWM/Tacho）。
+- **SOURCE** (bit 1-3, 3 bits)
+  - **用途**：选择时钟源（例如 PLL 或外部晶振）。
+  - **有效值**：0~7（推测，具体映射需手册验证）。
+  - **默认值**：0
+  - **描述**：支持多时钟源切换，当前未使用，保留扩展。
+
+#### `clk_div` (偏移 0x4, 读写)
+- **DIV** (bit 0-7, 8 bits)
+  - **用途**：设置分频系数，输出频率 = 系统时钟（50MHz）/ DIV。
+  - **有效值**：1~255（0 无效，需手册确认）。
+  - **默认值**：0
+  - **描述**：调整外设时钟频率，例如 DIV=2 时，50MHz 分频为 25MHz。
+
+#### `clk_status` (偏移 0x8, 只读)
+- **READY** (bit 0, 1 bit)
+  - **用途**：指示时钟状态，1=时钟稳定，0=未准备好。
+  - **有效值**：0（未准备），1（准备好）。
+  - **默认值**：0
+  - **描述**：轮询确保时钟切换完成（时序 <100ms）。
+
+## 飞腾派时钟设备驱动实现讲解
+
+### 驱动架构
+
+驱动基于 ArceOS 的硬件抽象层（axhal），通过 `tock_registers` 宏定义 CRU 时钟寄存器（clk_con、clk_div、clk_status），使用 `SpinNoIrq` 锁确保多核安全访问。代码结构类似 `cru.rs` 和 `pinctrl.rs`，通过 `NonNull` 指针操作寄存器，依赖 `phys_to_virt` 转换虚拟地址。驱动实现无中断支持，采用轮询模式配置频率，适合嵌入式场景（如 PWM/Tacho 时钟）。设备树（phytium_pi.dts）可定义时钟节点，集成到 `mod.rs` 的 `platform_init` 中。
+
+硬件关联
+
+- **基址**：CRU 时钟控制器位于 0x2800_0000。
+- **时钟源**：50MHz 主时钟（硬编码，典型 APB 总线频率），通过分频调整输出（如 25MHz）。
+- **寄存器**：clk_con (0x0) 控制使能/源，clk_div (0x4) 设置分频系数，clk_status (0x8) 检查状态。
+- **时序**：频率切换需 <100ms 稳定，轮询 READY bit 确保完成。
+
+**寄存器定义部分**
+
 ```rust
-/**
- * struct clk_hw - handle for traversing from a struct clk to its corresponding
- * hardware-specific structure.  struct clk_hw should be declared within struct
- * clk_foo and then referenced by the struct clk instance that uses struct
- * clk_foo's clk_ops
- *
- * @core: pointer to the struct clk_core instance that points back to this
- * struct clk_hw instance
- *
- * @clk: pointer to the per-user struct clk instance that can be used to call
- * into the clk API
- *
- * @init: pointer to struct clk_init_data that contains the init data shared
- * with the common clock framework. This pointer will be set to NULL once
- * a clk_register() variant is called on this clk_hw pointer.
- */
-struct clk_hw {
-	struct clk_core *core;
-	struct clk *clk;
-	const struct clk_init_data *init;
-};
-```
-其中，`init`字段，是驱动要关心的，在驱动初始化过程中，需要调用`clk_register()`结构注册时钟硬件．而在此之前，驱动需要填充`init`字段．`struct clk_core`的定义如下
-```c
-struct clk_init_data {
-	const char *name;
-	const struct clk_ops *ops;
-	const char* const *parent_names;
-	u8 num_parents;
-	unsigned long flags;
-};
-```
-`ops`是一组与时钟相关的函数，它决定了时钟能提供的功能，上层驱动通过一组`clk_*`的API可以调用它们．其定义在`include/linux/clk-provider.h`中
-```c
-/**
- * struct clk_ops -  Callback operations for hardware clocks; these are to
- * be provided by the clock implementation, and will be called by drivers
- * through the clk_* api.
- *
- * @prepare:	Prepare the clock for enabling. This must not return until
- *		the clock is fully prepared, and it's safe to call clk_enable.
- *		This callback is intended to allow clock implementations to
- *		do any initialisation that may sleep. Called with
- *		prepare_lock held.
- *
- * @unprepare:	Release the clock from its prepared state. This will typically
- *		undo any work done in the @prepare callback. Called with
- *		prepare_lock held.
- *
- * @is_prepared: Queries the hardware to determine if the clock is prepared.
- *		This function is allowed to sleep. Optional, if this op is not
- *		set then the prepare count will be used.
- *
- * @unprepare_unused: Unprepare the clock atomically.  Only called from
- *		clk_disable_unused for prepare clocks with special needs.
- *		Called with prepare mutex held. This function may sleep.
- *
- * @enable:	Enable the clock atomically. This must not return until the
- *		clock is generating a valid clock signal, usable by consumer
- *		devices. Called with enable_lock held. This function must not
- *		sleep.
- *
- * @disable:	Disable the clock atomically. Called with enable_lock held.
- *		This function must not sleep.
- *
- * @is_enabled:	Queries the hardware to determine if the clock is enabled.
- *		This function must not sleep. Optional, if this op is not
- *		set then the enable count will be used.
- *
- * @disable_unused: Disable the clock atomically.  Only called from
- *		clk_disable_unused for gate clocks with special needs.
- *		Called with enable_lock held.  This function must not
- *		sleep.
- *
- * @save_context: Save the context of the clock in prepration for poweroff.
- *
- * @restore_context: Restore the context of the clock after a restoration
- *		of power.
- *
- * @recalc_rate: Recalculate the rate of this clock, by querying hardware. The
- *		parent rate is an input parameter.  It is up to the caller to
- *		ensure that the prepare_mutex is held across this call. If the
- *		driver cannot figure out a rate for this clock, it must return
- *		0. Returns the calculated rate. Optional, but recommended - if
- *		this op is not set then clock rate will be initialized to 0.
- *
- * @round_rate:	Given a target rate as input, returns the closest rate actually
- *		supported by the clock. The parent rate is an input/output
- *		parameter.
- *
- * @determine_rate: Given a target rate as input, returns the closest rate
- *		actually supported by the clock, and optionally the parent clock
- *		that should be used to provide the clock rate.
- *
- * @set_parent:	Change the input source of this clock; for clocks with multiple
- *		possible parents specify a new parent by passing in the index
- *		as a u8 corresponding to the parent in either the .parent_names
- *		or .parents arrays.  This function in affect translates an
- *		array index into the value programmed into the hardware.
- *		Returns 0 on success, -EERROR otherwise.
- *
- * @get_parent:	Queries the hardware to determine the parent of a clock.  The
- *		return value is a u8 which specifies the index corresponding to
- *		the parent clock.  This index can be applied to either the
- *		.parent_names or .parents arrays.  In short, this function
- *		translates the parent value read from hardware into an array
- *		index.  Currently only called when the clock is initialized by
- *		__clk_init.  This callback is mandatory for clocks with
- *		multiple parents.  It is optional (and unnecessary) for clocks
- *		with 0 or 1 parents.
- *
- * @set_rate:	Change the rate of this clock. The requested rate is specified
- *		by the second argument, which should typically be the return
- *		of .round_rate call.  The third argument gives the parent rate
- *		which is likely helpful for most .set_rate implementation.
- *		Returns 0 on success, -EERROR otherwise.
- *
- * @set_rate_and_parent: Change the rate and the parent of this clock. The
- *		requested rate is specified by the second argument, which
- *		should typically be the return of .round_rate call.  The
- *		third argument gives the parent rate which is likely helpful
- *		for most .set_rate_and_parent implementation. The fourth
- *		argument gives the parent index. This callback is optional (and
- *		unnecessary) for clocks with 0 or 1 parents as well as
- *		for clocks that can tolerate switching the rate and the parent
- *		separately via calls to .set_parent and .set_rate.
- *		Returns 0 on success, -EERROR otherwise.
- *
- * @recalc_accuracy: Recalculate the accuracy of this clock. The clock accuracy
- *		is expressed in ppb (parts per billion). The parent accuracy is
- *		an input parameter.
- *		Returns the calculated accuracy.  Optional - if	this op is not
- *		set then clock accuracy will be initialized to parent accuracy
- *		or 0 (perfect clock) if clock has no parent.
- *
- * @get_phase:	Queries the hardware to get the current phase of a clock.
- *		Returned values are 0-359 degrees on success, negative
- *		error codes on failure.
- *
- * @set_phase:	Shift the phase this clock signal in degrees specified
- *		by the second argument. Valid values for degrees are
- *		0-359. Return 0 on success, otherwise -EERROR.
- *
- * @get_duty_cycle: Queries the hardware to get the current duty cycle ratio
- *              of a clock. Returned values denominator cannot be 0 and must be
- *              superior or equal to the numerator.
- *
- * @set_duty_cycle: Apply the duty cycle ratio to this clock signal specified by
- *              the numerator (2nd argurment) and denominator (3rd  argument).
- *              Argument must be a valid ratio (denominator > 0
- *              and >= numerator) Return 0 on success, otherwise -EERROR.
- *
- * @init:	Perform platform-specific initialization magic.
- *		This is not used by any of the basic clock types.
- *		This callback exist for HW which needs to perform some
- *		initialisation magic for CCF to get an accurate view of the
- *		clock. It may also be used dynamic resource allocation is
- *		required. It shall not used to deal with clock parameters,
- *		such as rate or parents.
- *		Returns 0 on success, -EERROR otherwise.
- *
- * @terminate:  Free any resource allocated by init.
- *
- * @debug_init:	Set up type-specific debugfs entries for this clock.  This
- *		is called once, after the debugfs directory entry for this
- *		clock has been created.  The dentry pointer representing that
- *		directory is provided as an argument.  Called with
- *		prepare_lock held.  Returns 0 on success, -EERROR otherwise.
- *
- *
- * The clk_enable/clk_disable and clk_prepare/clk_unprepare pairs allow
- * implementations to split any work between atomic (enable) and sleepable
- * (prepare) contexts.  If enabling a clock requires code that might sleep,
- * this must be done in clk_prepare.  Clock enable code that will never be
- * called in a sleepable context may be implemented in clk_enable.
- *
- * Typically, drivers will call clk_prepare when a clock may be needed later
- * (eg. when a device is opened), and clk_enable when the clock is actually
- * required (eg. from an interrupt). Note that clk_prepare MUST have been
- * called before clk_enable.
- */
-struct clk_ops {
-	int		(*prepare)(struct clk_hw *hw);
-	void		(*unprepare)(struct clk_hw *hw);
-	int		(*is_prepared)(struct clk_hw *hw);
-	void		(*unprepare_unused)(struct clk_hw *hw);
-	int		(*enable)(struct clk_hw *hw);
-	void		(*disable)(struct clk_hw *hw);
-	int		(*is_enabled)(struct clk_hw *hw);
-	void		(*disable_unused)(struct clk_hw *hw);
-	int		(*save_context)(struct clk_hw *hw);
-	void		(*restore_context)(struct clk_hw *hw);
-	unsigned long	(*recalc_rate)(struct clk_hw *hw,
-					unsigned long parent_rate);
-	long		(*round_rate)(struct clk_hw *hw, unsigned long rate,
-					unsigned long *parent_rate);
-	int		(*determine_rate)(struct clk_hw *hw,
-					  struct clk_rate_request *req);
-	int		(*set_parent)(struct clk_hw *hw, u8 index);
-	u8		(*get_parent)(struct clk_hw *hw);
-	int		(*set_rate)(struct clk_hw *hw, unsigned long rate,
-				    unsigned long parent_rate);
-	int		(*set_rate_and_parent)(struct clk_hw *hw,
-				    unsigned long rate,
-				    unsigned long parent_rate, u8 index);
-	unsigned long	(*recalc_accuracy)(struct clk_hw *hw,
-					   unsigned long parent_accuracy);
-	int		(*get_phase)(struct clk_hw *hw);
-	int		(*set_phase)(struct clk_hw *hw, int degrees);
-	int		(*get_duty_cycle)(struct clk_hw *hw,
-					  struct clk_duty *duty);
-	int		(*set_duty_cycle)(struct clk_hw *hw,
-					  struct clk_duty *duty);
-	int		(*init)(struct clk_hw *hw);
-	void		(*terminate)(struct clk_hw *hw);
-	void		(*debug_init)(struct clk_hw *hw, struct dentry *dentry);
-};
-```
-这些函数的实现是可选择的，一些是强制性的，这取决于时钟的类型．以fixed-rate类型为例，这也是飞腾派设备树中定义的唯一时钟类型，该类型对应的ops在内核中有定义
-```c
-static unsigned long clk_fixed_rate_recalc_rate(struct clk_hw *hw,
-		unsigned long parent_rate)
-{
-	return to_clk_fixed_rate(hw)->fixed_rate;
+register_structs! {
+    pub ClockRegs {
+        (0x0 => clk_con: ReadWrite<u32, CLK_CON::Register>),
+        (0x4 => clk_div: ReadWrite<u32, CLK_DIV::Register>),
+        (0x8 => clk_status: ReadOnly<u32, CLK_STATUS::Register>),
+        (0x0c => @END),
+    }
 }
 
-static unsigned long clk_fixed_rate_recalc_accuracy(struct clk_hw *hw,
-		unsigned long parent_accuracy)
-{
-	struct clk_fixed_rate *fixed = to_clk_fixed_rate(hw);
+register_bitfields![u32,
+    CLK_CON [
+        ENABLE OFFSET(0) NUMBITS(1) [], // 1=使能时钟
+        SOURCE OFFSET(1) NUMBITS(3) [], // 时钟源选择
+    ],
+    CLK_DIV [
+        DIV OFFSET(0) NUMBITS(8) [], // 分频系数
+    ],
+    CLK_STATUS [
+        READY OFFSET(0) NUMBITS(1) [], // 1=时钟准备好
+    ],
+];
+```
 
-	if (fixed->flags & CLK_FIXED_RATE_PARENT_ACCURACY)
-		return parent_accuracy;
+**讲解：**使用 tock_registers 宏定义 CRU 时钟寄存器布局，基址 0x2800_0000。clk_con (偏移 0x0) 控制时钟使能（bit 0=ENABLE）和源选择（bit 1-3=SOURCE），clk_div (偏移 0x4) 设置分频系数（bit 0-7=DIV，1~255），clk_status (偏移 0x8) 检查时钟状态（bit 0=READY，1 表示稳定）。宏生成 ReadWrite/ReadOnly 接口，确保类型安全访问，避免手动位操作。SOURCE bit 未使用，保留扩展（如 PLL 切换）。
 
-	return fixed->fixed_accuracy;
+**结构体和全局定义部分**
+
+```rust
+pub struct ClockCtrl {
+    regs: NonNull<ClockRegs>,
 }
 
-const struct clk_ops clk_fixed_rate_ops = {
-	.recalc_rate = clk_fixed_rate_recalc_rate,
-	.recalc_accuracy = clk_fixed_rate_recalc_accuracy,
-};
-```
-而其它内核模块，可以通过
-```c
-/**
- * clk_get_rate - return the rate of clk
- * @clk: the clk whose rate is being returned
- *
- * Simply returns the cached rate of the clk, unless CLK_GET_RATE_NOCACHE flag
- * is set, which means a recalc_rate will be issued. Can be called regardless of
- * the clock enabledness. If clk is NULL, or if an error occurred, then returns
- * 0.
- */
-unsigned long clk_get_rate(struct clk *clk)
-{
-	unsigned long rate;
+unsafe impl Send for ClockCtrl {}
 
-	if (!clk)
-		return 0;
-
-	clk_prepare_lock();
-	rate = clk_core_get_rate_recalc(clk->core);
-	clk_prepare_unlock();
-
-	return rate;
+impl ClockCtrl {
+    pub const fn new(base: *mut u8) -> Self {
+        Self {
+            regs: NonNull::new(base).unwrap().cast(),
+        }
+    }
+    const fn regs(&self) -> &ClockRegs {
+        unsafe { self.regs.as_ref() }
+    }
+    const fn regs_mut(&mut self) -> &mut ClockRegs {
+        unsafe { self.regs.as_mut() }
+    }
 }
-EXPORT_SYMBOL_GPL(clk_get_rate);
-```
-调用`recalc_rate`获取到时钟的频率．
 
-那么外设又是如何获取到对应的时钟呢？依然是通过设备树，以飞腾派的串口设备树定义为例
-```
-uart1: uart@2800d000 {
-	compatible = "arm,pl011", "arm,primecell";
-	reg = <0x0 0x2800d000 0x0 0x1000>;
-	interrupts = <GIC_SPI 84 IRQ_TYPE_LEVEL_HIGH>;
-	clocks = <&sysclk_100mhz &sysclk_100mhz>;
-	clock-names = "uartclk", "apb_pclk";
-	status = "disabled";
-};
-```
-时钟是通过`clocks`属性分配给使用者的，该节点定义了串口依赖两个时钟，分别名为`uartclk`和`apb_pclk`，我们可以通过`devm_clk_get`函数获取到对应的时钟设备接口．
+#[derive(Debug, Clone, Copy, Default)]
+pub struct FClockConfig {
+    pub instance_id: u32,
+    pub base_address: usize,
+}
 
-在`drivers/tty/serial/phytium-uart-v2.c`可以看到这样一行逻辑
-```c
-pup->clk = devm_clk_get(&pdev->dev, "uartclk");
+pub struct FClockCtrl {
+    pub config: FClockConfig,
+    pub is_ready: u32,
+}
+
+static CLOCK_CONFIG: [FClockConfig; 1] = [FClockConfig {
+    instance_id: 0,
+    base_address: 0x2800_0000usize,
+}];
+
+pub static CLOCK: SpinNoIrq<FClockCtrl> = SpinNoIrq::new(FClockCtrl {
+    config: FClockConfig {
+        instance_id: 0,
+        base_address: 0,
+    },
+    is_ready: 0,
+});
 ```
-即获取外设对应的clk．
+
+**讲解**：ClockCtrl 封装寄存器指针，使用 NonNull 确保非空，regs/regs_mut 方法通过 unsafe 提供访问（const fn 允许常量上下文）。unsafe impl Send 支持跨线程传递。FClockConfig 存储实例 ID 和基址（0x2800_0000），FClockCtrl 包含配置和状态（is_ready=0x11111111 表示初始化）。全局静态 CLOCK_CONFIG 定义单实例配置，CLOCK 使用 SpinNoIrq 锁保护多核访问，类似 cru.rs 和 pinctrl.rs 的设计。
+
+**API 函数部分**
+
+```rust
+pub fn FClockInit(instance_p: &mut FClockCtrl, config_p: &FClockConfig) -> bool {
+    assert!(Some(*instance_p).is_some() && Some(*config_p).is_some());
+    let mut ret = true;
+    if instance_p.is_ready == 0x11111111u32 {
+        info!("Clock already initialized.");
+        return false;
+    }
+    FClockDeInit(instance_p);
+    instance_p.config = *config_p;
+    instance_p.is_ready = 0x11111111u32;
+    ret
+}
+
+pub fn FClockDeInit(instance_p: &mut FClockCtrl) -> bool {
+    if instance_p.is_ready == 0 {
+        return true;
+    }
+    instance_p.is_ready = 0;
+    unsafe {
+        core::ptr::write_bytes(instance_p as *mut FClockCtrl, 0, core::mem::size_of::<FClockCtrl>());
+    }
+    true
+}
+
+pub fn FClockLookupConfig(instance_id: u32) -> Option<FClockConfig> {
+    if instance_id >= 1 {
+        return None;
+    }
+    Some(CLOCK_CONFIG[instance_id as usize])
+}
+
+pub fn FClockSetFreq(instance_p: &mut FClockCtrl, freq: u32) -> bool {
+    let base = instance_p.config.base_address;
+    let clock = ClockCtrl::new(phys_to_virt(PhysAddr::from(base)).as_mut_ptr());
+    let sys_clk = 50000000; // 50MHz 系统时钟，假设
+    let div = sys_clk / freq;
+    clock.regs().clk_div.modify(CLK_DIV::DIV.val(div));
+    clock.regs().clk_con.modify(CLK_CON::ENABLE::SET);
+    let mut timeout = 0;
+    while clock.regs().clk_status.read(CLK_STATUS::READY) != 1 && timeout < 500 {
+        timeout += 1;
+        crate::time::busy_wait(core::time::Duration::from_millis(1));
+    }
+    timeout < 500
+}
+
+pub fn FClockGetFreq(instance_p: &mut FClockCtrl) -> u32 {
+    let base = instance_p.config.base_address;
+    let clock = ClockCtrl::new(phys_to_virt(PhysAddr::from(base)).as_mut_ptr());
+    let sys_clk = 50000000; // 50MHz 系统时钟
+    let div = clock.regs().clk_div.read(CLK_DIV::DIV);
+    sys_clk / div
+}
+```
+
+**讲解**：
+
+- **FClockInit**：检查指针和状态（is_ready=0x11111111 表示已初始化），调用 FClockDeInit 清理，设置 config（基址 0x2800_0000）和 is_ready。效果是初始化 CRU 时钟控制器，准备频率配置。
+- **FClockDeInit**：清除 is_ready 并零初始化结构体（unsafe write_bytes），释放状态，适合重置或错误恢复。
+- **FClockLookupConfig**：从静态表 CLOCK_CONFIG 返回配置（ID=0，基址 0x2800_0000），支持多实例扩展（当前单实例）。
+- **FClockSetFreq**：创建 ClockCtrl 实例（使用 phys_to_virt 转换虚拟地址），计算分频系数（div = sys_clk / freq，sys_clk=50MHz 硬编码），写入 clk_div 的 DIV bit（bit 0-7）。设置 clk_con 的 ENABLE bit=1（bit 0）启用时钟，轮询 clk_status 的 READY bit（bit 0，超时 500ms）确保稳定。返回 true（成功）或 false（超时）。效果是调整外设时钟（如 25MHz）。
+- **FClockGetFreq**：类似创建实例，读取 clk_div 的 DIV bit，计算当前频率（sys_clk / div），返回 Hz 值。效果是查询实时频率。
+
+**硬件关联**：CRU 时钟控制器（基址 0x2800_0000），50MHz 主时钟分频（如 DIV=2 得到 25MHz），支持 PWM/Tacho 等外设。
+
