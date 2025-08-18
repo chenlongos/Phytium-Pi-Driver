@@ -1,0 +1,511 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>时钟设备驱动 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="22-时钟设备驱动"><a class="header" href="#22-时钟设备驱动">2.2 时钟设备驱动</a></h1>
+<h2 id="时钟设备原理"><a class="header" href="#时钟设备原理">时钟设备原理</a></h2>
+<p>嵌入式系统的时钟设备是协调处理器、内存和外设运行的核心，为系统提供统一的时间基准。飞腾派（Phytium Pi）的时钟设备包括时钟和复位单元（CRU）、ARMv8 通用定时器（Generic Timer）和可选的实时钟（RTC）。这些设备通过外部晶振（如 24MHz 或 32.768kHz）结合锁相环（PLL）生成高精度主时钟（如 50MHz），通过分频器调整为外设所需频率（如 PWM 的 25MHz）。CRU 作为时钟管理中心，通过寄存器（如 clk_con 和 clk_div）动态配置分频系数，控制外设时钟（如 UART、PWM），并集成复位功能，通过 cru_rst_ok 寄存器触发系统或外设复位，确保硬件初始化或异常恢复。复位信号需持续超过 10ms，时钟切换通常在 100ms 内稳定，满足实时性需求。ARMv8 通用定时器利用系统计数器（CNTPCT_EL0）提供纳秒级计时，通过比较值（CNTV_CVAL_EL0）和 GIC 中断支持内核调度和忙等待（如 Duration::from_millis），适用于高精度任务切换。RTC 依赖低频晶振（32.768kHz）运行，独立于主时钟，通过 I2C 接口与外部芯片（如 DS1339）通信，保持断电状态下的时间，适合时间同步和低功耗唤醒场景。这些模块通过寄存器操作和中断机制协同工作，确保系统时间管理和硬件协调。</p>
+<p><strong>时钟设备功能示意图</strong></p>
+<pre class="mermaid">graph TD
+    A[外部晶振&lt;br&gt;24MHz/32.768kHz] --&gt; B[PLL]
+    B --&gt; C[CRU&lt;br&gt;50MHz 主时钟]
+    C --&gt; D[分频器&lt;br&gt;clk_div]
+    D --&gt; E[外设时钟&lt;br&gt;PWM/UART 25MHz]
+    C --&gt; F[复位控制&lt;br&gt;cru_rst_ok]
+    F --&gt; G[系统/外设复位]
+    H[ARMv8 定时器&lt;br&gt;CNTPCT_EL0] --&gt; I[GIC 中断&lt;br&gt;调度/延时]
+    J[RTC&lt;br&gt;DS1339] --&gt; K[I2C 接口&lt;br&gt;时间保持]
+</pre>
+<h2 id="飞腾派时钟设备介绍"><a class="header" href="#飞腾派时钟设备介绍">飞腾派时钟设备介绍</a></h2>
+<p>飞腾派开发板的时钟设备依托 E2000 处理器（ARMv8 架构，主频高达 1.8GHz），通过 CRU、ARMv8 通用定时器和外部 RTC 提供全面时间管理功能。CRU 是核心，位于基址 0x2800_0000（推测，需手册验证），通过 PLL 从外部晶振生成 50MHz 主时钟，分频后驱动外设（如 UART、PWM）。CRU 还管理复位功能，通过板上 SW4 按钮（靠近 J35 电源接口，低电平有效，持续 &gt;10ms，3.3V 电平，电流 &lt;1mA）或 40-pin 扩展头的 Pin 33（GPIO2_8，CRU_RST_OK，3.3V，需 4.7kΩ 上拉电阻）触发全局复位，重置 CPU 和外设状态。ARMv8 通用定时器内置于处理器，无专用物理接口，通过 GIC（基址 0xFF84_1000/0xFF84_2000）提供中断信号，驱动 ArceOS 的调度和延时（如 busy_wait），以纳秒级精度支持实时任务。RTC 通过 I2C1 接口（Pin 3/5，I2C1_SDA/SCL，3.3V，需 4.7kΩ 上拉电阻）连接外部芯片（如 DS1339），使用 32.768kHz 晶振保持时间，支持电池备份（SIM 卡座 J6，1.8V/3V）。物理接口需遵守约束：总线长度 &lt;30cm 以防信号干扰，工作温度 0~50°C，使用 ESD 保护以避免静电损伤。飞腾派的时钟设备通过内部寄存器和扩展头引脚提供灵活配置，确保系统高效运行。</p>
+<p><strong>飞腾派时钟设备接口表</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>接口类型</th><th>物理接口</th><th>电平</th><th>描述与约束</th></tr></thead><tbody>
+<tr><td>CRU 复位按钮</td><td>SW4（近 J35）</td><td>3.3V</td><td>低电平有效，&gt;10ms，电流 &lt;1mA，ESD 保护</td></tr>
+<tr><td>CRU 外部复位</td><td>Pin 33（GPIO2_8）</td><td>3.3V</td><td>下降沿触发，需 4.7kΩ 上拉，线长 &lt;30cm</td></tr>
+<tr><td>RTC 接口</td><td>Pin 3/5（I2C1）</td><td>3.3V</td><td>4.7kΩ 上拉，100kbps，线长 &lt;30cm</td></tr>
+<tr><td>RTC 电池备份</td><td>J6（mini-SIM）</td><td>1.8V/3V</td><td>支持低功耗，ESD 保护</td></tr>
+</tbody></table>
+</div>
+<p><strong>CRU 时钟分频时序图</strong></p>
+<pre class="mermaid">sequenceDiagram
+    participant D as 驱动
+    participant C as CRU控制器
+    D-&gt;&gt;C: 写 clk_con（ENABLE=0）
+    C-&gt;&gt;D: 确认关闭
+    D-&gt;&gt;C: 写 clk_div（DIV=2）
+    D-&gt;&gt;C: 写 clk_con（ENABLE=1）
+    C-&gt;&gt;D: 轮询 clk_status（READY=1）
+    Note over C,D: 切换时间 &lt;100ms
+</pre>
+<p>**说明：**CRU 配置分频（如 50MHz 至 25MHz），需轮询 READY 状态。RTC 通过 I2C 异步访问，保持独立时间。</p>
+<h2 id="飞腾派时钟设备驱动-api-调用表"><a class="header" href="#飞腾派时钟设备驱动-api-调用表">飞腾派时钟设备驱动 API 调用表</a></h2>
+<p>以下为飞腾派（Phytium Pi）V3.x 版本的时钟设备驱动 API 调用表，基于在 <code>chenlongos/appd</code> 仓库 <code>phytium-pi</code> 分支中实现的 <code>modules/axhal/src/platform/aarch64_phytium_pi/clock.rs</code> 文件。该实现使用 Rust 和 <code>tock_registers</code> 宏，基于飞腾派软件编程手册 V1.0（提供 CRU 寄存器信息）和 <code>aarch64_phytium_pi.toml</code>（定义 MMIO 基址）。API 设计遵循 ArceOS 的 <code>axhal</code> 框架，适配 CRU 时钟控制器（基址 0x2800_0000），支持初始化、频率设置和查询。调用表包括函数描述、参数和返回值，适用于 ArceOS 或裸机环境。</p>
+<h3 id="时钟驱动-api-调用表"><a class="header" href="#时钟驱动-api-调用表">时钟驱动 API 调用表</a></h3>
+<div class="table-wrapper"><table><thead><tr><th><strong>API 函数</strong></th><th><strong>描述</strong></th><th><strong>参数</strong></th><th><strong>返回值</strong></th></tr></thead><tbody>
+<tr><td><code>FClockInit</code></td><td>初始化 CRU 时钟控制器，设置基址和设备状态，为频率配置准备。</td><td><code>instance_p: &amp;mut FClockCtrl</code>（时钟控制器实例）<br><code>config_p: &amp;FClockConfig</code>（基址 0x2800_0000 等）</td><td><code>bool</code>: true（成功），false（参数错误或已初始化）</td></tr>
+<tr><td><code>FClockDeInit</code></td><td>去初始化 CRU 时钟控制器，清除状态，标记未就绪。</td><td><code>instance_p: &amp;mut FClockCtrl</code>（时钟控制器实例）</td><td><code>bool</code>: true（成功）</td></tr>
+<tr><td><code>FClockLookupConfig</code></td><td>根据设备 ID 查找 CRU 时钟配置，返回基址等信息。</td><td><code>instance_id: u32</code>（设备 ID）</td><td><code>Option&lt;FClockConfig&gt;</code>: 配置结构体或 None（ID 无效）</td></tr>
+<tr><td><code>FClockSetFreq</code></td><td>设置时钟频率，写入 clk_div 寄存器（分频系数），启用 clk_con（ENABLE=1）。</td><td><code>instance_p: &amp;mut FClockCtrl</code><br><code>freq: u32</code>（目标频率，Hz）</td><td><code>bool</code>: true（成功），false（超时或寄存器错误）</td></tr>
+<tr><td><code>FClockGetFreq</code></td><td>查询当前时钟频率，读取 clk_div 寄存器，计算 sys_clk / DIV。</td><td><code>instance_p: &amp;mut FClockCtrl</code>（时钟控制器实例）</td><td><code>u32</code>: 当前频率（Hz）</td></tr>
+</tbody></table>
+</div>
+<h3 id="说明"><a class="header" href="#说明">说明</a></h3>
+<ul>
+<li><strong>调用顺序</strong>：
+<ol>
+<li>调用 <code>FClockInit</code> 和 <code>FClockLookupConfig</code> 初始化 CRU 时钟控制器，设置基址（0x2800_0000）。</li>
+<li>调用 <code>FClockSetFreq</code> 配置目标频率（如 25MHz）。</li>
+<li>可选调用 <code>FClockGetFreq</code> 查询频率。</li>
+<li>可选调用 <code>FClockDeInit</code> 清理状态。</li>
+</ol>
+</li>
+<li><strong>硬件依赖</strong>：
+<ul>
+<li><strong>基址</strong>：CRU 时钟控制器 0x2800_0000。</li>
+<li><strong>寄存器</strong>：
+<ul>
+<li><code>clk_con</code> (偏移 0x0)：bit 0=ENABLE（使能时钟），bit 1-3=SOURCE（时钟源选择）。</li>
+<li><code>clk_div</code> (偏移 0x4)：bit 0-7=DIV（分频系数）。</li>
+<li><code>clk_status</code> (偏移 0x8)：bit 0=READY（1=时钟准备好）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="飞腾派时钟设备驱动的寄存器信息"><a class="header" href="#飞腾派时钟设备驱动的寄存器信息">飞腾派时钟设备驱动的寄存器信息</a></h2>
+<h3 id="基地址"><a class="header" href="#基地址">基地址</a></h3>
+<p>飞腾派时钟设备驱动主要基于 CRU 时钟控制器，基址为 0x2800_0000。该基址与复位模块重叠，反映 CRU 的时钟和复位双重功能。</p>
+<div class="table-wrapper"><table><thead><tr><th><strong>模块</strong></th><th><strong>基地址</strong></th><th><strong>描述</strong></th></tr></thead><tbody>
+<tr><td>CRU</td><td>0x2800_0000</td><td>时钟和复位单元，管理系统时钟分频和复位。</td></tr>
+</tbody></table>
+</div>
+<h3 id="寄存器表"><a class="header" href="#寄存器表">寄存器表</a></h3>
+<p>以下为时钟驱动涉及的寄存器，定义在 <code>clock.rs</code> 中，用于配置和监控时钟功能。</p>
+<div class="table-wrapper"><table><thead><tr><th><strong>寄存器名称</strong></th><th><strong>偏移地址</strong></th><th><strong>描述</strong></th></tr></thead><tbody>
+<tr><td><code>clk_con</code></td><td>0x0</td><td>控制寄存器，配置时钟使能和源选择。</td></tr>
+<tr><td><code>clk_div</code></td><td>0x4</td><td>分频寄存器，设置分频系数以调整输出频率。</td></tr>
+<tr><td><code>clk_status</code></td><td>0x8</td><td>状态寄存器，检查时钟是否准备好。</td></tr>
+</tbody></table>
+</div>
+<h3 id="寄存器位域设置"><a class="header" href="#寄存器位域设置">寄存器位域设置</a></h3>
+<p>以下详细描述每个寄存器的位域，包括用途、有效值和默认状态。</p>
+<h4 id="clk_con-偏移-0x0-读写"><a class="header" href="#clk_con-偏移-0x0-读写"><code>clk_con</code> (偏移 0x0, 读写)</a></h4>
+<ul>
+<li><strong>ENABLE</strong> (bit 0, 1 bit)
+<ul>
+<li><strong>用途</strong>：控制时钟使能，1=开启时钟，0=关闭时钟。</li>
+<li><strong>有效值</strong>：0（关闭），1（开启）。</li>
+<li><strong>默认值</strong>：0</li>
+<li><strong>描述</strong>：启用或禁用 CRU 时钟输出，用于外设同步（如 PWM/Tacho）。</li>
+</ul>
+</li>
+<li><strong>SOURCE</strong> (bit 1-3, 3 bits)
+<ul>
+<li><strong>用途</strong>：选择时钟源（例如 PLL 或外部晶振）。</li>
+<li><strong>有效值</strong>：0~7（推测，具体映射需手册验证）。</li>
+<li><strong>默认值</strong>：0</li>
+<li><strong>描述</strong>：支持多时钟源切换，当前未使用，保留扩展。</li>
+</ul>
+</li>
+</ul>
+<h4 id="clk_div-偏移-0x4-读写"><a class="header" href="#clk_div-偏移-0x4-读写"><code>clk_div</code> (偏移 0x4, 读写)</a></h4>
+<ul>
+<li><strong>DIV</strong> (bit 0-7, 8 bits)
+<ul>
+<li><strong>用途</strong>：设置分频系数，输出频率 = 系统时钟（50MHz）/ DIV。</li>
+<li><strong>有效值</strong>：1~255（0 无效，需手册确认）。</li>
+<li><strong>默认值</strong>：0</li>
+<li><strong>描述</strong>：调整外设时钟频率，例如 DIV=2 时，50MHz 分频为 25MHz。</li>
+</ul>
+</li>
+</ul>
+<h4 id="clk_status-偏移-0x8-只读"><a class="header" href="#clk_status-偏移-0x8-只读"><code>clk_status</code> (偏移 0x8, 只读)</a></h4>
+<ul>
+<li><strong>READY</strong> (bit 0, 1 bit)
+<ul>
+<li><strong>用途</strong>：指示时钟状态，1=时钟稳定，0=未准备好。</li>
+<li><strong>有效值</strong>：0（未准备），1（准备好）。</li>
+<li><strong>默认值</strong>：0</li>
+<li><strong>描述</strong>：轮询确保时钟切换完成（时序 &lt;100ms）。</li>
+</ul>
+</li>
+</ul>
+<h2 id="飞腾派时钟设备驱动实现讲解"><a class="header" href="#飞腾派时钟设备驱动实现讲解">飞腾派时钟设备驱动实现讲解</a></h2>
+<h3 id="驱动架构"><a class="header" href="#驱动架构">驱动架构</a></h3>
+<p>驱动基于 ArceOS 的硬件抽象层（axhal），通过 <code>tock_registers</code> 宏定义 CRU 时钟寄存器（clk_con、clk_div、clk_status），使用 <code>SpinNoIrq</code> 锁确保多核安全访问。代码结构类似 <code>cru.rs</code> 和 <code>pinctrl.rs</code>，通过 <code>NonNull</code> 指针操作寄存器，依赖 <code>phys_to_virt</code> 转换虚拟地址。驱动实现无中断支持，采用轮询模式配置频率，适合嵌入式场景（如 PWM/Tacho 时钟）。设备树（phytium_pi.dts）可定义时钟节点，集成到 <code>mod.rs</code> 的 <code>platform_init</code> 中。</p>
+<p>硬件关联</p>
+<ul>
+<li><strong>基址</strong>：CRU 时钟控制器位于 0x2800_0000。</li>
+<li><strong>时钟源</strong>：50MHz 主时钟（硬编码，典型 APB 总线频率），通过分频调整输出（如 25MHz）。</li>
+<li><strong>寄存器</strong>：clk_con (0x0) 控制使能/源，clk_div (0x4) 设置分频系数，clk_status (0x8) 检查状态。</li>
+<li><strong>时序</strong>：频率切换需 &lt;100ms 稳定，轮询 READY bit 确保完成。</li>
+</ul>
+<p><strong>寄存器定义部分</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>register_structs! {
+    pub ClockRegs {
+        (0x0 =&gt; clk_con: ReadWrite&lt;u32, CLK_CON::Register&gt;),
+        (0x4 =&gt; clk_div: ReadWrite&lt;u32, CLK_DIV::Register&gt;),
+        (0x8 =&gt; clk_status: ReadOnly&lt;u32, CLK_STATUS::Register&gt;),
+        (0x0c =&gt; @END),
+    }
+}
+
+register_bitfields![u32,
+    CLK_CON [
+        ENABLE OFFSET(0) NUMBITS(1) [], // 1=使能时钟
+        SOURCE OFFSET(1) NUMBITS(3) [], // 时钟源选择
+    ],
+    CLK_DIV [
+        DIV OFFSET(0) NUMBITS(8) [], // 分频系数
+    ],
+    CLK_STATUS [
+        READY OFFSET(0) NUMBITS(1) [], // 1=时钟准备好
+    ],
+];
+<span class="boring">}</span></code></pre></pre>
+<p>**讲解：**使用 tock_registers 宏定义 CRU 时钟寄存器布局，基址 0x2800_0000。clk_con (偏移 0x0) 控制时钟使能（bit 0=ENABLE）和源选择（bit 1-3=SOURCE），clk_div (偏移 0x4) 设置分频系数（bit 0-7=DIV，1~255），clk_status (偏移 0x8) 检查时钟状态（bit 0=READY，1 表示稳定）。宏生成 ReadWrite/ReadOnly 接口，确保类型安全访问，避免手动位操作。SOURCE bit 未使用，保留扩展（如 PLL 切换）。</p>
+<p><strong>结构体和全局定义部分</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct ClockCtrl {
+    regs: NonNull&lt;ClockRegs&gt;,
+}
+
+unsafe impl Send for ClockCtrl {}
+
+impl ClockCtrl {
+    pub const fn new(base: *mut u8) -&gt; Self {
+        Self {
+            regs: NonNull::new(base).unwrap().cast(),
+        }
+    }
+    const fn regs(&amp;self) -&gt; &amp;ClockRegs {
+        unsafe { self.regs.as_ref() }
+    }
+    const fn regs_mut(&amp;mut self) -&gt; &amp;mut ClockRegs {
+        unsafe { self.regs.as_mut() }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct FClockConfig {
+    pub instance_id: u32,
+    pub base_address: usize,
+}
+
+pub struct FClockCtrl {
+    pub config: FClockConfig,
+    pub is_ready: u32,
+}
+
+static CLOCK_CONFIG: [FClockConfig; 1] = [FClockConfig {
+    instance_id: 0,
+    base_address: 0x2800_0000usize,
+}];
+
+pub static CLOCK: SpinNoIrq&lt;FClockCtrl&gt; = SpinNoIrq::new(FClockCtrl {
+    config: FClockConfig {
+        instance_id: 0,
+        base_address: 0,
+    },
+    is_ready: 0,
+});
+<span class="boring">}</span></code></pre></pre>
+<p><strong>讲解</strong>：ClockCtrl 封装寄存器指针，使用 NonNull 确保非空，regs/regs_mut 方法通过 unsafe 提供访问（const fn 允许常量上下文）。unsafe impl Send 支持跨线程传递。FClockConfig 存储实例 ID 和基址（0x2800_0000），FClockCtrl 包含配置和状态（is_ready=0x11111111 表示初始化）。全局静态 CLOCK_CONFIG 定义单实例配置，CLOCK 使用 SpinNoIrq 锁保护多核访问，类似 cru.rs 和 pinctrl.rs 的设计。</p>
+<p><strong>API 函数部分</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FClockInit(instance_p: &amp;mut FClockCtrl, config_p: &amp;FClockConfig) -&gt; bool {
+    assert!(Some(*instance_p).is_some() &amp;&amp; Some(*config_p).is_some());
+    let mut ret = true;
+    if instance_p.is_ready == 0x11111111u32 {
+        info!("Clock already initialized.");
+        return false;
+    }
+    FClockDeInit(instance_p);
+    instance_p.config = *config_p;
+    instance_p.is_ready = 0x11111111u32;
+    ret
+}
+
+pub fn FClockDeInit(instance_p: &amp;mut FClockCtrl) -&gt; bool {
+    if instance_p.is_ready == 0 {
+        return true;
+    }
+    instance_p.is_ready = 0;
+    unsafe {
+        core::ptr::write_bytes(instance_p as *mut FClockCtrl, 0, core::mem::size_of::&lt;FClockCtrl&gt;());
+    }
+    true
+}
+
+pub fn FClockLookupConfig(instance_id: u32) -&gt; Option&lt;FClockConfig&gt; {
+    if instance_id &gt;= 1 {
+        return None;
+    }
+    Some(CLOCK_CONFIG[instance_id as usize])
+}
+
+pub fn FClockSetFreq(instance_p: &amp;mut FClockCtrl, freq: u32) -&gt; bool {
+    let base = instance_p.config.base_address;
+    let clock = ClockCtrl::new(phys_to_virt(PhysAddr::from(base)).as_mut_ptr());
+    let sys_clk = 50000000; // 50MHz 系统时钟，假设
+    let div = sys_clk / freq;
+    clock.regs().clk_div.modify(CLK_DIV::DIV.val(div));
+    clock.regs().clk_con.modify(CLK_CON::ENABLE::SET);
+    let mut timeout = 0;
+    while clock.regs().clk_status.read(CLK_STATUS::READY) != 1 &amp;&amp; timeout &lt; 500 {
+        timeout += 1;
+        crate::time::busy_wait(core::time::Duration::from_millis(1));
+    }
+    timeout &lt; 500
+}
+
+pub fn FClockGetFreq(instance_p: &amp;mut FClockCtrl) -&gt; u32 {
+    let base = instance_p.config.base_address;
+    let clock = ClockCtrl::new(phys_to_virt(PhysAddr::from(base)).as_mut_ptr());
+    let sys_clk = 50000000; // 50MHz 系统时钟
+    let div = clock.regs().clk_div.read(CLK_DIV::DIV);
+    sys_clk / div
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>讲解</strong>：</p>
+<ul>
+<li><strong>FClockInit</strong>：检查指针和状态（is_ready=0x11111111 表示已初始化），调用 FClockDeInit 清理，设置 config（基址 0x2800_0000）和 is_ready。效果是初始化 CRU 时钟控制器，准备频率配置。</li>
+<li><strong>FClockDeInit</strong>：清除 is_ready 并零初始化结构体（unsafe write_bytes），释放状态，适合重置或错误恢复。</li>
+<li><strong>FClockLookupConfig</strong>：从静态表 CLOCK_CONFIG 返回配置（ID=0，基址 0x2800_0000），支持多实例扩展（当前单实例）。</li>
+<li><strong>FClockSetFreq</strong>：创建 ClockCtrl 实例（使用 phys_to_virt 转换虚拟地址），计算分频系数（div = sys_clk / freq，sys_clk=50MHz 硬编码），写入 clk_div 的 DIV bit（bit 0-7）。设置 clk_con 的 ENABLE bit=1（bit 0）启用时钟，轮询 clk_status 的 READY bit（bit 0，超时 500ms）确保稳定。返回 true（成功）或 false（超时）。效果是调整外设时钟（如 25MHz）。</li>
+<li><strong>FClockGetFreq</strong>：类似创建实例，读取 clk_div 的 DIV bit，计算当前频率（sys_clk / div），返回 Hz 值。效果是查询实时频率。</li>
+</ul>
+<p><strong>硬件关联</strong>：CRU 时钟控制器（基址 0x2800_0000），50MHz 主时钟分频（如 DIV=2 得到 25MHz），支持 PWM/Tacho 等外设。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter2/chapter_2.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter2/2_2_timer.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter2/chapter_2.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter2/2_2_timer.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

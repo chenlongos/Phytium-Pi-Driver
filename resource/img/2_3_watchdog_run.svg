@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" style="background:#1a2a6c;font-family:Arial,sans-serif">
+  <defs>
+    <!-- 箭头标记 -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#43a047"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#e53935"/>
+    </marker>
+    
+    <!-- 动画元素 -->
+    <radialGradient id="pulse" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#43a047" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#43a047" stop-opacity="0"/>
+    </radialGradient>
+    
+    <radialGradient id="pulse-red" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e53935" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#e53935" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- 微控制器样式 -->
+    <linearGradient id="mcuGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d47a1"/>
+      <stop offset="100%" stop-color="#1976d2"/>
+    </linearGradient>
+    
+    <!-- 看门狗样式 -->
+    <linearGradient id="wdogGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b71c1c"/>
+      <stop offset="100%" stop-color="#e53935"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- 标题 -->
+  <text x="400" y="50" text-anchor="middle" font-size="32" fill="white" font-weight="bold">
+    看门狗定时器工作原理动画演示
+  </text>
+  
+  <!-- 微控制器 -->
+  <g id="mcu">
+    <rect x="100" y="120" width="200" height="150" rx="15" fill="url(#mcuGradient)" stroke="#64b5f6" stroke-width="2"/>
+    <text x="200" y="180" text-anchor="middle" font-size="24" fill="white">微控制器</text>
+    <text x="200" y="210" text-anchor="middle" font-size="18" fill="#bbdefb">(主CPU)</text>
+    
+    <!-- 状态指示灯 -->
+    <circle cx="200" cy="240" r="12" fill="#4caf50" stroke="#fff" stroke-width="2">
+      <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <text x="230" y="243" font-size="16" fill="#e0f7fa">运行中</text>
+  </g>
+  
+  <!-- 看门狗定时器 -->
+  <g id="watchdog">
+    <rect x="500" y="120" width="200" height="150" rx="15" fill="url(#wdogGradient)" stroke="#e57373" stroke-width="2"/>
+    <text x="600" y="180" text-anchor="middle" font-size="24" fill="white">看门狗定时器</text>
+    <text x="600" y="210" text-anchor="middle" font-size="18" fill="#ffcdd2">(独立硬件)</text>
+    
+    <!-- 倒计时指示器 -->
+    <rect x="550" y="240" width="100" height="20" fill="#424242" rx="5"/>
+    <rect id="timeoutBar" x="550" y="240" width="100" height="20" fill="#4caf50" rx="5">
+      <animate attributeName="width" values="0;100;0" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <text x="600" y="255" text-anchor="middle" font-size="14" fill="white">倒计时</text>
+  </g>
+  
+  <!-- 喂狗信号 -->
+  <g id="feedSignal">
+    <path d="M300 195 L500 195" stroke="#43a047" stroke-width="3" stroke-dasharray="5,5" marker-end="url(#arrow)">
+      <animate attributeName="stroke-opacity" values="0;1;0" dur="6s" repeatCount="indefinite" begin="0s"/>
+    </path>
+    <circle cx="400" cy="195" r="0" fill="url(#pulse)">
+      <animate attributeName="r" values="0;15;0" dur="1.5s" repeatCount="indefinite" begin="0.5s"/>
+      <animate attributeName="opacity" values="1;0" dur="1.5s" repeatCount="indefinite" begin="0.5s"/>
+    </circle>
+    <text x="400" y="185" text-anchor="middle" font-size="16" fill="#a5d6a7" opacity="0.8">
+      喂狗信号
+      <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1.5s" repeatCount="indefinite" begin="0.5s"/>
+    </text>
+  </g>
+  
+  <!-- 复位信号 -->
+  <g id="resetSignal">
+    <path d="M500 225 L300 225" stroke="#e53935" stroke-width="3" marker-end="url(#arrow-red)" stroke-opacity="0">
+      <animate attributeName="stroke-opacity" values="0;1;0" dur="6s" repeatCount="indefinite" begin="5s"/>
+    </path>
+    <circle cx="400" cy="225" r="0" fill="url(#pulse-red)" opacity="0">
+      <animate attributeName="r" values="0;20;0" dur="1s" repeatCount="indefinite" begin="5s"/>
+      <animate attributeName="opacity" values="1;0" dur="1s" repeatCount="indefinite" begin="5s"/>
+    </circle>
+    <text x="400" y="215" text-anchor="middle" font-size="16" fill="#ffab91" opacity="0">
+      复位信号
+      <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite" begin="5s"/>
+    </text>
+  </g>
+  
+  <!-- 时间线 -->
+  <g id="timeline">
+    <line x1="100" y1="350" x2="700" y2="350" stroke="#bbdefb" stroke-width="2"/>
+    
+    <!-- 时间点 -->
+    <g>
+      <circle cx="150" cy="350" r="5" fill="#4caf50"/>
+      <text x="150" y="380" text-anchor="middle" fill="#a5d6a7" font-size="14">喂狗1</text>
+      <animateTransform attributeName="transform" type="translate" values="0,0;0,-10;0,0" 
+                       dur="6s" repeatCount="indefinite" begin="1s"/>
+    </g>
+    
+    <g>
+      <circle cx="300" cy="350" r="5" fill="#4caf50"/>
+      <text x="300" y="380" text-anchor="middle" fill="#a5d6a7" font-size="14">喂狗2</text>
+      <animateTransform attributeName="transform" type="translate" values="0,0;0,-10;0,0" 
+                       dur="6s" repeatCount="indefinite" begin="3s"/>
+    </g>
+    
+    <g>
+      <circle cx="450" cy="350" r="5" fill="#e53935"/>
+      <text x="450" y="380" text-anchor="middle" fill="#ffab91" font-size="14">超时点</text>
+      <animate attributeName="r" values="5;7;5" dur="1s" repeatCount="indefinite" begin="5s"/>
+    </g>
+    
+    <g>
+      <circle cx="600" cy="350" r="5" fill="#e53935"/>
+      <text x="600" y="380" text-anchor="middle" fill="#ffab91" font-size="14">复位!</text>
+      <animate attributeName="fill" values="#e53935;#ff5252;#e53935" dur="1s" repeatCount="indefinite" begin="5.5s"/>
+    </g>
+    
+    <!-- 超时区域 -->
+    <rect x="450" y="340" width="150" height="20" fill="#ff1744" opacity="0.2" rx="3">
+      <animate attributeName="opacity" values="0.2;0.4;0.2" dur="2s" repeatCount="indefinite" begin="4.5s"/>
+    </rect>
+    <text x="525" y="352" text-anchor="middle" font-size="12" fill="#ff8a80">超时窗口</text>
+  </g>
+  
+  <!-- 状态面板 -->
+  <rect x="200" y="420" width="400" height="120" rx="10" fill="rgba(255,255,255,0.1)" stroke="#29b6f6" stroke-width="2"/>
+  
+  <!-- <text x="400" y="450" text-anchor="middle" font-size="24" fill="#4fc3f7">工作原理说明</text> -->
+  
+  <g font-size="16" fill="#e0f7fa">
+    <text x="250" y="450">• 正常操作: 微控制器定期发送"喂狗"信号</text>
+    <text x="250" y="470">• 信号间隔必须小于超时时间</text>
+    <text x="250" y="490">• 故障发生: 程序崩溃，停止发送信号</text>
+    <text x="250" y="510">• 看门狗超时: 发出复位信号重启系统</text>
+  </g>
+  
+  <!-- 动画控制器 -->
+  <!-- <rect id="restartBtn" x="350" y="520" width="100" height="40" rx="20" fill="#4caf50" cursor="pointer"/>
+  <text x="400" y="545" text-anchor="middle" font-size="18" fill="white" pointer-events="none">重新播放</text> -->
+  
+  <script type="application/ecmascript">
+    // 重新开始动画
+    document.getElementById('restartBtn').addEventListener('click', function() {
+      var svgDoc = document;
+      
+      // 重启所有动画
+      var animElements = svgDoc.querySelectorAll('animate, animateTransform, animateMotion');
+      animElements.forEach(function(el) {
+        el.beginElement();
+      });
+    });
+  </script>
+</svg>

@@ -1,0 +1,701 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>UART串口驱动 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="31-uart串口驱动"><a class="header" href="#31-uart串口驱动">3.1 UART串口驱动</a></h1>
+<h2 id="uart-介绍"><a class="header" href="#uart-介绍"><em>UART</em> 介绍</a></h2>
+<h3 id="11-模块概述"><a class="header" href="#11-模块概述">1.1 模块概述</a></h3>
+<p><em>uart: universal asynchronous receiver/transmitter</em>，通用异步发送/接受器，是嵌入式设备中最常用全双工通信协议之一。关于它的详细介绍，可以参考 <a href="https://www.analog.com/cn/resources/analog-dialogue/articles/uart-a-hardware-communication-protocol.html">这篇文章</a>。对于软件工程师来说，以下几个概念是必须要掌握的。</p>
+<ul>
+<li>
+<p>波特率</p>
+<p>波特率就是一秒传递多少bit。由于uart里面并没有时钟线，这也就意味着通信双方需要预先约定好具体的通信速率是多少。使用过类似于<em>xshell</em>这样的串口工具的同学应该就知道，在配置串口的时候，这个值配置不对就会导致屏幕上出现乱码。常用的波特率有115200，9600等。</p>
+</li>
+<li>
+<p>数据宽度</p>
+<p>一次传输的数据宽度，可以是5-8的一个值，常见是8bit，因为这对软件开发者来说最友好。毕竟，你也不想把一个<em>u8</em>拆成5bits和3bits来发送吧～</p>
+</li>
+<li>
+<p>停止位</p>
+<p>一个特殊的bit，用来告诉对方这一次传输结束了。可以配置为1位或者2位。</p>
+</li>
+<li>
+<p>奇偶校验</p>
+<p>在数据传输时增加额外一个1bit，用来使得这一个bit+数据的每一位为1的总数为奇数或者偶数。发送端在发送时，计算出奇偶校验位应该为1或者为0，接收端在接受时，就可以根据这一位校验出数据传输是否出错。当然，这个校验非常不准确，一般不开。</p>
+</li>
+<li>
+<p>8N1</p>
+<p>这是一种缩写，意味着8个数据位，没有奇偶校验，1位停止位。这是最常见的串口配置。</p>
+</li>
+<li>
+<p>调制/解调</p>
+<p>一些高级的uart芯片集成了<a href="https://www.cnblogs.com/jason-lu/articles/3171907.html">调制/解调</a>的功能，这涉及到了通信原理的一些知识，其配置也对应的复杂更多。飞腾派上搭载9线串口就具有这个功能，不过幸运的是本次实验不涉及这块内容，所以在看寄存器定义时，也不需要对这部分有深入理解。</p>
+</li>
+</ul>
+<h3 id="12-硬件接口介绍"><a class="header" href="#12-硬件接口介绍">1.2 硬件接口介绍</a></h3>
+<ul>
+<li><strong>3线串口连接图</strong>
+一个典型的三线串口连接图如下：</li>
+</ul>
+<p><img src="../resource/img/3_1_3%E7%BA%BF%E4%B8%B2%E5%8F%A3%E8%BF%9E%E7%BA%BF%E5%9B%BE.png" alt="图1" /></p>
+<h3 id="13-时序图"><a class="header" href="#13-时序图">1.3 时序图</a></h3>
+<p><em>notice: 这里的时钟不会体现在传输线上，展示设备内部接受/发送时序。</em></p>
+<p>这个图展示了一帧数据的可能结构。</p>
+<p><img src="../resource/img/3_1_%E4%B8%B2%E5%8F%A3%E5%8D%8F%E8%AE%AE.png" alt="图2" /></p>
+<h2 id="2-接口表"><a class="header" href="#2-接口表">2. 接口表</a></h2>
+<p>完整代码在这儿: <a href="https://github.com/chenlongos/appd/commit/897c85c5952a123fa27f8612a4a5c86d37d679e3">https://github.com/chenlongos/appd/commit/897c85c5952a123fa27f8612a4a5c86d37d679e3</a></p>
+<ul>
+<li><strong>接口表</strong></li>
+</ul>
+<div class="table-wrapper"><table><thead><tr><th>API函数</th><th>描述</th><th>参数</th><th>返回值</th></tr></thead><tbody>
+<tr><td>PhytiumUart::new</td><td>新的飞腾派uart实例</td><td>base:uart控制器基地址</td><td>uart控制器</td></tr>
+<tr><td>PhytiumUart::init_no_irq</td><td>创建非irq模式的uart控制器</td><td>self, clock_hz: uart时钟频率，baude_rate: uart波特率</td><td>none</td></tr>
+<tr><td>PhytiumUart::read_byte_poll</td><td>轮询的方式读取一个字节</td><td>self</td><td>u8，一个读取的字节</td></tr>
+<tr><td>PhytiumUart::put_byte_poll</td><td>轮询的方式输出一个字节</td><td>self, byte:输出的字节</td><td>none</td></tr>
+</tbody></table>
+</div>
+<ul>
+<li><strong>调用顺序</strong>
+首先进行 new -&gt; init_no_irq, 之后可以按照需求进行读取或者写入字节。</li>
+</ul>
+<h2 id="3-寄存器结构"><a class="header" href="#3-寄存器结构">3. 寄存器结构</a></h2>
+<p>我们主要关注下面几个寄存器，这些寄存器的定义可以在<a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99">飞腾派软件开发手册</a>里找到。</p>
+<ul>
+<li>UARTDR: 数据寄存器，用来传输/接受最大8位的数据</li>
+<li>UARTRSR/UARTECR: 接受状态寄存器，用来查看接收过程中是否产生了错误，写这个寄存器可以清除错误。</li>
+<li>UARTFR：标志寄存器，存了各种各样的标志，包括设备忙，发送队列是否为空等等。发送接收都需要查看这个寄存器。</li>
+<li>UARTIBRD：存储波特率经过算法转变后的整数部分</li>
+<li>UARTFBRD：存储波特率经过算法转变后的小数部分</li>
+<li>UARTLCR_H：线控寄存器，控制uart的一些行为。</li>
+<li>UARTLCR：控制寄存器，控制uart的一些行为。</li>
+<li>UARTIMSC：控制是否打开中断。</li>
+</ul>
+<div class="table-wrapper"><table><thead><tr><th>寄存器名称</th><th>偏移</th><th>寄存器定义</th></tr></thead><tbody>
+<tr><td>UARTDR</td><td>0x000</td><td>数据寄存器</td></tr>
+<tr><td>UARTRSR/UARTECR</td><td>0x004</td><td>接收状态寄存器/错误清除寄存器</td></tr>
+<tr><td>UARTFR</td><td>0x018</td><td>标志寄存器</td></tr>
+<tr><td>UARTILPR</td><td>0x020</td><td>低功耗计数寄存器</td></tr>
+<tr><td>UARTIBRD</td><td>0x024</td><td>波特率整数值配置寄存器</td></tr>
+<tr><td>UARTFBRD</td><td>0x028</td><td>波特率小数值配置寄存器</td></tr>
+<tr><td>UARTLCR_H</td><td>0x02C</td><td>线控寄存器</td></tr>
+<tr><td>UARTCR</td><td>0x030</td><td>控制寄存器</td></tr>
+<tr><td>UARTIFLS</td><td>0x034</td><td>FIFO 阈值选择寄存器</td></tr>
+<tr><td>UARTIMSC</td><td>0x038</td><td>中断屏蔽选择/清除寄存器</td></tr>
+<tr><td>UARTRIS</td><td>0x03C</td><td>中断状态寄存器</td></tr>
+<tr><td>UARTMIS</td><td>0x040</td><td>中断屏蔽状态寄存器</td></tr>
+<tr><td>UARTICR</td><td>0x044</td><td>中断清除寄存器</td></tr>
+<tr><td>UARTDMACR</td><td>0x048</td><td>DMA 控制寄存器</td></tr>
+</tbody></table>
+</div>
+<h3 id="uart初始化步骤"><a class="header" href="#uart初始化步骤">uart初始化步骤</a></h3>
+<p>参考 <a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99">飞腾派软件开发手册</a> 的 5.22.1.1章节。</p>
+<h3 id="发送数据操作流程"><a class="header" href="#发送数据操作流程">发送数据操作流程</a></h3>
+<p>参考 <a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99">飞腾派软件开发手册</a> 的 5.22.1.2章节。</p>
+<h3 id="接收数据操作流程"><a class="header" href="#接收数据操作流程">接收数据操作流程</a></h3>
+<p>参考 <a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99">飞腾派软件开发手册</a> 的 5.22.1.3章节。</p>
+<h2 id="4-飞腾派-uart-串口驱动实验"><a class="header" href="#4-飞腾派-uart-串口驱动实验">4. 飞腾派 <em>UART</em> 串口驱动实验</a></h2>
+<h3 id="41-实验目标"><a class="header" href="#41-实验目标">4.1 实验目标</a></h3>
+<ul>
+<li>编写代码实现串口驱动
+<ul>
+<li>初始化为8N1模式，波特率为115200，非中断模式</li>
+<li>没有tx/rx FIFO队列，单次接收/发送1一个byte。</li>
+</ul>
+</li>
+<li>验证串口通信的基本原理</li>
+</ul>
+<h3 id="42-实验原理"><a class="header" href="#42-实验原理">4.2 实验原理</a></h3>
+<p>根据原理图，我们使用飞腾派的<em>UART2</em>串口，它被连线到<em>J1</em>端子板的8(tx),10(rx)口上。用<a href="https://baike.baidu.com/item/%E6%9D%9C%E9%82%A6%E7%BA%BF/197049">杜邦线</a>将8口与10口相连接，uart2 tx发出的数据会被uart rx口被收到。
+<img src="img/3_1_%E8%BF%9E%E7%BA%BF.jpg" alt="连线图" /></p>
+<h3 id="43-实验步骤"><a class="header" href="#43-实验步骤">4.3 实验步骤</a></h3>
+<ul>
+<li>根据数据手册，先使用tock-register库将寄存器定义好，将初始化函数实现。使用者通过传入一个 基地址 指向uart寄存器，返回一个不可并发的uart。</li>
+</ul>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// modules/axhal/src/platform/aarch64_phytium_pi/uart.rs
+
+use core::ptr::NonNull;
+
+use tock_registers::{
+    interfaces::{Readable, Writeable},
+    register_bitfields, register_structs,
+    registers::{ReadOnly, ReadWrite, WriteOnly},
+};
+
+register_structs! {
+    PhytiumUartRegs {
+        /// Data Register.
+        (0x00 =&gt; dr: ReadWrite&lt;u32, DATA::Register&gt;),
+        (0x04 =&gt; _reserved0),
+        /// Flag Register.
+        (0x18 =&gt; fr: ReadOnly&lt;u32, FLAG::Register&gt;),
+        (0x1c =&gt; _reserved1),
+        ///
+        (0x24 =&gt; tibd: ReadWrite&lt;u32&gt;),
+        ///
+        (0x28 =&gt; tfbd: ReadWrite&lt;u32&gt;),
+        /// Control register.
+        (0x2c =&gt; cr_h: ReadWrite&lt;u32, CONTROLH::Register&gt;),
+        (0x30 =&gt; cr_l: ReadWrite&lt;u32,CONTROLL::Register&gt;),
+        /// Interrupt FIFO Level Select Register.
+        (0x34 =&gt; ifls: ReadWrite&lt;u32&gt;),
+        /// Interrupt Mask Set Clear Register.
+        (0x38 =&gt; imsc: ReadWrite&lt;u32&gt;),
+        /// Raw Interrupt Status Register.
+        (0x3c =&gt; ris: ReadOnly&lt;u32&gt;),
+        /// Masked Interrupt Status Register.
+        (0x40 =&gt; mis: ReadOnly&lt;u32&gt;),
+        /// Interrupt Clear Register.
+        (0x44 =&gt; icr: WriteOnly&lt;u32&gt;),
+        (0x48 =&gt; @END),
+    }
+}
+
+register_bitfields![u32,
+    DATA [
+        RAW OFFSET(0) NUMBITS(8),
+        FE OFFSET(9) NUMBITS(1),
+        PE OFFSET(10) NUMBITS(1),
+        BE OFFSET(11) NUMBITS(1),
+        OE OFFSET(12) NUMBITS(1),
+    ],
+    FLAG [
+        CTS OFFSET(0) NUMBITS(1),
+        DSR OFFSET(1) NUMBITS(1),
+        DCD OFFSET(2) NUMBITS(1),
+        BUSY OFFSET(3) NUMBITS(1),
+        RXFE OFFSET(4) NUMBITS(1),
+        TXFF OFFSET(5) NUMBITS(1),
+        RXFF OFFSET(6) NUMBITS(1),
+        TXFE OFFSET(7) NUMBITS(1),
+    ],
+    CONTROLH [
+        BRK OFFSET(0) NUMBITS(1) [],
+        PEN OFFSET(1) NUMBITS(1) [],
+        EPS OFFSET(2) NUMBITS(1) [],
+        STP2 OFFSET(3) NUMBITS(1) [],
+        FEN OFFSET(4) NUMBITS(1) [],
+        WLEN OFFSET(5) NUMBITS(2) [
+            len5 = 0,
+            len6 = 1,
+            len7 = 2,
+            len8= 3
+        ],
+        SPS OFFSET(7) NUMBITS(1) [],
+    ],
+    CONTROLL [
+        ENABLE OFFSET(0) NUMBITS(1) [],
+        RSV OFFSET(1) NUMBITS(7) [],
+        TXE OFFSET(8) NUMBITS(1) [],
+        RXE OFFSET(9) NUMBITS(1) [],
+    ],
+];
+
+pub struct PhytiumUart {
+    base: NonNull&lt;PhytiumUartRegs&gt;,
+}
+
+unsafe impl Send for PhytiumUart {}
+
+impl PhytiumUart {
+    pub const fn new(base: *mut u8) -&gt; Self {
+        Self {
+            base: NonNull::new(base).unwrap().cast(),
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>根据数据手册，实现初始化函数。值的注意的是，计算波特率的小数部分的值有一个小trick：很多低端嵌入式设备可能不支持浮点运算，为了驱动的通用性，你需要实现一种不用浮点的方法来计算出小数部分的divider的方法</li>
+</ul>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl PhytiumUart {
+    fn get_ti_tf(clock_hz: u32, baude_rate: u32) -&gt; (u32, u32) {
+        let baude_rate_16 = 16 * baude_rate;
+        let ti = clock_hz / baude_rate_16;
+        let tf = clock_hz % baude_rate_16;
+        let tf = (tf * 64 + (baude_rate_16 &gt;&gt; 1)) / baude_rate_16;
+        (ti, tf)
+    }
+    /// no irq, no fifo, 8bits data, 1 stop bit, no odd-even check
+    pub fn init_no_irq(&amp;mut self, clock_hz: u32, baude_rate: u32) {
+        // disable reg
+        let regs = self.regs();
+        regs.cr_l.write(CONTROLL::ENABLE::CLEAR);
+
+        // set bd rate
+        let (ti, tf) = Self::get_ti_tf(clock_hz, baude_rate);
+        regs.tibd.set(ti);
+        regs.tfbd.set(tf);
+
+        // width 8 , no check, stop bit 1
+        regs.cr_h.write(CONTROLH::WLEN::len8);
+
+        // no interrupt
+        regs.imsc.set(0);
+
+        // enable uart ,rx, tx
+        regs.cr_l
+            .write(CONTROLL::ENABLE::SET + CONTROLL::TXE::SET + CONTROLL::RXE::SET);
+    }
+    const fn regs(&amp;self) -&gt; &amp;PhytiumUartRegs {
+        unsafe { self.base.as_ref() }
+    }
+
+}
+
+// 加一些简单的测试，会使得你的代码更加可靠。
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_get_ti_tf() {
+        let clock = 100_000_000;
+        let bd_rate = 115200;
+        let b16 = bd_rate * 16;
+        let di = clock / b16;
+        let df = clock % b16;
+        let res = clock as f32 / b16 as f32;
+        println!(
+            "res = {res}, di = {di}, df={df},  df/b16 = {} , clock &amp; (b16 -1)={}",
+            df as f32 / b16 as f32,
+            clock &amp; (b16 - 1)
+        );
+        assert_eq!((54, 16), PhytiumUart::get_ti_tf(clock, bd_rate));
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>根据数据手册，实现通过轮询的方式发送/接收串口中的数据。发送时检查flag寄存器的 txfifo 是否为满，如果为满，那么cpu死等；接收时检查flag寄存器的 rxfifo 是否为空，如果为空，那么cpu死等。</li>
+</ul>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl PhytiumUart {
+    pub fn read_byte_poll(&amp;self) -&gt; u8 {
+        // 检查flag寄存器的 rxfifo 是否为空，如果为空，那么cpu死等
+        while self.regs().fr.read(FLAG::RXFE) != 0 {}
+        (self.regs().dr.get() &amp; 0xff) as u8
+    }
+
+    pub fn put_byte_poll(&amp;mut self, b: u8) {
+        // 检查flag寄存器的txfifo是否为满，如果为满，那么cpu死等。
+        while self.regs().fr.read(FLAG::TXFF) == 1 {}
+        self.regs().dr.set(b as u32);
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>将飞腾派uart暴露给上层应用： 飞腾派的uart0是通过 println!() 来暴露给 <em>examples</em> 下面的应用的。也就是说它们默认的stdio被输出到uart0的tx口， 这也是为什么我们接入串口调试线，就能看到应用层调用println!输出的字符。我们这里为了方便，将UART2这个设备直接暴露在hal层的misc模块下，你也可以为uart2定义为stderr的接口。</li>
+</ul>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// modules/axhal/src/platform/aarch64_phytium_pi/uart.rs
+use crate::mem::PhysAddr;
+use crate::mem::phys_to_virt;
+use kspin::SpinNoIrq;
+
+/// we can only control uart 2
+const UART2_BASE: PhysAddr = pa!(0x000_2800_E000);
+pub static UART2: SpinNoIrq&lt;PhytiumUart&gt; =
+    SpinNoIrq::new(PhytiumUart::new(phys_to_virt(UART2_BASE).as_mut_ptr()));
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// modules/axhal/src/platform/aarch64_phytium_pi/mod.rs
+...
+
+pub mod misc {
+    pub fn terminate() -&gt; ! {
+        info!("Shutting down...");
+        loop {
+            axcpu::asm::halt();
+        }
+    }
+    pub use super::mio::*;
+    pub use super::uart::*;
+}
+...
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>在应用层代码中使用 UART2，进行初始化，读取接收数据，并将结果通过*println!*进行输出。</li>
+</ul>
+<pre><pre class="playground"><code class="language-rust">// examples/helloworld/src/main.rs
+#![cfg_attr(feature = "axstd", no_std)]
+#![cfg_attr(feature = "axstd", no_main)]
+
+use core::time;
+
+#[cfg(feature = "axstd")]
+use axstd::println;
+
+use axhal::misc::UART2;
+
+#[cfg_attr(feature = "axstd", unsafe(no_mangle))]
+fn main() {
+    println!("Hello, world!");
+    let mut uart = UART2.lock();
+    uart.init_no_irq(100_000_000, 115200);
+    let mut data = 0;
+    loop {
+        uart.put_byte_poll(data);
+        println!("send data {data}");
+        let read = uart.read_byte_poll();
+        println!("read data {read}");
+        println!("sleep 1s");
+        data = data.wrapping_add(1);
+        axstd::thread::sleep(time::Duration::from_secs(1));
+    }
+}
+</code></pre></pre>
+<ul>
+<li>烧入飞腾派开发板，运行得到如下日志。</li>
+</ul>
+<details>
+  <summary>运行结果</summary>
+    Starting kernel ...
+<pre><code>    d8888                            .d88888b.   .d8888b.
+    d88888                           d88P" "Y88b d88P  Y88b
+    d88P888                           888     888 Y88b.
+    d88P 888 888d888  .d8888b  .d88b.  888     888  "Y888b.
+d88P  888 888P"   d88P"    d8P  Y8b 888     888     "Y88b.
+d88P   888 888     888      88888888 888     888       "888
+d8888888888 888     Y88b.    Y8b.     Y88b. .d88P Y88b  d88P
+d88P     888 888      "Y8888P  "Y8888   "Y88888P"   "Y8888P"
+
+arch = aarch64
+platform = aarch64-phytium-pi
+target = aarch64-unknown-none-softfloat
+build_mode = release
+log_level = trace
+smp = 1
+
+[ 13.466610 0 axruntime:130] Logging is enabled.
+[ 13.472338 0 axruntime:131] Primary CPU 0 started, dtb = 0xf9c29000.
+[ 13.479890 0 axruntime:133] Found physcial memory regions:
+[ 13.486574 0 axruntime:135]   [PA:0x90000000, PA:0x90007000) .text (READ | EXECUTE | RESERVED)
+[ 13.496382 0 axruntime:135]   [PA:0x90007000, PA:0x9000a000) .rodata (READ | RESERVED)
+[ 13.505496 0 axruntime:135]   [PA:0x9000a000, PA:0x9000e000) .data .tdata .tbss .percpu (READ | WRITE | RESERVED)
+[ 13.516953 0 axruntime:135]   [PA:0x9000e000, PA:0x9004e000) boot stack (READ | WRITE | RESERVED)
+[ 13.527022 0 axruntime:135]   [PA:0x9004e000, PA:0x90051000) .bss (READ | WRITE | RESERVED)
+[ 13.536570 0 axruntime:135]   [PA:0x90051000, PA:0x100000000) free memory (READ | WRITE | FREE)
+[ 13.546465 0 axruntime:135]   [PA:0x2800c000, PA:0x2800d000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.556794 0 axruntime:135]   [PA:0x2800d000, PA:0x2800e000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.567124 0 axruntime:135]   [PA:0x2800e000, PA:0x2800f000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.577453 0 axruntime:135]   [PA:0x2800f000, PA:0x28010000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.587782 0 axruntime:135]   [PA:0x30000000, PA:0x38000000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.598111 0 axruntime:135]   [PA:0x40000000, PA:0x50000000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.608440 0 axruntime:135]   [PA:0x58000000, PA:0x80000000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.618770 0 axruntime:135]   [PA:0x28014000, PA:0x28016000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.629099 0 axruntime:135]   [PA:0x28016000, PA:0x28018000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.639428 0 axruntime:135]   [PA:0x28018000, PA:0x2801a000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.649757 0 axruntime:135]   [PA:0x2801a000, PA:0x2801c000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.660087 0 axruntime:135]   [PA:0x2801c000, PA:0x2801e000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.670416 0 axruntime:135]   [PA:0x28034000, PA:0x28035000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.680745 0 axruntime:135]   [PA:0x28035000, PA:0x28036000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.691074 0 axruntime:135]   [PA:0x28036000, PA:0x28037000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.701403 0 axruntime:135]   [PA:0x28037000, PA:0x28038000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.711732 0 axruntime:135]   [PA:0x28038000, PA:0x28039000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.722062 0 axruntime:135]   [PA:0x28039000, PA:0x2803a000) mmio (READ | WRITE | DEVICE | RESERVED)
+[ 13.732391 0 axruntime:150] Initialize platform devices...
+[ 13.739074 0 axhal::platform::aarch64_common::gic:51] Initialize GICv2...
+[ 13.747199 0 axhal::platform::aarch64_common::gic:27] GICD set enable: 30 true
+[ 13.755480 0 axhal::platform::aarch64_common::gic:27] GICD set enable: 116 true
+[ 13.763986 0 axruntime:176] Initialize interrupt handlers...
+[ 13.770843 0 axhal::platform::aarch64_common::gic:36] register handler irq 30
+[ 13.779176 0 axhal::platform::aarch64_common::gic:27] GICD set enable: 30 true
+[ 13.787596 0 axruntime:188] Primary CPU 0 init OK.
+Hello, world!
+send data 0
+read data 0
+sleep 1s
+send data 1
+read data 1
+sleep 1s
+send data 2
+read data 2
+sleep 1s
+send data 3
+read data 3
+sleep 1s
+send data 4
+read data 4
+sleep 1s
+send data 5
+read data 5
+sleep 1s
+send data 6
+read data 6
+sleep 1s
+send data 7
+read data 7
+sleep 1s
+send data 8
+read data 8
+sleep 1s
+send data 9
+read data 9
+sleep 1s
+send data 10
+read data 10
+sleep 1s
+send data 11
+read data 11
+sleep 1s
+send data 12
+read data 12
+sleep 1s
+send data 13
+read data 13
+sleep 1s
+send data 14
+read data 14
+sleep 1s
+^C
+</code></pre>
+</details>
+<h3 id="44-实验结论"><a class="header" href="#44-实验结论">4.4 实验结论</a></h3>
+<p>本实验验证了uart无中断，poll mode的通信模型，实现了相应的驱动代码。</p>
+<h3 id="45-实验代码"><a class="header" href="#45-实验代码">4.5 实验代码</a></h3>
+<p>完整代码可以在<a href="https://github.com/chenlongos/appd/commit/897c85c5952a123fa27f8612a4a5c86d37d679e3">这儿</a>看到</p>
+<h2 id="5-qemu串口驱动实验"><a class="header" href="#5-qemu串口驱动实验">5. qemu串口驱动实验</a></h2>
+<p>qemu模拟的qemu-virt机器使用串口为 <em>pl011</em> 模块，寄存器作用以及地址与飞腾派是一致的，并且默认已经被 <em>arceos</em> 的初始化（不然就看不到arceos的启动所打印的信息了）。具体实现代码可以看<a href="https://docs.rs/arm_pl011/0.1.0/src/arm_pl011/pl011.rs.html#42-44">这个crate</a>。这个crate默认采用了波特率为115200，8N1的通信格式。</p>
+<h2 id="6-参考资料"><a class="header" href="#6-参考资料">6. 参考资料</a></h2>
+<h3 id="pl011"><a class="header" href="#pl011">pl011</a></h3>
+<p><a href="https://developer.arm.com/documentation/ddi0183/g/programmers-model">https://developer.arm.com/documentation/ddi0183/g/programmers-model</a></p>
+<h3 id="uart协议"><a class="header" href="#uart协议">uart协议</a></h3>
+<p><a href="https://www.analog.com/cn/resources/analog-dialogue/articles/uart-a-hardware-communication-protocol.html">https://www.analog.com/cn/resources/analog-dialogue/articles/uart-a-hardware-communication-protocol.html</a></p>
+<h3 id="飞腾派软件开发手册"><a class="header" href="#飞腾派软件开发手册">飞腾派软件开发手册</a></h3>
+<p><a href="https://github.com/elliott10/dev-hw-driver/blob/main/phytiumpi/docs/%E9%A3%9E%E8%85%BE%E6%B4%BE%E8%BD%AF%E4%BB%B6%E7%BC%96%E7%A8%8B%E6%89%8B%E5%86%8CV1.0.pdf">https://github.com/elliott10/dev-hw-driver/blob/main/phytiumpi/docs/飞腾派软件编程手册V1.0.pdf</a></p>
+<h3 id="飞腾派硬件原理图"><a class="header" href="#飞腾派硬件原理图">飞腾派硬件原理图</a></h3>
+<p><a href="https://github.com/elliott10/dev-hw-driver/blob/main/phytiumpi/docs/%E9%A3%9E%E8%85%BE%E6%B4%BEv3%E5%8E%9F%E7%90%86%E5%9B%BE%20cek8903_piq_v3_sch20240506.pdf">https://github.com/elliott10/dev-hw-driver/blob/main/phytiumpi/docs/%E9%A3%9E%E8%85%BE%E6%B4%BEv3%E5%8E%9F%E7%90%86%E5%9B%BE%20cek8903_piq_v3_sch20240506.pdf</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter3/chapter_3.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter3/3_2_i2c_driver.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter3/chapter_3.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter3/3_2_i2c_driver.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,928 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>DMA驱动开发 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="51-dma驱动开发"><a class="header" href="#51-dma驱动开发">5.1 DMA驱动开发</a></h1>
+<h3 id="dma-原理"><a class="header" href="#dma-原理">DMA 原理</a></h3>
+<p>DMA（Direct Memory Access，直接内存访问）是计算机系统中一种高效数据传输机制，允许外设或内存之间直接交换数据，而无需 CPU 干预，从而减少 CPU 负载并提高系统性能。DMA 原理基于专用控制器（DMA Controller），它接管总线控制权，从 CPU 获得数据传输权限。工作流程包括：外设（如磁盘、网络卡）发出 DMA 请求信号，DMA 控制器响应并向 CPU 请求总线使用权，CPU 暂停当前任务释放总线，DMA 控制器配置传输参数（如源地址、目的地址、传输长度），然后执行批量数据移动（burst mode 或 cycle stealing mode）。传输完成后，DMA 控制器发出中断信号通知 CPU，CPU 恢复控制权。DMA 支持多种模式，包括单地址传输（fly-by DMA，用于内存-外设）和双地址传输（memory-to-memory DMA）。在 ARM 架构中（如飞腾 E2000），DMA 控制器（如 PL330）通过 AXI 总线实现，支持多通道、多优先级队列和散射-聚集传输（scatter-gather），适用于高吞吐量场景如网络数据包处理或磁盘 I/O。</p>
+<h3 id="飞腾派-dma-设备"><a class="header" href="#飞腾派-dma-设备">飞腾派 DMA 设备</a></h3>
+<p>飞腾派（Phytium Pi）开发板的 DMA 设备集成在 E2000 处理器中，支持 ARM PL330 DMA 控制器架构，用于高效内存-外设数据传输。设备基址约为 0x2800_0000（与 CRU 时钟复位单元重叠），通过 MMIO 寄存器访问，支持 8 个通道，每个通道可独立配置传输模式（如内存到内存、外设到内存）。DMA 控制器包含寄存器如 DMAC_CFG (配置通道优先级和使能)、DMAC_CHEN (通道使能)、DMAC_CHx_CTL (通道控制，如源/目的地址增量)、DMAC_CHx_SAR (源地址)、DMAC_CHx_DAR (目的地址)、DMAC_CHx_BLOCK_TS (块传输大小)。飞腾派 DMA 支持 burst 传输（批量数据移动）和 cycle stealing（周期窃取模式），适用于 UART、I2C、SPI 等外设的中断优化传输。设备树（phytium_pi.dts）定义 DMA 节点，配置文件（aarch64-phytium-pi.toml）包含 MMIO 区域如 [0x2800_0000, 0x1000]。驱动在 ArceOS 中通过 axhal 实现，支持 init_primary 配置通道。</p>
+<ul>
+<li><strong>通道配置</strong>：8 个通道，优先级通过 DMAC_CFG bit 0-7 设置。</li>
+<li><strong>传输模式</strong>：支持内存-内存、内存-外设、外设-内存，散射-聚集列表（DMAC_CHx_LLP）。</li>
+<li><strong>中断支持</strong>：DMAC_INTSTATUS 寄存器（偏移 0x0030）检查通道中断，DMAC_CHx_INTSTATUS (偏移 0xA0 + x*0x58) 通道状态。</li>
+<li><strong>核间 DMA</strong>：E2000 多核支持，目标 CPU 通过 GIC 路由中断（如 IRQ 32~1019）。</li>
+</ul>
+<h3 id="飞腾派-dma-设备时序图"><a class="header" href="#飞腾派-dma-设备时序图">飞腾派 DMA 设备时序图</a></h3>
+<p>飞腾派 DMA 设备时序以内存-外设传输为例，涉及 DMA 控制器（基址 0x2800_0000）、CPU 核心、外设（如 UART 0x2800_E000）和 AXI 总线。当外设请求 DMA，控制器向 CPU 发送请求，CPU 释放总线，DMA 配置通道参数（如源/目的地址），执行 burst 传输（批量数据），完成后发出中断通知 CPU。整个过程延迟约 50~100 ns（100 MHz 时钟），时序依赖 AXI 总线握手（ARVALID/ARREADY, AWVALID/AWREADY, WVALID/WREADY）。</p>
+<pre class="mermaid">sequenceDiagram
+    participant Outer as 外设 (e.g., UART 0x2800_E000)
+    participant DMA as DMA 控制器 (0x2800_0000)
+    participant CPU as E2000 CPU Core
+    participant AXI as AXI 总线
+
+    Outer-&gt;&gt;DMA: DMA 请求 (IRQ 信号)
+    DMA-&gt;&gt;CPU: 请求总线控制权
+    CPU-&gt;&gt;DMA: 释放总线 (暂停任务)
+    DMA-&gt;&gt;DMA: 配置通道 (DMAC_CHx_SAR/DAR/BLOCK_TS)
+    DMA-&gt;&gt;AXI: 发起传输 (ARVALID/ARADDR, AWVALID/AWADDR)
+    AXI-&gt;&gt;DMA: 响应握手 (ARREADY, AWREADY)
+    DMA-&gt;&gt;AXI: 数据传输 (WVALID/WDATA, burst 模式)
+    AXI-&gt;&gt;DMA: 传输完成 (BVALID/BRESP)
+    DMA-&gt;&gt;CPU: 中断通知 (DMAC_INTSTATUS bit)
+    CPU-&gt;&gt;DMA: 处理中断 (清 DMAC_CHx_INTSTATUS)
+    CPU-&gt;&gt;CPU: 恢复任务
+</pre>
+<h3 id="飞腾派-dma-驱动-api-调用表"><a class="header" href="#飞腾派-dma-驱动-api-调用表">飞腾派 DMA 驱动 API 调用表</a></h3>
+<p>飞腾派 DMA 驱动（基于 Fxmac 以太网控制器）提供以下 API，用于缓冲区描述符（BD）环管理、DMA 初始化和数据传输。这些 API 支持 Tx/Rx 方向的数据处理，适用于 100 MHz 时钟的低速设备（如 UART/SPI）。表中列出函数名、参数、返回值和功能描述。</p>
+<div class="table-wrapper"><table><thead><tr><th><strong>函数名</strong></th><th><strong>参数</strong></th><th><strong>返回值</strong></th><th><strong>功能描述</strong></th></tr></thead><tbody>
+<tr><td><code>FXmacBdRingCreate</code></td><td><code>ring_ptr: &amp;mut FXmacBdRing</code> - BD 环指针。 <code>phys_addr: u64</code> - 物理基址。 <code>virt_addr: u64</code> - 虚拟基址。 <code>alignment: u64</code> - 对齐（128 字节）。 <code>bd_count: u32</code> - BD 数量（128）。</td><td><code>u32</code> - 0（成功），非 0（失败）。</td><td>创建 BD 环形缓冲区，初始化指针和计数器，用于 Tx/Rx 描述符队列。</td></tr>
+<tr><td><code>FXmacBdRingClone</code></td><td><code>ring_ptr: &amp;mut FXmacBdRing</code> - BD 环指针。 <code>src_bd_ptr: &amp; FXmacBd</code> - 模板 BD。 <code>direction: u32</code> - 方向（FXMAC_SEND 或 FXMAC_RECV）。</td><td><code>u32</code> - 0（成功）。</td><td>将模板 BD 克隆到环中所有 BD，设置状态位（如 TXBUF_USED_MASK）。</td></tr>
+<tr><td><code>FXmacBdRingAlloc</code></td><td><code>ring_ptr: &amp;mut FXmacBdRing</code> - BD 环指针。 <code>num_bd: u32</code> - 分配数量。 <code>bd_set_ptr: &amp;mut(*mut FXmacBd)</code> - 返回 BD 集指针。</td><td><code>u32</code> - 0（成功），4（BD 不足）。</td><td>从环中分配 BD 集，更新 free_cnt 和 pre_cnt，绕环处理。</td></tr>
+<tr><td><code>FXmacBdRingToHw</code></td><td><code>ring_ptr: &amp;mut FXmacBdRing</code> - BD 环指针。 <code>num_bd: u32</code> - BD 数量。 <code>bd_set_ptr: *mut FXmacBd</code> - BD 集指针。</td><td><code>u32</code> - 0（成功）。</td><td>将分配的 BD 集提交到硬件，更新 hw_tail 和 hw_cnt，绕环处理。</td></tr>
+<tr><td><code>FXmacBdRingFromHwRx</code></td><td><code>ring_ptr: &amp;mut FXmacBdRing</code> - BD 环指针。 <code>bd_limit: usize</code> - 最大 BD 数量。 <code>bd_set_ptr: &amp;mut(*mut FXmacBd)</code> - 返回 BD 集指针。</td><td><code>u32</code> - 处理 BD 数量（0 表示无）。</td><td>从硬件检索已处理的 Rx BD，检查 RXBUF_NEW_MASK 和 RXBUF_EOF_MASK，更新 hw_head 和 post_cnt。</td></tr>
+<tr><td><code>FXmacBdRingFromHwTx</code></td><td><code>ring_ptr: &amp;mut FXmacBdRing</code> - BD 环指针。 <code>bd_limit: usize</code> - 最大 BD 数量。 <code>bd_set_ptr: &amp;mut(*mut FXmacBd)</code> - 返回 BD 集指针。</td><td><code>u32</code> - 处理 BD 数量（0 表示无）。</td><td>从硬件检索已处理的 Tx BD，检查 TXBUF_USED_MASK 和 TXBUF_LAST_MASK，更新 hw_head 和 post_cnt。</td></tr>
+<tr><td><code>FXmacBdRingFree</code></td><td><code>ring_ptr: &amp;mut FXmacBdRing</code> - BD 环指针。 <code>num_bd: u32</code> - BD 数量。</td><td><code>u32</code> - 0（成功）。</td><td>释放 BD 集，更新 free_cnt 和 post_cnt，绕环处理。</td></tr>
+<tr><td><code>FXmacAllocDmaPbufs</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。</td><td><code>u32</code> - 0（成功）。</td><td>分配 Rx/Tx DMA 缓冲区（128KB），设置 BD 环和 pbufs_storage，使用 dma_alloc_coherent。</td></tr>
+<tr><td><code>FXmacInitDma</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。</td><td><code>u32</code> - 0（成功）。</td><td>初始化 DMA 环，创建 Tx/Rx BD 环，克隆模板，设置队列指针（RXQBASE/TXQBASE）。</td></tr>
+<tr><td><code>FXmacBdRingPtrReset</code></td><td><code>ring_ptr: &amp;mut FXmacBdRing</code> - BD 环指针。 <code>virtaddrloc: *mut FXmacBd</code> - 虚拟地址。</td><td>无</td><td>重置 BD 环指针，绕环设置 hw_head/tail 等为基址。</td></tr>
+<tr><td><code>FXmacProcessSentBds</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。</td><td>无</td><td>处理已发送 Tx BD，检索 FromHwTx，释放缓冲区，清除 USED 位和 TXBUF_LAST_MASK。</td></tr>
+<tr><td><code>FXmacRecvHandler</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。</td><td>无</td><td>处理 Rx 中断，检索 FromHwRx BD，复制数据到 Vec，释放 BD 并重新设置 Rx BD。</td></tr>
+<tr><td><code>FXmacSgsend</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。 <code>p: Vec&lt;Vec&lt;u8&gt;&gt;</code> - 数据包向量。</td><td><code>u32</code> - 发送长度（字节）。</td><td>分配 Tx BD，复制数据到缓冲区，设置 BD 地址/长度/状态，提交到硬件，启动传输。</td></tr>
+</tbody></table>
+</div>
+<h2 id="代码实现讲解"><a class="header" href="#代码实现讲解">代码实现讲解</a></h2>
+<p>飞腾派 DMA 驱动基于 Fxmac 以太网控制器架构（基址 0x3200_C000/0x3200_E000），支持 DMA 缓冲区描述符（BD）环管理，用于 Tx/Rx 数据传输。代码使用 alloc 动态分配、core::sync::atomic 原子操作、super::utils::DSB 数据同步屏障，以及 read_reg/write_reg MMIO 操作。以下从常量、结构到每个 API 的实现逐一讲解，结合 D2000 处理器（ARMv8-A）和 YT8521 PHY 上下文。</p>
+<h3 id="常量与结构设计"><a class="header" href="#常量与结构设计">常量与结构设计</a></h3>
+<ul>
+<li>常量：
+<ul>
+<li>FXMAX_RX_BDSPACE_LENGTH / FXMAX_TX_BDSPACE_LENGTH：BD 空间大小（128KB，128 BD * 64 字节）。</li>
+<li>FXMAX_RX_PBUFS_LENGTH / FXMAX_TX_PBUFS_LENGTH：数据包缓冲数量（128）。</li>
+<li>FXMAC_BD_ADDR_OFFSET / FXMAC_BD_STAT_OFFSET：BD 偏移（地址 0x0，状态 0x4）。</li>
+<li>FXMAC_RXBUF_NEW_MASK / FXMAC_RXBUF_WRAP_MASK：Rx BD 状态位（NEW bit 0, WRAP bit 1）。</li>
+<li>FXMAC_TXBUF_USED_MASK / FXMAC_TXBUF_WRAP_MASK：Tx BD 状态位（USED bit 31, WRAP bit 30）。</li>
+<li>ULONG64_HI_MASK / ULONG64_LO_MASK：64 位地址掩码，支持 aarch64。</li>
+<li>BD_ALIGNMENT：BD 对齐（64 字节）。</li>
+<li>FXMAC_SEND / FXMAC_RECV：传输方向（1=发送，2=接收）。</li>
+</ul>
+</li>
+<li>结构：
+<ul>
+<li>macb_dma_desc：BD 描述符（addr: u32, ctrl: u32, addrh: u32, resvd: u32），支持 64 位地址。</li>
+<li>FXmacBdRing：BD 环结构（phys_base_addr, base_bd_addr, high_bd_addr, length, run_state, separation, free_head 等），支持绕环指针（hw_head/tail）。</li>
+<li>FXmacNetifBuffer：缓冲区（rx_bdspace/tx_bdspace: usize, rx_pbufs_storage/tx_pbufs_storage: [u64; 128]），使用 dma_alloc_coherent 分配。</li>
+<li>FXmacLwipPort：端口结构（buffer: FXmacNetifBuffer, feature: u32, hwaddr: [u8; 6], recv_flg: u32）。</li>
+<li>FXmac：主结构（config, link_status, options, mask, caps, lwipport, tx_bd_queue, rx_bd_queue 等），包含 BD 环和缓冲区。</li>
+</ul>
+</li>
+</ul>
+<p>这些结构支持 DMA BD 环管理，环绕处理确保高效传输，100 MHz 时钟下延迟 100ns~1µs。</p>
+<h3 id="api-实现讲解"><a class="header" href="#api-实现讲解">API 实现讲解</a></h3>
+<p><strong>FXmacBdRingCreate</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacBdRingCreate(ring_ptr: &amp;mut FXmacBdRing, phys_addr: u64, virt_addr: u64, alignment: u64, bd_count: u32) -&gt; u32 {
+    assert!((virt_addr % alignment) == 0);
+    assert!(bd_count &gt; 0);
+    ring_ptr.separation = size_of::&lt;FXmacBd&gt;() as u32;
+    ring_ptr.base_bd_addr = virt_addr;
+    ring_ptr.high_bd_addr = virt_addr + (bd_count as u64 * ring_ptr.separation as u64);
+    ring_ptr.length = ring_ptr.high_bd_addr - ring_ptr.base_bd_addr + ring_ptr.separation as u64;
+    ring_ptr.free_head = virt_addr as *mut FXmacBd;
+    ring_ptr.pre_head = virt_addr as *mut FXmacBd;
+    ring_ptr.free_cnt = bd_count;
+    ring_ptr.all_cnt = bd_count;
+    ring_ptr.run_state = FXMAC_DMA_SG_IS_STOPED as u32;
+    ring_ptr.phys_base_addr = phys_addr;
+    ring_ptr.hw_head = virt_addr as *mut FXmacBd;
+    ring_ptr.hw_tail = virt_addr as *mut FXmacBd;
+    ring_ptr.post_head = virt_addr as *mut FXmacBd;
+    ring_ptr.bda_restart = phys_addr as *mut FXmacBd;
+    0
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：创建 BD 环形缓冲区，初始化指针和计数器，用于 Tx/Rx 描述符队列。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>检查对齐和数量，设置 separation（BD 大小 16 字节）。</li>
+<li>计算 high_bd_addr（最后一个 BD 地址）和 length（总长度）。</li>
+<li>初始化 free_head/pre_head/hw_head 等指针为基址，设置 free_cnt/all_cnt 为 bd_count（128）。</li>
+<li>设置 run_state 为 STOPED，phys_base_addr 为物理地址。</li>
+<li>返回 0 表示成功。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：为 Fxmac Rx/Tx 创建 BD 环（128 BD，128KB），支持 DMA 传输（基址 0x3200_C000）。</p>
+<p><strong>FXmacBdRingClone</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacBdRingClone(ring_ptr: &amp;mut FXmacBdRing, src_bd_ptr: &amp; FXmacBd, direction: u32) -&gt; u32 {
+    let mut cur_bd = ring_ptr.base_bd_addr;
+    for i in 0..ring_ptr.all_cnt {
+        let cur_bd_slice = unsafe { from_raw_parts_mut(cur_bd as *mut FXmacBd, 1) };
+        cur_bd_slice[0].copy_from_slice(src_bd_ptr);
+        super::utils::DSB();
+        cur_bd += ring_ptr.separation as u64;
+    }
+    cur_bd -= ring_ptr.separation as u64;
+    if direction == FXMAC_RECV {
+        FXmacBdSetRxWrap(cur_bd);
+    } else {
+        FXmacBdSetTxWrap(cur_bd);
+    }
+    0
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：将模板 BD 克隆到环中所有 BD，设置状态位（如 TXBUF_USED_MASK）。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>循环复制 src_bd_ptr 到每个 BD（绕环），调用 DSB 同步。</li>
+<li>对最后一个 BD 设置 WRAP 位（RXBUF_WRAP_MASK 或 TXBUF_WRAP_MASK）。</li>
+<li>返回 0 表示成功。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：初始化 Rx/Tx BD 环，设置 TXBUF_USED_MASK（bit 31）使能硬件处理。</p>
+<p><strong>FXmacBdRingAlloc</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacBdRingAlloc(ring_ptr: &amp;mut FXmacBdRing, num_bd: u32, bd_set_ptr: &amp;mut(*mut FXmacBd)) -&gt; u32 {
+    if ring_ptr.free_cnt &lt; num_bd {
+        error!("No Enough free BDs available for the request: {}", num_bd);
+        4
+    } else {
+        *bd_set_ptr = ring_ptr.free_head;
+        let free_head_t = ring_ptr.free_head;
+        FXMAC_RING_SEEKAHEAD(ring_ptr, &amp;mut ring_ptr.free_head, num_bd);
+        ring_ptr.free_cnt -= num_bd;
+        ring_ptr.pre_cnt += num_bd;
+        0
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：从环中分配 BD 集，更新 free_cnt 和 pre_cnt，绕环处理。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>检查 free_cnt 是否足够，返回 4（BD 不足）若不足。</li>
+<li>设置 bd_set_ptr 为 free_head，调用 FXMAC_RING_SEEKAHEAD 移动 free_head（绕环）。</li>
+<li>更新计数器，返回 0 表示成功。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：分配 Tx BD（num_bd=1）用于发送数据包。</p>
+<p><strong>FXmacBdRingToHw</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacBdRingToHw(ring_ptr: &amp;mut FXmacBdRing, num_bd: u32, bd_set_ptr: *mut FXmacBd) -&gt; u32 {
+    let mut cur_bd_ptr = bd_set_ptr;
+    for i in 0..num_bd {
+        cur_bd_ptr = FXMAC_BD_RING_NEXT(ring_ptr, cur_bd_ptr);
+    }
+    let pre_head_t = ring_ptr.pre_head;
+    FXMAC_RING_SEEKAHEAD(ring_ptr, &amp;mut ring_ptr.pre_head, num_bd);
+    ring_ptr.pre_cnt -= num_bd;
+    ring_ptr.hw_tail = cur_bd_ptr;
+    ring_ptr.hw_cnt += num_bd;
+    0
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：将分配的 BD 集提交到硬件，更新 hw_tail 和 hw_cnt，绕环处理。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>移动 cur_bd_ptr 到 BD 集末尾（FXMAC_BD_RING_NEXT 绕环）。</li>
+<li>更新 pre_head/pre_cnt, hw_tail/hw_cnt。</li>
+<li>返回 0 表示成功。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：提交 Tx BD 到 Fxmac，启动传输（NWCTRL_STARTTX_MASK bit）。</p>
+<p><strong>FXmacBdRingFromHwRx</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacBdRingFromHwRx(ring_ptr: &amp;mut FXmacBdRing, bd_limit: usize, bd_set_ptr: &amp;mut(*mut FXmacBd)) -&gt; u32 {
+    let mut cur_bd_ptr = ring_ptr.hw_head;
+    let mut bd_str = 0;
+    let mut bd_count = 0;
+    let mut bd_partial_count = 0;
+    let mut bd_limit_loc = bd_limit as u32;
+    if ring_ptr.hw_cnt == 0 {
+        *bd_set_ptr = null_mut();
+        0
+    } else {
+        if bd_limit_loc &gt; ring_ptr.hw_cnt {
+            bd_limit_loc = ring_ptr.hw_cnt;
+        }
+        while bd_count &lt; bd_limit_loc {
+            bd_str = fxmac_bd_read(cur_bd_ptr as u64, FXMAC_BD_ADDR_OFFSET) &amp; FXMAC_RXBUF_NEW_MASK;
+            if bd_str == 0 {
+                break;
+            }
+            bd_count += 1;
+            if (bd_str &amp; FXMAC_RXBUF_EOF_MASK) != 0 {
+                bd_partial_count = 0;
+            } else {
+                bd_partial_count += 1;
+            }
+            cur_bd_ptr = FXMAC_BD_RING_NEXT(ring_ptr, cur_bd_ptr);
+        }
+        bd_count -= bd_partial_count;
+        if bd_count &gt; 0 {
+            *bd_set_ptr = ring_ptr.hw_head;
+            ring_ptr.hw_cnt -= bd_count;
+            ring_ptr.post_cnt += bd_count;
+            let hw_head_t = ring_ptr.hw_head;
+            FXMAC_RING_SEEKAHEAD(ring_ptr, &amp;mut ring_ptr.hw_head, bd_count);
+            bd_count
+        } else {
+            *bd_set_ptr = null_mut();
+            0
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：从硬件检索已处理的 Rx BD，检查 RXBUF_NEW_MASK 和 RXBUF_EOF_MASK，更新 hw_head 和 post_cnt。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>若 hw_cnt=0，返回 0。</li>
+<li>限制 bd_limit_loc 为 hw_cnt，循环检查 BD 地址的 NEW 位（bit 0=0 表示处理完成）。</li>
+<li>处理部分包（EOF 位 bit 13=0），绕环移动 hw_head。</li>
+<li>更新计数器，返回处理 BD 数量。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：处理 Rx 中断，检索已接收 BD，复制数据到 Vec（FXmacRecvHandler）。</p>
+<p><strong>FXmacBdRingFromHwTx</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacBdRingFromHwTx(ring_ptr: &amp;mut FXmacBdRing, bd_limit: usize, bd_set_ptr: &amp;mut(*mut FXmacBd)) -&gt; u32 {
+    let mut bd_str = 0;
+    let mut bd_count = 0;
+    let mut bd_partial_count = 0;
+    let mut bd_limit_loc = bd_limit as u32;
+    if ring_ptr.hw_cnt == 0 {
+        *bd_set_ptr = null_mut();
+        0
+    } else {
+        if bd_limit_loc &gt; ring_ptr.hw_cnt {
+            bd_limit_loc = ring_ptr.hw_cnt;
+        }
+        while bd_count &lt; bd_limit_loc {
+            bd_str = fxmac_bd_read(cur_bd_ptr as u64, FXMAC_BD_STAT_OFFSET);
+            if (bd_str &amp; FXMAC_TXBUF_USED_MASK) != 0 {
+                bd_count += 1;
+                bd_partial_count += 1;
+            }
+            if (bd_str &amp; FXMAC_TXBUF_LAST_MASK) != 0 {
+                bd_partial_count = 0;
+            }
+            cur_bd_ptr = FXMAC_BD_RING_NEXT(ring_ptr, cur_bd_ptr);
+        }
+        bd_count -= bd_partial_count;
+        if bd_count &gt; 0 {
+            *bd_set_ptr = ring_ptr.hw_head;
+            ring_ptr.hw_cnt -= bd_count;
+            ring_ptr.post_cnt += bd_count;
+            let hw_head_t = ring_ptr.hw_head;
+            FXMAC_RING_SEEKAHEAD(ring_ptr, &amp;mut ring_ptr.hw_head, bd_count);
+            bd_count
+        } else {
+            *bd_set_ptr = null_mut();
+            0
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：从硬件检索已处理的 Tx BD，检查 TXBUF_USED_MASK 和 TXBUF_LAST_MASK，更新 hw_head 和 post_cnt。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>若 hw_cnt=0，返回 0。</li>
+<li>循环检查 BD 状态的 USED 位（bit 31=1 表示处理完成）。</li>
+<li>处理部分包（LAST 位 bit 30=0），绕环移动 hw_head。</li>
+<li>更新计数器，返回处理 BD 数量。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：处理 Tx 中断，检索已发送 BD，释放缓冲区（FXmacProcessSentBds）。</p>
+<p><strong>FXmacBdRingFree</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacBdRingFree(ring_ptr: &amp;mut FXmacBdRing, num_bd: u32) -&gt; u32 {
+    if num_bd == 0 {
+        0
+    } else {
+        ring_ptr.free_cnt += num_bd;
+        ring_ptr.post_cnt -= num_bd;
+        let post_head_t = ring_ptr.post_head;
+        FXMAC_RING_SEEKAHEAD(ring_ptr, &amp;mut ring_ptr.post_head, num_bd);
+        0
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：释放 BD 集，更新 free_cnt 和 post_cnt，绕环处理。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>若 num_bd=0，直接返回 0。</li>
+<li>更新计数器，调用 FXMAC_RING_SEEKAHEAD 移动 post_head。</li>
+<li>返回 0 表示成功。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：释放 Rx/Tx BD 集，回收内存（FXmacRecvHandler, FXmacProcessSentBds）。</p>
+<p><strong>FXmacAllocDmaPbufs</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacAllocDmaPbufs(instance_p: &amp;mut FXmac) -&gt; u32 {
+    let mut status: u32 = 0;
+    let rxringptr: &amp;mut FXmacBdRing = &amp;mut instance_p.rx_bd_queue.bdring;
+    let txringptr: &amp;mut FXmacBdRing = &amp;mut instance_p.tx_bd_queue.bdring;
+    info!("Allocate RX descriptors, 1 RxBD at a time.");
+    for i in 0..FXMAX_RX_PBUFS_LENGTH {
+        let max_frame_size = if (instance_p.lwipport.feature &amp; FXMAC_LWIP_PORT_CONFIG_JUMBO) != 0 { FXMAC_MAX_FRAME_SIZE_JUMBO } else { FXMAC_MAX_FRAME_SIZE };
+        let alloc_rx_buffer_pages = (max_frame_size as usize + (PAGE_SIZE - 1)) / PAGE_SIZE;
+        let (mut rx_mbufs_vaddr, mut rx_mbufs_dma) = crate_interface::call_interface!(super::KernelFunc::dma_alloc_coherent(alloc_rx_buffer_pages));
+        let mut rxbd: *mut FXmacBd = null_mut();
+        status = FXmacBdRingAlloc(rxringptr, 1, &amp;mut rxbd);
+        assert!(!rxbd.is_null());
+        if status != 0 {
+            error!("FXmacInitDma: Error allocating RxBD");
+            return status;
+        }
+        status = FXmacBdRingToHw(rxringptr, 1, rxbd);
+        let bdindex = FXMAC_BD_TO_INDEX(rxringptr, rxbd as u64);
+        let mut temp = rxbd as *mut u32;
+        let mut v = 0;
+        if bdindex == (FXMAX_RX_PBUFS_LENGTH - 1) as u32 {
+            v |= FXMAC_RXBUF_WRAP_MASK;
+        }
+        unsafe {
+            temp.add(1).write_volatile(0);
+            temp.write_volatile(v);
+        }
+        super::utils::DSB();
+        fxmac_bd_set_address_rx(rxbd as u64, rx_mbufs_dma as u64);
+        instance_p.lwipport.buffer.rx_pbufs_storage[bdindex as usize] = rx_mbufs_vaddr as u64;
+    }
+    for index in 0..FXMAX_TX_PBUFS_LENGTH {
+        let max_fr_size = if (instance_p.lwipport.feature &amp; FXMAC_LWIP_PORT_CONFIG_JUMBO) != 0 { FXMAC_MAX_FRAME_SIZE_JUMBO } else { FXMAC_MAX_FRAME_SIZE };
+        let alloc_pages = (max_fr_size as usize + (PAGE_SIZE - 1)) / PAGE_SIZE;
+        let (mut tx_mbufs_vaddr, mut tx_mbufs_dma) = crate_interface::call_interface!(super::KernelFunc::dma_alloc_coherent(alloc_pages));
+        instance_p.lwipport.buffer.tx_pbufs_storage[index as usize] = tx_mbufs_vaddr as u64;
+        let txbd = (txringptr.base_bd_addr + (index as u64 * txringptr.separation as u64)) as *mut FXmacBd;
+        fxmac_bd_set_address_tx(txbd as u64, tx_mbufs_dma as u64);
+    }
+    0
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：分配 Rx/Tx DMA 缓冲区，设置 BD 环和 pbufs_storage，使用 dma_alloc_coherent。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>计算 max_frame_size（JUMBO 支持 9000 字节，默认 1500）。</li>
+<li>为 Rx 分配 128 缓冲区（dma_alloc_coherent），分配 BD，设置 WRAP 位（bit 1），写入 BD 地址（fxmac_bd_set_address_rx）。</li>
+<li>为 Tx 分配 128 缓冲区，直接设置 BD 地址（fxmac_bd_set_address_tx）。</li>
+<li>返回 0 表示成功。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：为 Fxmac 网卡分配 DMA 缓冲区（128KB），支持 SGMII 接口的 1Gbps 传输。</p>
+<p><strong>FXmacInitDma</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacInitDma(instance_p: &amp;mut FXmac) -&gt; u32 {
+    let rxringptr = &amp;mut instance_p.rx_bd_queue.bdring;
+    let txringptr = &amp;mut instance_p.tx_bd_queue.bdring;
+    FXmacBdRingCreate(rxringptr, instance_p.lwipport.buffer.rx_bdspace as u64, instance_p.lwipport.buffer.rx_bdspace as u64, BD_ALIGNMENT, FXMAX_RX_PBUFS_LENGTH as u32);
+    FXmacBdRingClone(rxringptr, &amp;[0; FXMAC_BD_NUM_WORDS], FXMAC_RECV);
+    FXmacBdRingCreate(txringptr, instance_p.lwipport.buffer.tx_bdspace as u64, instance_p.lwipport.buffer.tx_bdspace as u64, BD_ALIGNMENT, FXMAX_TX_PBUFS_LENGTH as u32);
+    FXmacBdRingClone(txringptr, &amp;[0; FXMAC_BD_NUM_WORDS], FXMAC_SEND);
+    FXmacAllocDmaPbufs(instance_p);
+    FXmacSetQueuePtr(instance_p.rx_bd_queue.bdring.phys_base_addr, 0, FXMAC_RECV);
+    FXmacSetQueuePtr(instance_p.tx_bd_queue.bdring.phys_base_addr, 0, FXMAC_SEND);
+    let FXMAC_TAIL_QUEUE = |queue: u64| 0x0e80 + (queue &lt;&lt; 2);
+    if (instance_p.config.caps &amp; FXMAC_CAPS_TAILPTR) != 0 {
+        write_reg((instance_p.config.base_address + FXMAC_TAIL_QUEUE(0)) as *mut u32, (1 &lt;&lt; 31) | 0);
+    }
+    0
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：初始化 DMA 环，创建 Tx/Rx BD 环，克隆模板，设置队列指针。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>调用 FXmacBdRingCreate 创建 Rx/Tx BD 环（128 BD）。</li>
+<li>调用 FXmacBdRingClone 克隆模板 BD（设置 TXBUF_USED_MASK）。</li>
+<li>调用 FXmacAllocDmaPbufs 分配缓冲区。</li>
+<li>设置 RXQBASE/TXQBASE 寄存器（偏移 0x018/0x01C），写入物理基址。</li>
+<li>若支持 TAILPTR，设置尾指针寄存器（偏移 0x0E80）。</li>
+<li>返回 0 表示成功。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：初始化 Fxmac DMA，准备 Tx/Rx 队列，支持 1Gbps 网卡传输。</p>
+<p><strong>FXmacBdRingPtrReset</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacBdRingPtrReset(ring_ptr: &amp;mut FXmacBdRing, virtaddrloc: *mut FXmacBd) {
+    ring_ptr.free_head = virtaddrloc;
+    ring_ptr.pre_head = virtaddrloc;
+    ring_ptr.hw_head = virtaddrloc;
+    ring_ptr.hw_tail = virtaddrloc;
+    ring_ptr.post_head = virtaddrloc;
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：重置 BD 环指针，绕环设置 hw_head/tail 等为基址。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>将 free_head/pre_head/hw_head/hw_tail/post_head 设置为 virtaddrloc（虚拟基址）。</li>
+<li>无返回值，用于 DMA 复位。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：错误恢复时调用（如 ResetDma），重置 Tx/Rx 环。</p>
+<p><strong>FXmacProcessSentBds</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacProcessSentBds(instance_p: &amp;mut FXmac) {
+    let txring = &amp;mut instance_p.tx_bd_queue.bdring;
+    loop {
+        let mut txbdset: *mut FXmacBd = null_mut();
+        let n_bds = FXmacBdRingFromHwTx(txring, FXMAX_TX_PBUFS_LENGTH, &amp;mut txbdset);
+        if n_bds == 0 {
+            return;
+        }
+        let mut n_pbufs_freed = n_bds;
+        let mut curbdpntr = txbdset;
+        for _ in 0..n_pbufs_freed {
+            let bdindex = FXMAC_BD_TO_INDEX(txring, curbdpntr as u64) as usize;
+            let mut v = 0;
+            if bdindex == (FXMAX_TX_PBUFS_LENGTH - 1) {
+                v = FXMAC_TXBUF_WRAP_MASK | FXMAC_TXBUF_USED_MASK;
+            } else {
+                v = FXMAC_TXBUF_USED_MASK;
+            }
+            let mut temp = curbdpntr as *mut u32;
+            unsafe {
+                temp.add(1).write_volatile(v);
+            }
+            super::utils::DSB();
+            curbdpntr = FXMAC_BD_RING_NEXT(txring, curbdpntr);
+        }
+        FXmacBdRingFree(txring, n_bds);
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：处理已发送 Tx BD，检索 FromHwTx，释放缓冲区，清除 USED 位和 LAST_MASK。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>循环调用 FXmacBdRingFromHwTx，检索已处理 BD（检查 USED 位 bit 31=1）。</li>
+<li>清零 BD 状态（TXBUF_USED_MASK bit 31=0, WRAP bit 30），绕环处理。</li>
+<li>调用 FXmacBdRingFree 释放 BD，返回缓冲区到 free_cnt。</li>
+<li>无返回值，用于 Tx 中断处理（FXmacSendHandler）。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：释放 Tx BD 内存，回收缓冲区，优化 1Gbps 网卡性能。</p>
+<p><strong>FXmacRecvHandler</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacRecvHandler(instance_p: &amp;mut FXmac) -&gt; Option&lt;Vec&lt;Vec&lt;u8&gt;&gt;&gt; {
+    let mut recv_packets = Vec::new();
+    loop {
+        let mut rxbdset: *mut FXmacBd = null_mut();
+        let bd_processed = FXmacBdRingFromHwRx(&amp;mut instance_p.rx_bd_queue.bdring, FXMAX_RX_PBUFS_LENGTH, &amp;mut rxbdset);
+        if bd_processed == 0 {
+            break;
+        }
+        assert!(!rxbdset.is_null());
+        let mut curbdptr = rxbdset;
+        for k in 0..bd_processed {
+            let rxring = &amp;mut instance_p.rx_bd_queue.bdring;
+            let rx_bytes = if (instance_p.lwipport.feature &amp; FXMAC_LWIP_PORT_CONFIG_JUMBO) != 0 {
+                fxmac_bd_read(curbdptr as u64, FXMAC_BD_STAT_OFFSET) &amp; 0x00003FFF
+            } else {
+                fxmac_bd_read(curbdptr as u64, FXMAC_BD_STAT_OFFSET) &amp; FXMAC_RXBUF_LEN_MASK
+            };
+            let bdindex = FXMAC_BD_TO_INDEX(rxring, curbdptr as u64) as usize;
+            let pbufs_virt = instance_p.lwipport.buffer.rx_pbufs_storage[bdindex as usize];
+            let mbuf = unsafe { from_raw_parts_mut(pbufs_virt as *mut u8, rx_bytes as usize) };
+            recv_packets.push(mbuf.to_vec());
+            curbdptr = FXMAC_BD_RING_NEXT(rxring, curbdptr);
+        }
+        FXmacBdRingFree(&amp;mut instance_p.rx_bd_queue.bdring, bd_processed);
+        SetupRxBds(instance_p);
+    }
+    if recv_packets.len() &gt; 0 {
+        Some(recv_packets)
+    } else {
+        None
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：处理 Rx 中断，检索 FromHwRx BD，复制数据到 Vec，释放 BD 并重新设置 Rx BD。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>循环调用 FXmacBdRingFromHwRx，检索已处理 BD（检查 NEW 位 bit 0=0）。</li>
+<li>计算 rx_bytes（JUMBO 支持 9000 字节），复制数据到 Vec（from_raw_parts_mut）。</li>
+<li>调用 FXmacBdRingFree 释放 BD，调用 SetupRxBds 重新设置 Rx BD（清零状态，设置 WRAP 位）。</li>
+<li>返回接收数据包向量，或 None（无数据）。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：处理 Rx 中断，接收网络包，更新 recv_flg（FXmacRecvIsrHandler）。</p>
+<p><strong>FXmacSgsend</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacSgsend(instance_p: &amp;mut FXmac, p: Vec&lt;Vec&lt;u8&gt;&gt;) -&gt; u32 {
+    let n_pbufs = p.len() as u32;
+    let mut status = 0;
+    let mut bdindex = 0;
+    let mut max_fr_size = 0;
+    let mut send_len = 0;
+    let mut last_txbd = null_mut();
+    let mut txbdset = null_mut();
+    let txring = &amp;mut instance_p.tx_bd_queue.bdring;
+    status = FXmacBdRingAlloc(txring, n_pbufs, &amp;mut txbdset);
+    assert!(!txbdset.is_null());
+    let mut txbd = txbdset;
+    for q in &amp;p {
+        bdindex = FXMAC_BD_TO_INDEX(txring, txbd as u64);
+        max_fr_size = if (instance_p.lwipport.feature &amp; FXMAC_LWIP_PORT_CONFIG_JUMBO) != 0 { FXMAC_MAX_FRAME_SIZE_JUMBO } else { FXMAC_MAX_FRAME_SIZE };
+        let pbufs_len = min(q.len(), max_fr_size as usize);
+        let pbufs_virt = instance_p.lwipport.buffer.tx_pbufs_storage[bdindex as usize];
+        let pbuf = unsafe { from_raw_parts_mut(pbufs_virt as *mut u8, pbufs_len) };
+        pbuf.copy_from_slice(q);
+        super::utils::FCacheDCacheFlushRange(pbufs_virt, pbufs_len as u64);
+        send_len += pbufs_len as u32;
+        if q.len() &gt; max_fr_size as usize {
+            fxmac_bd_write(txbd as u64, FXMAC_BD_STAT_OFFSET, (fxmac_bd_read(txbd as u64, FXMAC_BD_STAT_OFFSET) &amp; !FXMAC_TXBUF_LEN_MASK) | (max_fr_size &amp; 0x3FFF));
+            n_pbufs_freed -= 1; // 未完整发送
+        } else {
+            fxmac_bd_write(txbd as u64, FXMAC_BD_STAT_OFFSET, (fxmac_bd_read(txbd as u64, FXMAC_BD_STAT_OFFSET) &amp; !FXMAC_TXBUF_LEN_MASK) | (q.len() as u32 &amp; 0x3FFF));
+        }
+        fxmac_bd_write(txbd as u64, FXMAC_BD_STAT_OFFSET, fxmac_bd_read(txbd as u64, FXMAC_BD_STAT_OFFSET) &amp; !FXMAC_TXBUF_LAST_MASK);
+        txbd = FXMAC_BD_RING_NEXT(txring, txbd);
+    }
+    fxmac_bd_write(last_txbd as u64, FXMAC_BD_STAT_OFFSET, fxmac_bd_read(last_txbd as u64, FXMAC_BD_STAT_OFFSET) | FXMAC_TXBUF_LAST_MASK);
+    if (instance_p.config.caps &amp; FXMAC_CAPS_TAILPTR) != 0 {
+        bdindex = FXMAC_BD_TO_INDEX(txring, txbd as u64);
+    }
+    let mut txbd = txbdset;
+    for _ in 1..p.len() {
+        txbd = FXMAC_BD_RING_NEXT(txring, txbd);
+        FXMAC_BD_CLEAR_TX_USED(txbd as u64);
+        super::utils::DSB();
+    }
+    FXMAC_BD_CLEAR_TX_USED(txbdset as u64);
+    super::utils::DSB();
+    status = FXmacBdRingToHw(txring, n_pbufs, txbdset);
+    let value = read_reg((instance_p.config.base_address + FXMAC_NWCTRL_OFFSET) as *const u32) | FXMAC_NWCTRL_STARTTX_MASK;
+    write_reg((instance_p.config.base_address + FXMAC_NWCTRL_OFFSET) as *mut u32, value);
+    send_len
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：发送数据包，使用 BD 集，配置长度和 LAST_MASK，提交到硬件，启动传输。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>分配 n_pbufs BD（FXmacBdRingAlloc），循环复制数据到缓冲区（pbuf.copy_from_slice）。</li>
+<li>刷新缓存（FCacheDCacheFlushRange），设置 BD 状态（长度 bit 0-13, LAST_MASK bit 30）。</li>
+<li>清 USED 位（bit 31=0），提交 BD（FXmacBdRingToHw）。</li>
+<li>设置尾指针（若支持 TAILPTR），启动传输（NWCTRL_STARTTX_MASK bit 1）。</li>
+<li>返回发送长度。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：发送网络包（Vec&lt;Vec<u8>&gt;），支持 JUMBO 帧（9000 字节）。</u8></p>
+<p><strong>ResetDma</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn ResetDma(instance_p: &amp;mut FXmac) {
+    let txringptr = &amp;mut instance_p.tx_bd_queue.bdring;
+    let rxringptr = &amp;mut instance_p.rx_bd_queue.bdring;
+    FXmacBdRingPtrReset(txringptr, instance_p.lwipport.buffer.tx_bdspace as *mut FXmacBd);
+    FXmacBdRingPtrReset(rxringptr, instance_p.lwipport.buffer.rx_bdspace as *mut FXmacBd);
+    FXmacSetQueuePtr(instance_p.tx_bd_queue.bdring.phys_base_addr, 0, FXMAC_SEND);
+    FXmacSetQueuePtr(instance_p.rx_bd_queue.bdring.phys_base_addr, 0, FXMAC_RECV);
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：重置 DMA 指针，绕环设置 Tx/Rx 环基址。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>调用 FXmacBdRingPtrReset 重置 Tx/Rx 指针。</li>
+<li>调用 FXmacSetQueuePtr 设置 TXQBASE/RXQBASE 寄存器（偏移 0x01C/0x018）。</li>
+<li>无返回值，用于错误恢复。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：DMA 错误时调用，重置队列。</p>
+<p><strong>FXmacHandleDmaTxError</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacHandleDmaTxError(instance_p: &amp;mut FXmac) {
+    panic!("Failed to handle DMA interrupt error");
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：处理 DMA 发送错误，重置 Tx 队列。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>记录错误日志，调用 FreeTxRxPbufs, FXmacCfgInitialize, FXmacInitOnError, FXmacSetupIsr, FXmacInitDma, FXmacStart 重置驱动。</li>
+</ul>
+<p><strong>FXmacHandleTxErrors</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacHandleTxErrors(instance_p: &amp;mut FXmac) {
+    let mut netctrlreg = read_reg((instance_p.config.base_address + FXMAC_NWCTRL_OFFSET) as *const u32);
+    netctrlreg &amp;= !FXMAC_NWCTRL_TXEN_MASK;
+    write_reg((instance_p.config.base_address + FXMAC_NWCTRL_OFFSET) as *mut u32, netctrlreg);
+    FreeOnlyTxPbufs(instance_p);
+    CleanDmaTxdescs(instance_p);
+    netctrlreg = read_reg((instance_p.config.base_address + FXMAC_NWCTRL_OFFSET) as *const u32);
+    netctrlreg |= FXMAC_NWCTRL_TXEN_MASK;
+    write_reg((instance_p.config.base_address + FXMAC_NWCTRL_OFFSET) as *mut u32, netctrlreg);
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：处理 Tx 错误，禁用 Tx，释放缓冲区，清除描述符，重新使能 Tx。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>清除 NWCTRL_TXEN_MASK (bit 3) 禁用发送。</li>
+<li>调用 FreeOnlyTxPbufs 释放 Tx 缓冲区（dma_free_coherent）。</li>
+<li>调用 CleanDmaTxdescs 清零 Tx BD（设置 TXBUF_USED_MASK）。</li>
+<li>重新设置 NWCTRL_TXEN_MASK 使能发送。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：处理 TXSR_URUN_MASK 等错误，恢复传输。</p>
+<p><strong>CleanDmaTxdescs</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn CleanDmaTxdescs(instance_p: &amp;mut FXmac) {
+    let txringptr = &amp;mut instance_p.tx_bd_queue.bdring;
+    let mut bdtemplate: FXmacBd = [0; FXMAC_BD_NUM_WORDS];
+    fxmac_bd_write((&amp;mut bdtemplate as *mut _ as u64), FXMAC_BD_STAT_OFFSET, FXMAC_TXBUF_USED_MASK);
+    let tx_bdspace_ptr = instance_p.lwipport.buffer.tx_bdspace as u64;
+    FXmacBdRingCreate(txringptr, tx_bdspace_ptr, tx_bdspace_ptr, BD_ALIGNMENT, FXMAX_TX_BDSPACE_LENGTH as u32);
+    FXmacBdRingClone(txringptr, &amp;bdtemplate, FXMAC_SEND);
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：清零 Tx BD，克隆模板 BD 设置 USED_MASK。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>设置模板 BD 状态为 TXBUF_USED_MASK (bit 31=1)。</li>
+<li>调用 FXmacBdRingCreate 和 FXmacBdRingClone 重置环。</li>
+</ul>
+<p><strong>FreeOnlyTxPbufs</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn FreeOnlyTxPbufs(instance_p: &amp;mut FXmac) {
+    for index in 0..FXMAX_TX_PBUFS_LENGTH {
+        if instance_p.lwipport.buffer.tx_pbufs_storage[index] != 0 {
+            let pbuf = instance_p.lwipport.buffer.tx_pbufs_storage[index];
+            let pages = (FXMAC_MAX_FRAME_SIZE as usize + (PAGE_SIZE - 1)) / PAGE_SIZE;
+            crate_interface::call_interface!(super::KernelFunc::dma_free_coherent(pbuf as usize, pages));
+            instance_p.lwipport.buffer.tx_pbufs_storage[index] = 0;
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：释放 Tx 缓冲区，调用 dma_free_coherent。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>循环检查 tx_pbufs_storage[index] != 0，计算 pages，释放内存。</li>
+<li>设置 storage[index]=0。</li>
+</ul>
+<p><strong>FXmacLinkChange</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacLinkChange(instance: &amp;mut FXmac) {
+    if instance.config.interface == FXMAC_PHY_INTERFACE_MODE_SGMII {
+        let mut link: u32 = 0;
+        let mut link_status: u32 = 0;
+        let ctrl: u32 = read_reg((instance.config.base_address + FXMAC_PCS_AN_LP_OFFSET) as *const u32);
+        link = (ctrl &amp; FXMAC_PCS_LINK_PARTNER_NEXT_PAGE_STATUS) &gt;&gt; FXMAC_PCS_LINK_PARTNER_NEXT_PAGE_OFFSET;
+        match link {
+            0 =&gt; {
+                info!("link status is down");
+                link_status = FXMAC_LINKDOWN;
+            }
+            1 =&gt; {
+                info!("link status is up");
+                link_status = FXMAC_LINKUP;
+            }
+            _ =&gt; {
+                error!("link status is error {:#x}", link);
+            }
+        }
+    }
+    if link_status == FXMAC_LINKUP {
+        if link_status != instance.link_status {
+            instance.link_status = FXMAC_NEGOTIATING;
+            info!("need NEGOTIATING");
+        }
+    } else {
+        instance.link_status = FXMAC_LINKDOWN;
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：检测链路状态变化，更新 link_status。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>若接口为 SGMII，读取 PCS_AN_LP_OFFSET（偏移 0x20, PCS 链路状态），提取 LINK_PARTNER_NEXT_PAGE_STATUS (bit 0, OFFSET 16)。</li>
+<li>设置 link_status 为 LINKUP(1)/LINKDOWN(0)，若变化设置 NEGOTIATING(2)。</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter5/chapter_5.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter5/5_2_pcie_basic.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter5/chapter_5.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter5/5_2_pcie_basic.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

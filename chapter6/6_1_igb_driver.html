@@ -1,0 +1,405 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>IGB网卡驱动实现 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="igb-网卡驱动"><a class="header" href="#igb-网卡驱动">IGB 网卡驱动</a></h1>
+<h2 id="资料"><a class="header" href="#资料">资料</a></h2>
+<p><a href="https://www.qemu.org/docs/master/system/devices/igb.html">qemu igb文档</a></p>
+<p><a href="https://www.intel.com/content/dam/www/public/us/en/documents/datasheets/82576eg-gbe-datasheet.pdf">igb网卡文档</a></p>
+<p><a href="https://github.com/torvalds/linux/tree/master/drivers/net/ethernet/intel/igb">linux igb驱动</a></p>
+<h2 id="硬件架构"><a class="header" href="#硬件架构">硬件架构</a></h2>
+<p>CPU集成MAC:</p>
+<p><img src="../resource/img/cpumac-phy.jpg" alt="cpu集成MAC" /></p>
+<p>网卡包含MAC和PHY:</p>
+<p><img src="../resource/img/cpu-macphy.jpg" alt="网卡包含MAC和PHY" /></p>
+<p>IGB网卡架构:</p>
+<p><img src="../resource/img/82576-block.png" alt="IGB网卡架构" /></p>
+<h3 id="macmedia-access-control"><a class="header" href="#macmedia-access-control">MAC(Media Access Control)</a></h3>
+<h3 id="phyphysical-layer"><a class="header" href="#phyphysical-layer">PHY(Physical Layer)</a></h3>
+<h3 id="miimedia-independent-interface"><a class="header" href="#miimedia-independent-interface">MII(Media Independent Interface)</a></h3>
+<p><img src="../resource/img/mii.png" alt="MII接口" /></p>
+<ul>
+<li>
+<p>发送数据接口</p>
+</li>
+<li>
+<p>接收数据接口</p>
+</li>
+<li>
+<p>MDIO：配置PHY芯片状态、读取寄存器、获取LINK状态等操作</p>
+</li>
+</ul>
+<p>RMII、GMII、RGMII、SGMII等都是MII的变种，主要区别在于数据传输速率和引脚数量。</p>
+<h2 id="驱动分析"><a class="header" href="#驱动分析">驱动分析</a></h2>
+<h3 id="osal-操作系统抽象层"><a class="header" href="#osal-操作系统抽象层">OSAL 操作系统抽象层</a></h3>
+<p><a href="https://crates.io/crates/trait-ffi">trait-ffi</a> 使用<code>trait</code>生成和安全使用外部函数。</p>
+<h3 id="驱动初始化"><a class="header" href="#驱动初始化">驱动初始化</a></h3>
+<p>PCIe 枚举</p>
+<p>手册阅读、寄存器定义</p>
+<p>MAC定义</p>
+<p>PHY定义</p>
+<p>PHY寄存器读写</p>
+<h3 id="smoltcp"><a class="header" href="#smoltcp">Smoltcp</a></h3>
+<p>网络栈验证</p>
+<h3 id="requestresponse-模型"><a class="header" href="#requestresponse-模型">Request/Response 模型</a></h3>
+<h3 id="收发数据"><a class="header" href="#收发数据">收发数据</a></h3>
+<p>Ring</p>
+<ul>
+<li>
+<p>Head</p>
+</li>
+<li>
+<p>Tail</p>
+</li>
+</ul>
+<p>Descriptor</p>
+<ul>
+<li>
+<p>Read</p>
+</li>
+<li>
+<p>Write-Back</p>
+</li>
+<li>
+<p>Buffer</p>
+</li>
+</ul>
+<p><code>Reqeust</code> 生命周期</p>
+<h2 id="ixgbe-驱动-hal-api-调用表"><a class="header" href="#ixgbe-驱动-hal-api-调用表">IxGBE 驱动 HAL API 调用表</a></h2>
+<div class="table-wrapper"><table><thead><tr><th><strong>函数名</strong></th><th><strong>参数</strong></th><th><strong>返回值</strong></th><th><strong>功能描述</strong></th></tr></thead><tbody>
+<tr><td><code>dma_alloc</code></td><td><code>size: usize</code> - 分配内存大小（字节）。</td><td><code>(IxgbePhysAddr, NonNull&lt;u8&gt;)</code> - 物理地址（u64）和虚拟地址指针。失败返回 <code>(0, dangling)</code>。</td><td>使用 <code>axdma::alloc_coherent</code> 分配 8 字节对齐的 DMA 一致性内存，用于 Tx/Rx 环缓冲区。</td></tr>
+<tr><td><code>dma_dealloc</code></td><td><code>paddr: IxgbePhysAddr</code> - 物理地址。 <code>vaddr: NonNull&lt;u8&gt;</code> - 虚拟地址指针。 <code>size: usize</code> - 内存大小。</td><td><code>i32</code> - 始终返回 0（成功）。</td><td>使用 <code>axdma::dealloc_coherent</code> 释放 DMA 内存，处理原始指针，标记为 unsafe。</td></tr>
+<tr><td><code>mmio_phys_to_virt</code></td><td><code>paddr: IxgbePhysAddr</code> - 物理地址。 <code>size: usize</code> - 大小（未使用）。</td><td><code>NonNull&lt;u8&gt;</code> - 虚拟地址指针。</td><td>使用 <code>axhal::mem::phys_to_virt</code> 将 MMIO 物理地址转换为虚拟地址，访问设备寄存器，标记为 unsafe。</td></tr>
+<tr><td><code>mmio_virt_to_phys</code></td><td><code>vaddr: NonNull&lt;u8&gt;</code> - 虚拟地址指针。 <code>size: usize</code> - 大小（未使用）。</td><td><code>IxgbePhysAddr</code> - 物理地址（u64）。</td><td>使用 <code>axhal::mem::virt_to_phys</code> 将 MMIO 虚拟地址转换为物理地址，设置 DMA 描述符，标记为 unsafe。</td></tr>
+<tr><td><code>wait_until</code></td><td><code>duration: core::time::Duration</code> - 等待时间。</td><td><code>Result&lt;(), &amp;'static str&gt;</code> - 始终返回 <code>Ok(())</code>。</td><td>使用 <code>axhal::time::busy_wait_until</code> 执行忙等待，用于驱动操作中的超时处理。</td></tr>
+</tbody></table>
+</div>
+<h2 id="代码实现讲解"><a class="header" href="#代码实现讲解">代码实现讲解</a></h2>
+<p>ixgbe.rs IxGBE 驱动 HAL 实现，通过 IxgbeHalImpl 结构体实现 IxgbeHal trait，支持 DMA 内存管理、MMIO 地址转换和定时操作。代码运行在 ArceOS 的 no_std 环境中，依赖 axdma（DMA 分配）、axdriver_net::ixgbe（trait 定义）、axhal::mem（地址转换）和 core 模块（指针和时间操作）。以下从依赖、结构到每个 API 的实现逐一讲解，确保与飞腾派硬件上下文（Mini-PCIe 接口支持 10GbE 网卡）相关。</p>
+<h4 id="关键依赖与结构"><a class="header" href="#关键依赖与结构">关键依赖与结构</a></h4>
+<ul>
+<li>依赖：
+<ul>
+<li>axdma：提供 alloc_coherent 和 dealloc_coherent，用于 DMA 一致性内存分配。</li>
+<li>axdriver_net::ixgbe：定义 IxgbeHal trait 和类型（如 IxgbePhysAddr 为 u64，NonNull<u8> 为指针）。</li>
+<li>axhal::mem：提供 phys_to_virt 和 virt_to_phys 用于 MMIO 地址转换。</li>
+<li>core::alloc::Layout：定义内存布局，确保 8 字节对齐。</li>
+</ul>
+</li>
+<li>结构：
+<ul>
+<li>IxgbeHalImpl：空结构体，仅作为 IxgbeHal trait 的实现载体。</li>
+<li>DMAInfo：axdma 提供的结构体，包含 cpu_addr（虚拟地址，NonNull<u8>）和 bus_addr（物理地址，BusAddr）。</li>
+</ul>
+</li>
+</ul>
+<h4 id="api-实现讲解"><a class="header" href="#api-实现讲解">API 实现讲解</a></h4>
+<p><strong>dma_alloc</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn dma_alloc(size: usize) -&gt; (IxgbePhysAddr, NonNull&lt;u8&gt;) {
+    let layout = Layout::from_size_align(size, 8).unwrap();
+    match unsafe { alloc_coherent(layout) } {
+        Ok(dma_info) =&gt; (dma_info.bus_addr.as_u64() as usize, dma_info.cpu_addr),
+        Err(_) =&gt; (0, NonNull::dangling()),
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：分配 8 字节对齐的 DMA 一致性内存，用于 IxGBE 的 Tx/Rx 环缓冲区（如描述符或数据包缓冲区）。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>使用 Layout::from_size_align 创建内存布局，确保 8 字节对齐（匹配缓存线）。</li>
+<li>调用 axdma::alloc_coherent（标记为 unsafe，处理原始内存），返回 DMAInfo（包含 bus_addr 和 cpu_addr）。</li>
+<li>成功时返回物理地址（bus_addr 转为 usize）和虚拟地址指针（cpu_addr），失败返回 (0, dangling)。</li>
+</ul>
+<p><strong>dma_dealloc</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>unsafe fn dma_dealloc(paddr: IxgbePhysAddr, vaddr: NonNull&lt;u8&gt;, size: usize) -&gt; i32 {
+    let layout = Layout::from_size_align(size, 8).unwrap();
+    let dma_info = DMAInfo {
+        cpu_addr: vaddr,
+        bus_addr: BusAddr::from(paddr as u64),
+    };
+    unsafe { dealloc_coherent(dma_info, layout) };
+    0
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：释放 DMA 一致性内存，清理 Tx/Rx 缓冲区。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>标记为 unsafe，因涉及原始指针和内存释放。</li>
+<li>重新创建 Layout（8 字节对齐），构造 DMAInfo（包含 vaddr 和 paddr）。</li>
+<li>调用 axdma::dealloc_coherent 释放内存，始终返回 0（成功，假设释放无失败）。</li>
+</ul>
+<p><strong>mmio_phys_to_virt</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>unsafe fn mmio_phys_to_virt(paddr: IxgbePhysAddr, _size: usize) -&gt; NonNull&lt;u8&gt; {
+    NonNull::new(phys_to_virt(paddr.into()).as_mut_ptr()).unwrap()
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：将 MMIO 物理地址转换为虚拟地址，用于访问 IxGBE 设备寄存器（如 BAR0）。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>标记为 unsafe，因处理原始指针。</li>
+<li>使用 axhal::mem::phys_to_virt 将物理地址（paddr）转为虚拟地址，返回 NonNull<u8> 指针。</li>
+<li>size 参数未使用，假设映射由 ArceOS 内存管理器处理。</li>
+</ul>
+<p><strong>mmio_virt_to_phys</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>unsafe fn mmio_virt_to_phys(vaddr: NonNull&lt;u8&gt;, _size: usize) -&gt; IxgbePhysAddr {
+    virt_to_phys((vaddr.as_ptr() as usize).into()).into()
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：将 MMIO 虚拟地址转换为物理地址，用于 DMA 描述符设置。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>标记为 unsafe，因处理原始指针。</li>
+<li>使用 axhal::mem::virt_to_phys 将虚拟地址（vaddr）转为物理地址，返回 u64（IxgbePhysAddr）。</li>
+<li>size 参数未使用，假设映射固定。</li>
+</ul>
+<p><strong>wait_until</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn wait_until(duration: core::time::Duration) -&gt; Result&lt;(), &amp;'static str&gt; {
+    axhal::time::busy_wait_until(duration);
+    Ok(())
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：执行指定时间的忙等待，用于驱动中的超时处理（如链路协商或设备重置）。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>调用 axhal::time::busy_wait_until，基于 CPU 周期或定时器实现等待。</li>
+<li>始终返回 Ok(())，无错误处理（假设忙等待无失败）。</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter6/chapter_6.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter6/6_2_gmac_ethernet.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter6/chapter_6.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter6/6_2_gmac_ethernet.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

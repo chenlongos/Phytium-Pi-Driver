@@ -1,0 +1,258 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>i2c的中断实现 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="42-中断方式实现-i2c-驱动"><a class="header" href="#42-中断方式实现-i2c-驱动">4.2 中断方式实现 i2c 驱动</a></h1>
+<h3 id="i2c-驱动的中断实现原理"><a class="header" href="#i2c-驱动的中断实现原理">I2C 驱动的中断实现原理</a></h3>
+<p>I2C 驱动的中断实现是嵌入式系统中处理数据传输事件的关键机制，在飞腾派（Phytium Pi）开发板上，通过 MIO（Multi-Function Input/Output）控制器和 I2C 寄存器协作完成。原理基于中断信号的触发和响应：当 I2C 传输发生特定事件（如完成或错误）时，控制器产生中断信号，通过 GIC（Generic Interrupt Controller）路由到 CPU 核心。驱动在初始化时设置中断号（通过 FMioFuncGetIrqNum 获取 MIO 的 IRQ），并使用 master_evt_handlers 数组注册处理函数（默认为 None，需开发者自定义）。中断事件主要包括传输完成（检测到停止条件）和错误（如 NACK），通过轮询或中断模式处理数据 FIFO。IC_RAW_INTR_STAT 寄存器的 bit[9] 用于检测停止信号，触发传输完成中断；IC_CLR_INTR 用于清除中断状态，确保后续传输。整个过程依赖 50MHz 时钟（ref_clk_hz），分频后生成 I2C 速率（如 100kbps），并在 FI2cMioMasterInit 中初始化中断处理数组。</p>
+<h3 id="飞腾派-i2c-驱动的中断设备"><a class="header" href="#飞腾派-i2c-驱动的中断设备">飞腾派 I2C 驱动的中断设备</a></h3>
+<p>飞腾派 I2C 驱动的中断设备集成在 MIO 控制器中，每个 MIO（基址 0x2801_4000~0x2803_2000）提供独立中断号，支持 I2C 主/从模式的中断事件。设备通过 IC_INTR_STAT (偏移 0x2C) 检查中断状态，IC_INTR_MASK (0x30) 使能/屏蔽中断，IC_RAW_INTR_STAT (0x34) 读取原始状态（bit[9]=停止检测，用于传输完成），IC_CLR_INTR (0x40) 清除中断。MIO 配置 creg_mio_func_sel=00 选择 I2C 模式，中断号通过 FMioFuncGetIrqNum 获取（e.g., UART IRQ 24 类似）。驱动在 FI2cMioMasterInit 中初始化 master_evt_handlers[0~2] = None，开发者需注册自定义函数处理事件（如 ACK/NACK）。中断支持轮询模式，适用于低速传感器传输（如 Pin 3/5 I2C1_SDA/SCL），PAD (0x32B30000) 配置 x_reg0=5 启用 I2C 引脚。</p>
+<h3 id="飞腾派-i2c-驱动的中断时序图"><a class="header" href="#飞腾派-i2c-驱动的中断时序图">飞腾派 I2C 驱动的中断时序图</a></h3>
+<p>飞腾派 I2C 中断处理时序以传输完成中断（IC_RAW_INTR_STAT bit[9]=1）为例，涉及 I2C 控制器（基址 0x2801_4000）、MIO（中断号获取）、GIC（路由 IRQ）和 CPU 核心。当 I2C 传输结束检测到停止条件，控制器触发中断信号，发送到 GIC 分发器。GIC 检查使能和优先级，路由到 CPU 0 的接口。CPU 接口读取中断 ID，触发异常处理程序，调用注册的 master_evt_handlers 函数处理数据。处理完成后，写 IC_CLR_INTR 清除中断，GIC 标记完成。总时序延迟约 20~50 ns（50MHz 时钟）。</p>
+<pre class="mermaid">sequenceDiagram
+    participant I2C as I2C 控制器 (0x2801_4000)
+    participant MIO as MIO (中断号)
+    participant GIC as GIC (0xFF84_1000)
+    participant CPU as E2000 CPU Core 0
+
+    I2C-&gt;&gt;I2C: 检测停止条件 (IC_RAW_INTR_STAT bit[9]=1)
+    I2C-&gt;&gt;MIO: 触发中断信号
+    MIO-&gt;&gt;GIC: 发送 IRQ (e.g., 24)
+    GIC-&gt;&gt;GIC: Check ISENABLER (IRQ enabled)
+    GIC-&gt;&gt;GIC: Read IPRIORITYR (Priority 0xA0)
+    GIC-&gt;&gt;GIC: Read ITARGETSR (Target CPU 0)
+    GIC-&gt;&gt;CPU: Forward IRQ
+    CPU-&gt;&gt;CPU: Handle interrupt (master_evt_handlers)
+    CPU-&gt;&gt;I2C: Write IC_CLR_INTR (clear interrupt)
+    CPU-&gt;&gt;GIC: Write EOIR (IRQ complete)
+    GIC-&gt;&gt;GIC: Update status
+</pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter4/4_1_gic.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter4/4_3_spi_interrupt.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter4/4_1_gic.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter4/4_3_spi_interrupt.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

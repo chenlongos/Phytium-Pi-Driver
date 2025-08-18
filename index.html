@@ -1,0 +1,328 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>前言 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="前言"><a class="header" href="#前言">前言</a></h1>
+<p>本教材仍在撰写和调整中</p>
+<ul>
+<li>
+<p><a href="preface.html">前言</a></p>
+</li>
+<li>
+<p><a href="chapter0/chapter_0.html">第零章：环境配置与预备知识</a></p>
+<ul>
+<li><a href="chapter0/0_1_hardware_intro.html">硬件平台介绍</a></li>
+<li><a href="chapter0/0_2_dev_env.html">开发环境准备</a></li>
+<li><a href="chapter0/0_3_prerequisites.html">前置知识引导</a></li>
+</ul>
+</li>
+<li>
+<p><a href="chapter1/chapter_1.html">第一章：硬件控制类驱动</a></p>
+<ul>
+<li><a href="chapter1/1_1_gpio_driver.html">GPIO驱动开发</a></li>
+<li><a href="chapter1/1_2_pwm_driver.html">PWM驱动开发</a></li>
+<li><a href="chapter1/1_3_reset_pinmux.html">复位与引脚复用驱动</a></li>
+</ul>
+</li>
+<li>
+<p><a href="chapter2/chapter_2.html">第二章：时钟管理类驱动</a></p>
+<ul>
+<li><a href="chapter2/2_1_clock.html">时钟设备驱动</a></li>
+<li><a href="chapter2/2_2_timer.html">Timer驱动</a></li>
+<li><a href="chapter2/2_3_watchdog.html">看门狗驱动</a></li>
+</ul>
+</li>
+<li>
+<p><a href="chapter3/chapter_3.html">第三章：外设协议类驱动</a></p>
+<ul>
+<li><a href="chapter3/3_1_uart_driver.html">UART串口驱动</a></li>
+<li><a href="chapter3/3_2_i2c_driver.html">I2C驱动开发</a></li>
+<li><a href="chapter3/3_3_spi_driver.html">SPI驱动开发</a></li>
+</ul>
+</li>
+<li>
+<p><a href="chapter4/chapter_4.html">第四章：中断</a></p>
+<ul>
+<li><a href="chapter4/4_1_gic.html">GIC</a></li>
+<li><a href="chapter4/4_2_i2c_interrupt.html">i2c的中断实现</a></li>
+<li><a href="chapter4/4_3_spi_interrupt.html">spi的中断实现</a></li>
+</ul>
+</li>
+<li>
+<p><a href="chapter5/chapter_5.html">第五章：高速传输类驱动</a></p>
+<ul>
+<li><a href="chapter5/5_1_dma_driver.html">DMA驱动开发</a></li>
+<li><a href="chapter5/5_2_pcie_basic.html">PCIe原理</a></li>
+<li><a href="chapter5/5_3_pcie_interconnect.html">PCIe互联驱动</a></li>
+</ul>
+</li>
+<li>
+<p><a href="chapter6/chapter_6.html">第六章：网络通信类驱动</a></p>
+<ul>
+<li><a href="chapter6/6_1_igb_driver.html">IGB网卡驱动实现</a></li>
+<li><a href="chapter6/6_2_gmac_ethernet.html">GMAC以太网基础</a></li>
+<li><a href="chapter6/6_3_yt8521_driver.html">YT8521驱动实现</a></li>
+<li><a href="chapter6/6_4_net_device.html">net_device实现</a></li>
+</ul>
+</li>
+<li>
+<p><a href="chapter7/chapter_7.html">第七章：存储驱动实现</a></p>
+<ul>
+<li><a href="chapter7/7_1_sd_driver.html">Micro SD驱动</a></li>
+<li><a href="chapter7/7_2_emmc_driver.html">eMMC驱动</a></li>
+<li><a href="chapter7/7_3_flash_driver.html">Flash驱动</a></li>
+</ul>
+</li>
+<li>
+<p><a href="chapter8/chapter_8.html">第八章：多媒体方向</a></p>
+<ul>
+<li><a href="chapter8/8_1_usb_serial.html">USB串口驱动</a></li>
+<li><a href="chapter8/8_2_usb_camera.html">USB摄像头驱动</a></li>
+</ul>
+</li>
+<li>
+<p><a href="chapter9/chapter_9.html">第九章：无线通讯方向</a></p>
+<ul>
+<li><a href="chapter9/9_1_wifi6_driver.html">WiFi6驱动开发</a></li>
+<li><a href="chapter9/9_2_bluetooth_driver.html">蓝牙驱动开发</a></li>
+</ul>
+</li>
+<li>
+<p><a href="chapter10/chapter_10.html">第十章：实时工业总线方向</a></p>
+<ul>
+<li><a href="chapter10/10_1_canfd_driver.html">CANFD驱动</a></li>
+<li><a href="chapter10/10_2_ethercat_driver.html">EtherCAT驱动</a></li>
+</ul>
+</li>
+<li>
+<p><a href="appendix/appendix.html">附录</a></p>
+<ul>
+<li><a href="appendix/A_1_TDD.html">测试驱动开发</a></li>
+<li><a href="appendix/A_2_design_patterns.html">设计模式</a></li>
+<li><a href="appendix/A_3_precautions.html">注意事项</a></li>
+</ul>
+</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+                            <a rel="next prefetch" href="chapter0/chapter_0.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+                    <a rel="next prefetch" href="chapter0/chapter_0.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="mermaid.min.js"></script>
+        <script src="mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

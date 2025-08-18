@@ -1,0 +1,333 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Micro SD驱动 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="71-micro-sd驱动"><a class="header" href="#71-micro-sd驱动">7.1 Micro SD驱动</a></h1>
+<h3 id="sd-卡设备原理"><a class="header" href="#sd-卡设备原理">SD 卡设备原理</a></h3>
+<p>SD 卡（Secure Digital Card）是一种非易失性存储设备，广泛用于嵌入式系统的数据存储和传输。SD 卡原理基于闪存芯片和控制器架构，控制器处理命令和数据，通过 SPI 或 SD 模式与主机通信。SD 模式支持 1~4 位数据总线，速率从默认 25 MHz 到 UHS-II 的 208 MHz，提供 12.5 MB/s 到 624 MB/s 带宽。SD 卡协议包括初始化、命令/响应和数据传输阶段：主机发送 CMD 命令（如 CMD0 复位，CMD8 接口条件），SD 卡返回响应（R1/R3/R7），数据块以 512 字节为单位传输，支持 CRC 校验和错误重试。SD 卡类型包括 SDSC（标准容量，≤2GB）、SDHC（高容量，4~32GB）和 SDXC（扩展容量，64GB~2TB），文件系统通常为 FAT32 或 exFAT。控制器内部闪存阵列通过 NAND 闪存实现，支持磨损均衡和错误纠正（ECC），电源管理包括低功耗模式和热插拔。</p>
+<ul>
+<li>
+<p>命令类型：</p>
+<ul>
+<li><strong>基本命令</strong>：CMD0（复位）、CMD1（初始化 OCR）。</li>
+<li><strong>读写命令</strong>：CMD17（单块读）、CMD24（单块写）、CMD18/25（多块读写）。</li>
+<li><strong>响应格式</strong>：R1（正常响应，bit 0-7 状态）、R2（CID/CSD 寄存器）、R3（OCR 寄存器）。</li>
+</ul>
+</li>
+<li>
+<p><strong>数据传输</strong>：块模式（512 字节），总线宽度 1/4 位，CRC16 校验数据完整性。</p>
+</li>
+</ul>
+<p>SD 卡支持电压切换（3.3V 到 1.8V），UHS-I/II 模式提升速率，适用于飞腾派等嵌入式板卡的 boot 和存储。</p>
+<h3 id="飞腾派-sd-卡设备"><a class="header" href="#飞腾派-sd-卡设备">飞腾派 SD 卡设备</a></h3>
+<p>飞腾派（Phytium Pi）开发板的 SD 卡设备集成在 D2000 处理器中，支持 SD 3.0 规范，提供 eMMC/SD 接口，用于启动和数据存储。设备控制器基址为 0x28008000，支持 1/4 位总线宽度，最大速率 50 MHz（SDR25 模式），带宽 25 MB/s。飞腾派 SD 卡设备通过 MMC 控制器实现，支持 SDHC/SDXC 卡（容量 &gt;2GB），文件系统为 FAT32。设备树（phytium_pi.dts）定义 mmc 节点：</p>
+<pre><code class="language-shell">mmc@28008000 {
+    compatible = "phytium,mmc";
+    reg = &lt;0x0 0x28008000 0x0 0x1000&gt;;
+    clocks = &lt;&amp;clk MMC_CLK&gt;;
+    interrupts = &lt;0 24 4&gt;; // IRQ 24
+};
+</code></pre>
+<p>配置文件（aarch64-phytium-pi.toml）包含 MMIO 区域 [0x28008000, 0x1000]。驱动在 ArceOS 中通过 axhal 实现，支持初始化命令（如 CMD0/CMD8）和数据块传输，适用于 SD 卡 boot（arceos.img）。</p>
+<ul>
+<li>
+<p>硬件特性：</p>
+<ul>
+<li><strong>接口</strong>：microSD 卡槽，支持热插拔。</li>
+<li><strong>中断</strong>：IRQ 24，通过 GIC 路由 SPI。</li>
+<li><strong>时钟</strong>：50 MHz（MMC_CLK），支持 DDR 模式。</li>
+<li><strong>扩展</strong>：支持 SDIO 设备（如 WiFi 模块）。</li>
+</ul>
+</li>
+<li>
+<p><strong>驱动支持</strong>：ArceOS 的 axdriver_mmc 模块（假设），初始化控制器，配置 CMD/DAT 引脚，通过 PAD (0x32B30000)。</p>
+</li>
+</ul>
+<hr />
+<h3 id="飞腾派-sd-卡设备时序图"><a class="header" href="#飞腾派-sd-卡设备时序图">飞腾派 SD 卡设备时序图</a></h3>
+<p>飞腾派 SD 卡设备时序以单块读操作（CMD17）为例，涉及主机控制器（基址 0x28008000）、SD 卡和数据总线。主机发送 CMD17（读地址），SD 卡返回 R1 响应（状态），然后传输数据块（512 字节），结束后触发中断（IRQ 24）通知 CPU。总延迟约 1~10 ms（50 MHz 时钟），依赖总线宽度（1/4 位）。</p>
+<pre class="mermaid">sequenceDiagram
+    participant Host as MMC 控制器 (0x28008000)
+    participant SD as SD 卡
+    participant Bus as 数据总线 (DAT0-3)
+
+    Host-&gt;&gt;SD: 发送 CMD17 (读命令, 地址)
+    SD-&gt;&gt;Host: 返回 R1 响应 (状态, bit 0-7)
+    SD-&gt;&gt;Bus: 传输数据块 (512 字节 + CRC)
+    Bus-&gt;&gt;Host: 数据到达 FIFO
+    Host-&gt;&gt;Host: 触发中断 (IRQ 24, GIC SPI)
+    Host-&gt;&gt;SD: 等待结束位
+</pre>
+<h4 id="时序分析"><a class="header" href="#时序分析">时序分析</a></h4>
+<ul>
+<li><strong>命令阶段</strong>：CMD 线传输 48 位命令（CRC7 校验），响应延迟 &lt;1 ms。</li>
+<li><strong>数据阶段</strong>：DAT 线传输块数据，4 位宽度下速率 25 MB/s。</li>
+<li><strong>中断</strong>：传输完成后，控制器触发 IRQ 24，GIC 路由到 CPU 0。</li>
+</ul>
+<hr />
+<h2 id="相关寄存器信息位域及基地址"><a class="header" href="#相关寄存器信息位域及基地址">相关寄存器信息、位域及基地址</a></h2>
+<p>飞腾派 SD 卡设备寄存器基于 MMC 控制器（基址 0x28008000），支持命令、数据和中断配置。以下是关键寄存器、位域和基地址信息。</p>
+<ul>
+<li>
+<p><strong>基址</strong>：MMC 控制器基址 0x28008000。</p>
+</li>
+<li>
+<p>寄存器表：</p>
+<div class="table-wrapper"><table><thead><tr><th><strong>寄存器</strong></th><th><strong>偏移</strong></th><th><strong>功能</strong></th><th><strong>关键位域</strong></th></tr></thead><tbody>
+<tr><td>MMC_CMD</td><td>0x00</td><td>命令寄存器</td><td>CMD_IDX (bit 0-5: 命令索引，如 CMD17=17), CMD_RESP (bit 6-7: 响应类型)</td></tr>
+<tr><td>MMC_ARG</td><td>0x04</td><td>命令参数寄存器</td><td>ARG (bit 0-31: 命令参数，如读地址)</td></tr>
+<tr><td>MMC_RESP0</td><td>0x08</td><td>响应寄存器 0</td><td>RESP (bit 0-31: R1/R3 响应)</td></tr>
+<tr><td>MMC_DATA_CTRL</td><td>0x0C</td><td>数据控制寄存器</td><td>BLOCK_SIZE (bit 0-11: 512 字节), DMA_EN (bit 0)</td></tr>
+<tr><td>MMC_INTR_EN</td><td>0x10</td><td>中断使能寄存器</td><td>TX_COMPLETE (bit 0), RX_COMPLETE (bit 1), ERR_INTR (bit 2)</td></tr>
+<tr><td>MMC_INTR_STATUS</td><td>0x14</td><td>中断状态寄存器</td><td>TX_INTR (bit 0), RX_INTR (bit 1)</td></tr>
+<tr><td>MMC_CLK_DIV</td><td>0x18</td><td>时钟分频寄存器</td><td>DIV (bit 0-7: 分频值，50 MHz / DIV)</td></tr>
+</tbody></table>
+</div></li>
+</ul>
+<p>MMC_CMD 寄存器位域：</p>
+<ul>
+<li><strong>CMD_IDX</strong> (bit 0-5)：命令索引，如 CMD0=0 (复位), CMD17=17 (单块读)。</li>
+<li><strong>CMD_RESP</strong> (bit 6-7)：响应类型，00=无响应, 01=R1/R3/R4/R5, 10=R2。</li>
+<li><strong>CMD_DATA</strong> (bit 8)：1=有数据传输。</li>
+</ul>
+<p>MMC_DATA_CTRL 寄存器位域：</p>
+<ul>
+<li><strong>BLOCK_SIZE</strong> (bit 0-11)：数据块大小（512 字节=0x200）。</li>
+<li><strong>DMA_EN</strong> (bit 0)：1=使能 DMA 传输。</li>
+<li><strong>DIR</strong> (bit 1)：0=写（主机到卡），1=读（卡到主机）。</li>
+</ul>
+<p>MMC_INTR_EN 寄存器位域：</p>
+<ul>
+<li><strong>TX_COMPLETE_EN</strong> (bit 0)：使能发送完成中断。</li>
+<li><strong>RX_COMPLETE_EN</strong> (bit 1)：使能接收完成中断。</li>
+<li><strong>ERR_INTR_EN</strong> (bit 2)：使能错误中断（如 CRC 错误）。</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter7/chapter_7.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter7/7_2_emmc_driver.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter7/chapter_7.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter7/7_2_emmc_driver.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>开发环境准备 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="02-开发环境准备"><a class="header" href="#02-开发环境准备">0.2 开发环境准备</a></h1>
+<h2 id="021-运行环境"><a class="header" href="#021-运行环境">0.2.1 运行环境</a></h2>
+<h3 id="编译环境"><a class="header" href="#编译环境">编译环境</a></h3>
+<p>编译依赖ubuntu操作系统，使用的winodws操作系统的同学可以通过安装<a href="https://learn.microsoft.com/zh-cn/windows/wsl/install#step-4---download-the-linux-kernel-update-package">WSL</a>（linux 子系统）或者<a href="https://www.vmware.com/cn/products/workstation-pro/workstation-pro-evaluation.html">VMwork</a>虚拟机来安装ubuntu。
+安装好ubuntu 后需要安装必要的一些组件可直接执行如下指令</p>
+<pre><code class="language-bash"># 安装git 拉取代码
+sudo apt install git
+# 输入自己github的邮箱用户名
+git config --global user.name "runoob"
+git config --global user.email test@runoob.com
+# 生成ssh密钥  
+ssh-keygen -t rsa -b 4096 -C "your.email@example.com"
+
+# 安装编译qemu所需的依赖包
+sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev \
+              gawk build-essential bison flex texinfo gperf libtool patchutils bc \
+              zlib1g-dev libexpat-dev pkg-config  libglib2.0-dev libpixman-1-dev libsdl2-dev \
+              git tmux python3 python3-pip ninja-build
+</code></pre>
+<blockquote>
+<p><strong>注释：</strong>  ①基础运行环境可以参考<a href="https://rcore-os.cn/arceos-tutorial-book/ch01-00.html">Arcos指导书</a> ②想要把修改上传到github仓库还需要 <a href="https://blog.csdn.net/weixin_42310154/article/details/118340458">配置ssh密钥</a></p>
+</blockquote>
+<h3 id="vscode使用"><a class="header" href="#vscode使用">vscode使用</a></h3>
+<p>由于是使用的wsl（inux子系统）作为基础编译环境，默认提供的是命令行搭配vim的方式来编辑文件。这可能并不是大部分人喜欢的开发环境，所以推荐使用vscode搭配remote-ssh插件来进行开发，并且该插件对于wsl是有很好的兼容性的，安装插件后直接选择连接wsl即可使用。</p>
+<div style="text-align: center;">
+  <figure style="display: inline-block; margin: 0 auto; text-align: center;">
+    <img src="../resource/img/0_2_1_1_install_remote_ssh.png" alt="安装remote-ssh插件" width="700">
+    <figcaption>图1：安装Remote-SSH插件的界面截图</figcaption>
+  </figure>
+  <figure style="display: inline-block; margin: 0 auto; text-align: center;">
+    <img src="../resource/img/0_2_1_2_connect_wsl.png" alt="连接到wsl" width="700">
+    <figcaption>图2：选择连接到wsl</figcaption>
+  </figure>
+  <figure style="display: inline-block; margin: 0 auto; text-align: center;">
+    <img src="../resource/img/0_2_1_3_open_remote_folder.png" alt="打开远程文件夹" width="700">
+    <figcaption>图3：打开工作目录</figcaption>
+  </figure>
+</div>
+<h3 id="qemu-补充"><a class="header" href="#qemu-补充">qemu 补充</a></h3>
+<p>在第一节的指导手册上使用的qemu版本是7.0.2，而很多模拟的外设是在后续版本才加到qemu中的。所以推荐从官网安装最新版或指定版本<a href="https://www.qemu.org/download">qemu官网</a></p>
+<p>以10.0.2 版本为例子，使用如下命令即可完成qemu的安装。</p>
+<pre><code class="language-bash">wget https://download.qemu.org/qemu-10.0.2.tar.xz
+tar xvJf qemu-10.0.2.tar.xz
+cd qemu-10.0.2
+make
+make install
+</code></pre>
+<h2 id="022-飞腾派上运行arceos"><a class="header" href="#022-飞腾派上运行arceos">0.2.2 飞腾派上运行Arceos</a></h2>
+<p>首先运行Arceos需要依赖其他系统来提供uboot,所以运行Arceos第一步是先烧录提供的飞腾派OS。</p>
+<h3 id="烧录飞腾派os"><a class="header" href="#烧录飞腾派os">烧录飞腾派OS</a></h3>
+<p><a href="https://pan.baidu.com/s/1pStiyqohrB3SxHAFFk8R6Q">飞腾派资料包</a>(提取码：dzdv)</p>
+<blockquote>
+<p><strong>注释：</strong> 5-系统镜像/1-PhytiumPIOS（基于Debian）/phytiumpiosv2.1资料包/4G内存-optee版/sdcard.img.7z，解压缩。</p>
+</blockquote>
+<p>下载解压后使用烧录工具将系统镜像烧录到TF卡，之后将TF插到飞腾派的卡槽中，最后连接电源线上电。</p>
+<p>烧录工具推荐使用<a href="https://etcher.balena.io/">balenaEtcher</a>也可以使用<a href="https://sourceforge.net/projects/win32diskimager/">win32 disk image</a></p>
+<blockquote>
+<p><strong>注释：</strong> 常用的手机以及派上的小卡正式名叫做TF或者说microSD 大的是SD卡当然统称为sd卡也是可以的  具体区别可查看
+<a href="https://www.sd-nand.com/news/technology/312.html">TF卡与SD卡</a></p>
+</blockquote>
+<p>注意引导方式选择从sd卡启动！！！
+<img src="../resource/img/0_2_2_1_start_mode_table.png" alt="启动模式" /></p>
+<blockquote>
+<p><strong>注释：</strong>  如果使用的是带emmc的版本可以直接从emmc启动，是当前版本的麒麟os启动会禁用风扇请注意，过热可能会损坏飞腾派。</p>
+</blockquote>
+<p>启动后连接串口，可以看到如下打印即说明系统成功启动，
+<img src="../resource/img/0_2_2_4_start_phyiumpios.png" alt="phyiumpi" />
+账号:root
+密码:root</p>
+<h3 id="编译及运行"><a class="header" href="#编译及运行">编译及运行</a></h3>
+<p>首先快速验证请参考这个链接，可以通过ostool来快速验证当前开发环境是完整可用的，避免后面在进行了较多code后因为难以验证而放弃。</p>
+<p><a href="https://github.com/qclic/phytium-mci/blob/main/docs/%E9%A3%9E%E8%85%BE%E6%B4%BESDMMC%E5%BC%80%E5%8F%91.md#%E6%9C%80%E7%AE%80%E4%BB%A3%E7%A0%81%E6%B5%8B%E8%AF%95%E6%96%B9%E5%BC%8F">最快速验证</a></p>
+<p>下载Arceos</p>
+<pre><code class="language-bash">git clone  https://github.com/rcore-os/arceos.git
+</code></pre>
+<p>编译Arceos</p>
+<pre><code class="language-bash">make A=examples/helloworld ARCH=aarch64 PLATFORM=aarch64-phytium-pi  FEARURES="irq" SMP=4 LOG=info
+</code></pre>
+<p>之后会在example/helloword 文件夹内生成对应的可执行文件helloworld_aarch64-phytium-pi.bin
+将该文件拷贝到u盘中后将u盘插入飞腾派，之后重启飞腾派并在重启过程中在串口工具中输入enter以进入cmd模式，成功进入后串口打印如下图所示。
+<img src="../resource/img/0_2_2_2_enter_cmd_mode.png" alt="命令行模式" /></p>
+<p>执行如下指令即可将本地编译的Arceos部署到飞腾派上运行</p>
+<pre><code class="language-bash">usb start
+fatload usb 0 0x90000000 helloworld_aarch64-phytium-pi.bin
+go 0x90000000
+</code></pre>
+<p><img src="../resource/img/0_2_2_3_start_Arceos.png" alt="运行Arceos" /></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter0/0_1_hardware_intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter0/0_3_prerequisites.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter0/0_1_hardware_intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter0/0_3_prerequisites.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

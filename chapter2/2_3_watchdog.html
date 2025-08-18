@@ -1,0 +1,471 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>看门狗驱动 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="23-看门狗驱动"><a class="header" href="#23-看门狗驱动">2.3 看门狗驱动</a></h1>
+<h2 id="看门狗工作原理"><a class="header" href="#看门狗工作原理">看门狗工作原理</a></h2>
+<p>看门狗是为了保障系统在因为某些错误导致挂起时，用来恢复系统所设计的一个硬件．其内部有个定时器，如果在定时器超时时间内，没有周期性地去"喂"（通常以设置某个寄存器，或者拉升/低某个引脚的形式）看门狗，则会导致看门狗重启整个系统．所以，从用户使用的角度来看，用户通常是会设计一个周期性"喂"看门狗的程序，如果内核崩溃恐慌导致系统挂起，则该程序无法继续"喂"狗，看门狗超时导致系统重启．</p>
+<p><img src="../resource/img/2_3_watchdog_run.svg" alt="看门狗工作原理" /></p>
+<h2 id="飞腾派linux源码中的看门狗操作接口实现"><a class="header" href="#飞腾派linux源码中的看门狗操作接口实现">飞腾派Linux源码中的看门狗操作接口实现</a></h2>
+<p>如上所述，一个看门狗驱动，至少需要提供让用户可以设置超时，启动/关闭看门狗，"喂＂狗等等的接口．因此，在飞腾派Linux内核源码的<code>include/linux/watchdog.h</code>文件中，我们可以看到这样的定义</p>
+<pre><code class="language-c">/** struct watchdog_ops - The watchdog-devices operations
+ *
+ * @owner:	The module owner.
+ * @start:	The routine for starting the watchdog device.
+ * @stop:	The routine for stopping the watchdog device.
+ * @ping:	The routine that sends a keepalive ping to the watchdog device.
+ * @status:	The routine that shows the status of the watchdog device.
+ * @set_timeout:The routine for setting the watchdog devices timeout value (in seconds).
+ * @set_pretimeout:The routine for setting the watchdog devices pretimeout.
+ * @get_timeleft:The routine that gets the time left before a reset (in seconds).
+ * @restart:	The routine for restarting the machine.
+ * @ioctl:	The routines that handles extra ioctl calls.
+ *
+ * The watchdog_ops structure contains a list of low-level operations
+ * that control a watchdog device. It also contains the module that owns
+ * these operations. The start function is mandatory, all other
+ * functions are optional.
+ */
+struct watchdog_ops {
+	struct module *owner;
+	/* mandatory operations */
+	int (*start)(struct watchdog_device *);
+	/* optional operations */
+	int (*stop)(struct watchdog_device *);
+	int (*ping)(struct watchdog_device *);
+	unsigned int (*status)(struct watchdog_device *);
+	int (*set_timeout)(struct watchdog_device *, unsigned int);
+	int (*set_pretimeout)(struct watchdog_device *, unsigned int);
+	unsigned int (*get_timeleft)(struct watchdog_device *);
+	int (*restart)(struct watchdog_device *, unsigned long, void *);
+	long (*ioctl)(struct watchdog_device *, unsigned int, unsigned long);
+};
+</code></pre>
+<p>上面的结构体描述了，Linux下，一个看门狗设备需要提供的操作接口．而这些，由驱动实现．本节我们只会分析其中的<code>start</code>，<code>set_timeout</code>和<code>ping</code>接口，其它接口的说明，超出了本节范围，其中<code>ping</code>方法既是用来给用户提供一个"喂"狗的接口的，而另两个，顾名思义，分别是启动看门狗和设置看门狗超时的功能的．</p>
+<p>接下来，我们会结合飞腾派的文档和Linux内核源码，分析如何在Arceos中实现对应的接口．要说明的是，飞腾派中的看门狗的设计遵照ARM-Sbsa规范，其驱动实现位于<code>drivers/watchdog/sbsa-gwdt</code>下．我们可以看到其中对应的方法实现，分别是</p>
+<pre><code class="language-c">static const struct watchdog_ops sbsa_gwdt_ops = {
+	.owner		= THIS_MODULE,
+	.start		= sbsa_gwdt_start,
+	.stop		= sbsa_gwdt_stop,
+	.ping		= sbsa_gwdt_keepalive,
+	.set_timeout	= sbsa_gwdt_set_timeout,
+	.get_timeleft	= sbsa_gwdt_get_timeleft,
+};
+</code></pre>
+<p>继续看下去，我们会发现<code>sbsa_gwdt_start</code>，<code>sbsa_gwdt_set_timeout</code>和<code>sbsa_gwdt_keepalive</code>三个函数的实现异常简单，没有太多"魔法"在里面．如下</p>
+<pre><code class="language-c">static void sbsa_gwdt_reg_write(u64 val, struct sbsa_gwdt *gwdt)
+{
+	if (gwdt-&gt;version == 0)
+		writel((u32)val, gwdt-&gt;control_base + SBSA_GWDT_WOR);
+	else
+		lo_hi_writeq(val, gwdt-&gt;control_base + SBSA_GWDT_WOR);
+}
+/*
+ * watchdog operation functions
+ */
+static int sbsa_gwdt_set_timeout(struct watchdog_device *wdd,
+				 unsigned int timeout)
+{
+	struct sbsa_gwdt *gwdt = watchdog_get_drvdata(wdd);
+
+	wdd-&gt;timeout = timeout;
+	timeout = clamp_t(unsigned int, timeout, 1, wdd-&gt;max_hw_heartbeat_ms / 1000);
+
+	if (action)
+		sbsa_gwdt_reg_write((u64)gwdt-&gt;clk * timeout, gwdt);
+	else
+		/*
+		 * In the single stage mode, The first signal (WS0) is ignored,
+		 * the timeout is (WOR * 2), so the WOR should be configured
+		 * to half value of timeout.
+		 */
+		sbsa_gwdt_reg_write(((u64)gwdt-&gt;clk / 2) * timeout, gwdt);
+
+	return 0;
+}
+
+static int sbsa_gwdt_keepalive(struct watchdog_device *wdd)
+{
+	struct sbsa_gwdt *gwdt = watchdog_get_drvdata(wdd);
+
+	/*
+	 * Writing WRR for an explicit watchdog refresh.
+	 * You can write anyting (like 0).
+	 */
+	writel(0, gwdt-&gt;refresh_base + SBSA_GWDT_WRR);
+
+	return 0;
+}
+
+static int sbsa_gwdt_start(struct watchdog_device *wdd)
+{
+	struct sbsa_gwdt *gwdt = watchdog_get_drvdata(wdd);
+
+	/* writing WCS will cause an explicit watchdog refresh */
+	writel(SBSA_GWDT_WCS_EN, gwdt-&gt;control_base + SBSA_GWDT_WCS);
+
+	return 0;
+}
+</code></pre>
+<p>本质上，是对<code>SBSA_GWDT_WOR</code>，<code>SBSA_GWDT_WRR</code>和<code>SBSA_GWDT_WCS</code>三个寄存器的操作．关于这些寄存器的描述，我们可以在<em>飞腾派软件软件编程手册V1.0</em>上找到．</p>
+<blockquote>
+<p>WDT_WRR (0x0000)</p>
+</blockquote>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">域</th><th style="text-align: center">位</th><th style="text-align: center">读写</th><th style="text-align: center">复位值</th><th style="text-align: center">描述</th></tr></thead><tbody>
+<tr><td style="text-align: center">WDT_WRR</td><td style="text-align: center">31:0</td><td style="text-align: center">RW</td><td style="text-align: center">0x0</td><td style="text-align: center">Watchdog更新寄存器．写操作会重新开始看门狗计数，读返回0</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>WDT_WOR (0x1008)</p>
+</blockquote>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">域</th><th style="text-align: center">位</th><th style="text-align: center">读写</th><th style="text-align: center">复位值</th><th style="text-align: center">描述</th></tr></thead><tbody>
+<tr><td style="text-align: center">WDT_WOR</td><td style="text-align: center">31:0</td><td style="text-align: center">RO</td><td style="text-align: center">0x3000000</td><td style="text-align: center">Watchdog清除寄存器</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>WDT_WCS (0x1000)</p>
+</blockquote>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">域</th><th style="text-align: center">位</th><th style="text-align: center">读写</th><th style="text-align: center">复位值</th><th style="text-align: center">描述</th></tr></thead><tbody>
+<tr><td style="text-align: center">reserved</td><td style="text-align: center">31:3</td><td style="text-align: center">RO</td><td style="text-align: center">0x0</td><td style="text-align: center">保留</td></tr>
+<tr><td style="text-align: center">Ws1</td><td style="text-align: center">2</td><td style="text-align: center">RO</td><td style="text-align: center">0x0</td><td style="text-align: center">二次超时，读返回当前ws1的值</td></tr>
+<tr><td style="text-align: center">Ws0</td><td style="text-align: center">1</td><td style="text-align: center">RO</td><td style="text-align: center">0x0</td><td style="text-align: center">一次超时，读返回当期ws0的值</td></tr>
+<tr><td style="text-align: center">Wdt_en</td><td style="text-align: center">0</td><td style="text-align: center">RW</td><td style="text-align: center">0x0</td><td style="text-align: center">Watchdog使能信号，高有效，常规复位和热保护都会清0．</td></tr>
+</tbody></table>
+</div>
+<p>对该三个寄存器的写入，会直接导致sys_cnt+WOR寄存器储存的值被更新到WCV寄存器中．而sys_cnt的计数值大于当前WCV寄存器存储的比较值则会导致看门狗超时．</p>
+<h2 id="看门狗驱动的rust实现"><a class="header" href="#看门狗驱动的rust实现">看门狗驱动的Rust实现</a></h2>
+<p>为了让Arceos支持对这三个寄存器进行读取写入，我们需要将三个寄存器的地址空间映射到内核虚拟空间中，在<code>configs/platforms/aarch64-phytium-pi.toml</code>文件中，修改<code>mmio-regions</code>部分，添加上对看门狗的支持.</p>
+<pre><code class="language-toml">#
+# Device specifications
+#
+[devices]
+# MMIO regions with format (`base_paddr`, `size`).
+mmio-regions = [
+    [0x2800_C000, 0x1000],  # UART 0
+    [0x2800_D000, 0x1000],  # UART 1
+    [0x2800_E000, 0x1000],  # UART 2
+    [0x2800_F000, 0x1000],  # UART 3
+
+    [0x3000_0000, 0x800_0000],  # other devices
+    [0x4000_0000, 0x1000_0000], # Pcie ecam
+
+    [0x5800_0000, 0x2800_0000], # 32-bit MMIO space
+
+    [0x2801_4000, 0x2000],  # MIO0 - I2C
+    [0x2801_6000, 0x2000],  # MIO1 - I2C
+    [0x2801_8000, 0x2000],  # MIO2 - I2C
+    [0x2801_A000, 0x2000],  # MIO3 - I2C
+    [0x2801_C000, 0x2000],  # MIO4 - I2C
+
+    [0x000_2803_4000, 0x1000],  # GPIO0
+    [0x000_2803_5000, 0x1000],  # GPIO1
+    [0x000_2803_6000, 0x1000],  # GPIO2
+    [0x000_2803_7000, 0x1000],  # GPIO3
+    [0x000_2803_8000, 0x1000],  # GPIO4
+    [0x000_2803_9000, 0x1000],  # GPIO5
+    [0x000_2804_0000, 0x2000],  # WDT0
+    [0x000_2804_2000, 0x2000],  # WDT1
+] 
+
+# Watchdog Address
+wdt0-paddr = 0x2804_0000         # uint
+wdt1-paddr = 0x2804_2000         # uint
+</code></pre>
+<p>在<code>axhal/src/platform/aarch64_common</code>文件夹下创建<code>sbsa_wdt.rs</code>文件，之后我们就可以参照之前linux源码中的实现，来完成看门狗使能，设置超时和关闭看门狗的功能，因此，我们需要实现如下接口：</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">接口名称</th><th style="text-align: center">参数</th><th style="text-align: center">调用范例</th><th style="text-align: center">简要功能说明</th></tr></thead><tbody>
+<tr><td style="text-align: center">start_watchdog</td><td style="text-align: center">无</td><td style="text-align: center">start_watchdog()</td><td style="text-align: center">启动看门狗</td></tr>
+<tr><td style="text-align: center">set_watchdog_timeout</td><td style="text-align: center">timeout</td><td style="text-align: center">set_watchdog_timeout(6)</td><td style="text-align: center">设置看门狗超时，参数单位为秒</td></tr>
+<tr><td style="text-align: center">stop_watchdog</td><td style="text-align: center">无</td><td style="text-align: center">stop_watchdog()</td><td style="text-align: center">停止看门狗</td></tr>
+<tr><td style="text-align: center">ping_watchdog</td><td style="text-align: center">无</td><td style="text-align: center">ping_watchdog()</td><td style="text-align: center">喂看门狗，重置计数器</td></tr>
+</tbody></table>
+</div>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// Start Watchdog
+pub fn start_watchdog() {
+    axlog::debug!("starting watchdog");
+    let wdt = WDT.lock();
+    unsafe {
+        // Enable Watchdog Timer
+        core::ptr::write_volatile(
+            (wdt.0 + SBSA_GWDT_WCS) as *mut u32, 0x1);
+    }
+}
+
+pub fn set_watchdog_timeout(timeout: u32) {
+    axlog::debug!("set watchdog timeout: {timeout}");
+    let clk = CNTFRQ_EL0.get();
+    let wdt = WDT.lock();
+    unsafe {
+        core::ptr::write_volatile(
+            (wdt.0 + SBSA_GWDT_WOR) as *mut u32, (clk * timeout as u64 / 2) as u32);
+    }
+}
+
+pub fn stop_watchdog() {
+    axlog::debug!("stopping watchdog");
+    let wdt = WDT.lock();
+    unsafe {
+        // Disable Watchdog Timer
+        core::ptr::write_volatile(
+            (wdt.0 + SBSA_GWDT_WCS) as *mut u32, 0x0);
+    }
+}
+
+pub fn ping_watchdog() {
+    axlog::debug!("feeding watchdog");
+    let wdt = WDT.lock();
+    unsafe {
+        // Write to Watchdog Timer Reset Register to reset the timer
+        core::ptr::write_volatile(
+            (wdt.0 + SBSA_GWDT_WRR) as *mut u32, 0);
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>接下来，我们进行测试，我们可以选择在内核中启用看门狗，并设置超时时间为6秒，</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>super::aarch64_common::sbsa_wdt::set_watchdog_timeout(6);
+super::aarch64_common::sbsa_wdt::start_watchdog();
+<span class="boring">}</span></code></pre></pre>
+<p>同时编写个测试应用</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    println!("Hello, world!");
+    let mut count = 1usize;
+    loop {
+        println!("count {count}");
+        count += 1;
+        axstd::thread::sleep(core::time::Duration::from_secs(1));
+    }
+}</code></pre></pre>
+<p>可观察到如下现象，应用程序计时到第6秒时，设备重启了．
+<img src="../resource/img/2_3_watdog_reboot.png" alt="" /></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter2/2_2_timer.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter3/chapter_3.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter2/2_2_timer.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter3/chapter_3.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>
