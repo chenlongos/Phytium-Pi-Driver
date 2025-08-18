@@ -29,16 +29,14 @@
 
 - [第五章：高速传输类驱动](chapter5/chapter_5.md)
   * [DMA驱动开发](chapter5/5_1_dma_driver.md)
-  * [PCI控制器驱动](chapter5/5_2_pci_controller.md)
+  * [PCIe原理](chapter5/5_2_pcie_basic.md)
   * [PCIe互联驱动](chapter5/5_3_pcie_interconnect.md)
 
 - [第六章：网络通信类驱动](chapter6/chapter_6.md)
-  * [单元测试与调试](chapter6/6_1_unit_testing.md)
-  * [PCIe网卡驱动基础](chapter6/6_2_pcie_nic_basic.md)
-  * [IGB网卡驱动实现](chapter6/6_3_igb_driver.md)
-  * [GMAC以太网基础](chapter6/6_4_gmac_ethernet.md)
-  * [YT8521驱动实现](chapter6/6_5_yt8521_driver.md)
-  * [net_device实现](chapter6/6_6_net_device.md)
+  * [IGB网卡驱动实现](chapter6/6_1_igb_driver.md)
+  * [GMAC以太网基础](chapter6/6_2_gmac_ethernet.md)
+  * [YT8521驱动实现](chapter6/6_3_yt8521_driver.md)
+  * [net_device实现](chapter6/6_4_net_device.md)
 
 - [第七章：存储驱动实现](chapter7/chapter_7.md)
   * [Micro SD驱动](chapter7/7_1_sd_driver.md)
