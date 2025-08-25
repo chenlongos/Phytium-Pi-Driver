@@ -168,14 +168,14 @@ generic timer arm公司提出的一种硬件上的设计框架。在早期单核
     #[cfg(feature = "irq")]
     fn init_interrupt() {
         use axhal::time::TIMER_IRQ_NUM;
-
+  
         // Setup timer interrupt handler
         const PERIODIC_INTERVAL_NANOS: u64 =
             axhal::time::NANOS_PER_SEC / axconfig::TICKS_PER_SEC as u64;
-
+  
         #[percpu::def_percpu]
         static NEXT_DEADLINE: u64 = 0;
-
+  
         fn update_timer() {
             let now_ns = axhal::time::monotonic_time_nanos();
             // Safety: we have disabled preemption in IRQ handler.
@@ -186,17 +186,17 @@ generic timer arm公司提出的一种硬件上的设计框架。在早期单核
             unsafe { NEXT_DEADLINE.write_current_raw(deadline + PERIODIC_INTERVAL_NANOS) };
             axhal::time::set_oneshot_timer(deadline);
         }
-
+  
         axhal::irq::register_handler(TIMER_IRQ_NUM, || {
             update_timer();
             #[cfg(feature = "multitask")]
             axtask::on_timer_tick();
         });
-
+  
         # // Enable IRQs before starting app
         # axhal::asm::enable_irqs();
     }
-
+  
     pub(crate) fn init_percpu() {
         #[cfg(feature = "irq")]
         {
@@ -221,14 +221,14 @@ generic timer arm公司提出的一种硬件上的设计框架。在早期单核
         d88P   888 888     888      88888888 888     888       "888
         d8888888888 888     Y88b.    Y8b.     Y88b. .d88P Y88b  d88P
         d88P     888 888      "Y8888P  "Y8888   "Y88888P"   "Y8888P"
-
+      
         arch = aarch64
         platform = aarch64-qemu-virt
         target = aarch64-unknown-none-softfloat
         build_mode = release
         log_level = trace
         smp = 4
-
+      
         [  0.003638 axruntime:130] Logging is enabled.
         [  0.004146 axruntime:131] Primary CPU 0 started, dtb = 0x44000000.
         [  0.004338 axruntime:133] Found physcial memory regions:
@@ -380,3 +380,39 @@ loop current duty 1, meter = 0
 ## 5. 参考资料
 [arm_generic_timer](https://developer.arm.com/documentation/102379/0104/What-is-the-Generic-Timer-)
 [generic_timer_in_linux](https://cloud.tencent.com/developer/article/1518249)
+
+## 6. 测试用例
+
+### timer_tacho_test
+
+开发板上运行`timer_tacho_test`命令，通过转速计tacho来测试timer的功能。如果tacho接收到的值发生了变化则打印"timer test OK"，否则打印"timer test failed"。
+
+```rust
+    let mut initial_value_set = false; 
+    let mut meter = 0; 
+    for i in 0..100 {
+        if let Some(res) = tacho.get_result() {
+            if !initial_value_set {
+                // 记录res的初值
+                meter = res;
+                initial_value_set = true;
+                println!("Initial res = {res}");
+            } else {
+                println!("res = {res}");
+                // 每次获取到的值和初值进行比较
+                if res != meter {
+                    println!("Timer test OK.");
+                    return;
+                }
+            }
+        }
+    axstd::thread::sleep(time::Duration::from_millis(50));
+    }
+```
+
+测试机上执行测试脚本，测试脚本依据测试命令输出的值判断测试是否通过。
+
+```sh
+pytest -v -m timer
+```
+
