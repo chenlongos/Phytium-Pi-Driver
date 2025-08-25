@@ -610,3 +610,33 @@ IoError::InvChn 不合法的通道
 <https://github.com/elliott10/dev-hw-driver/blob/main/phytiumpi/docs/%E9%A3%9E%E8%85%BE%E6%B4%BEv3%E5%8E%9F%E7%90%86%E5%9B%BE%20cek8903_piq_v3_sch20240506.pdf>
 ### 飞腾派软件开发手册
  <https://github.com/elliott10/dev-hw-driver/blob/main/phytiumpi/docs/飞腾派软件编程手册V1.0.pdf>
+
+## 7. 测试用例
+
+### gpio_test
+
+本测例基于飞腾派的点灯实验，通过观察开发板自带的调试led灯的亮灭来验证gpio的功能。
+
+在开发板上gpio_test命令实现如下：
+
+```rust
+// 在一个循环里，周期性反转引脚的值
+fn do_gpio_test(_args: &str) {
+    let mut gpio0 = GPIO0.lock();
+    let p = gpio::GpioPins::p8;
+    gpio0.set_pin_dir(p, true);
+    for i in 0..10{
+        sleep(time::Duration::from_millis(1000));
+        gpio0.set_pin_data(p, data);
+        println!("current data: {data}");
+        data = !data;
+    }
+}
+```
+
+在测试机上由用户验证调试led灯是否存在周期性亮灭的现象。
+
+```sh
+pytest -v -m gpio # 观察调试灯是否存在周期性亮灭的现象，输入"OK"则测试通过，否则测试失败
+```
+
