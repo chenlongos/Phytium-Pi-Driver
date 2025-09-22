@@ -283,6 +283,12 @@ fn main() {
 
 ## 5. 测试用例
 
+### 硬件准备
+
+飞腾派 40pin 接口中，spi接线方式如下：
+
+- 飞腾派40pin接口：19pin短接21pin(TX和RX短接)
+
 ### spi_test
 
 本驱动实现的是spi0，无中断，poll模式，单次收发１字节的功能。开发板上的测试程序spi_test将针对此功能进行测试。
@@ -292,6 +298,8 @@ fn main() {
 在测试机上会执行测试脚本，会自动判断测试是否通过。并给出统计信息。
 
 ```sh
-pytest -v -m spi
+source ~/.venv/bin/activate
+pytest -v -m spi # 日志记录在output目录下
+deactivate
 ```
 

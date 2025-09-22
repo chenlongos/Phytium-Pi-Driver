@@ -413,6 +413,9 @@ loop current duty 1, meter = 0
 测试机上执行测试脚本，测试脚本依据测试命令输出的值判断测试是否通过。
 
 ```sh
-pytest -v -m timer
+source ~/.venv/bin/activate
+pytest -v -m timer # 日志记录在output目录下
+deactivate
 ```
 
+测试日志应显示一条测试用例PASSED。

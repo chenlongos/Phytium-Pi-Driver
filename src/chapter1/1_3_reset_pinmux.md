@@ -646,3 +646,26 @@ pub fn FMioFuncGetIrqNum(_instance_p: &PhitiumMio, _func: u32) -> u32 {
 **硬件关联**：PAD 基址 0x32B30000，偏移 0x00D0~0x00E4（SCL/SDA/GPIO 示例）。MIO 基址 0x2801_4000~0x2803_2000，creg_mio_func_sel (0x1000) 配置 MUX。
 
 **ArceOS 上下文**：使用 SpinNoIrq 锁保护全局 PAD，info! 来自 ArceOS 日志。兼容 axhal 的 pinctrl trait。
+
+## 测试用例
+
+本次 reset 测试的目的：验证 Arceos 的 Watchdog 驱动能否正常初始化、启动定时器，并在“不喂狗”（未按时重置定时器）的情况下触发飞腾派重启，确保驱动的故障恢复能力。
+
+1. **前置检查**
+
+   确认飞腾派已成功启动 Arceos，且测试机与飞腾派的串口通信正常。
+
+2. **执行测试命令**
+
+   在测试机的 Python 虚拟环境中，通过 `pytest` 执行 reset 测试（仅运行标记为 `reset` 的测试用例）：
+
+```sh
+# 运行测试。
+source ~/.venv/bin/activate
+pytest -v -m reset # 日志记录在output目录下
+deactivate
+```
+
+3. **测试结果验证**
+
+   观察测试机终端输出与飞腾派状态。飞腾派应在测试过程中自动重启。

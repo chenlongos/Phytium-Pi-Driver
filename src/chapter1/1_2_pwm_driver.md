@@ -580,3 +580,17 @@ impl PwmSystem {
 - new：初始化 8 个控制器，基址从 0x2804_A000 到 0x2805_1000（手册表 5-67）。unsafe 构造。
 - global_enable：检查配置通道，生成使能掩码（bit 0-7），写入全局使能寄存器（0x2807E020，volatile 确保写入）。
 - controller：返回指定控制器（index 0~7），支持动态访问。
+
+## 飞腾派PWM测试用例
+
+本次 PWM 测试的目的：验证 PWM 驱动能否正常初始化，并输出不同占空比（1%、25%、50%、75%、100%）的 PWM 信号，确保驱动对占空比的精确控制能力。
+
+**执行测试命令**
+
+```sh
+source ~/.venv/bin/activate
+pytest -v -m pwm # 日志记录在output目录下
+deactivate
+```
+
+测试日志应显示 7 个测试用例全部 PASSED。

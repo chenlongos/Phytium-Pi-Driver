@@ -467,9 +467,19 @@ qemu模拟的qemu-virt机器使用串口为 *pl011* 模块，寄存器作用以�
 
 ## 7. 测试用例
 
+### 硬件准备
+
+飞腾派需通过 **USB 转 TTL 模块** 与测试机连接，接线方式如下：
+
+- 飞腾派40pin接口：10pin为RX，接USB转TTL的TX
+- 飞腾派40pin接口：8pin为TX，接USB转TTL的RX
+- 飞腾派40pin接口：6pin为GND，接USB转TTL的GND
+
 ### arceos上的测试程序
 
 uart驱动实现的是uart2，无中断，poll模式，单次收发1字节的功能。可调节波特率。
+
+本次 UART 测试的目的：在不同波特率下，通过 UART 接口发送测试数据，验证驱动能否正确配置波特率、稳定传输数据，确保 UART 通信的兼容性与可靠性。
 
 开发板上`uart_set_baud`命令用于设置波特率。`uart_test`命令收发10个字符，先收后发。
 
@@ -494,6 +504,9 @@ uart驱动实现的是uart2，无中断，poll模式，单次收发1字节的功
 在测试机上执行测试命令，测试脚本通过收发的字符是否一致自动判断测试通过与否。
 
 ```sh
-pytest -v -m uart
+source ~/.venv/bin/activate
+pytest -v -m uart # 日志记录在output目录下
+deactivate
 ```
 
+测试日志应显示 6 个测试用例全部 PASSED。

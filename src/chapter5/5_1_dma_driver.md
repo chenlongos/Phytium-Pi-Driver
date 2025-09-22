@@ -754,3 +754,46 @@ pub fn FXmacLinkChange(instance: &mut FXmac) {
 - 若接口为 SGMII，读取 PCS_AN_LP_OFFSET（偏移 0x20, PCS 链路状态），提取 LINK_PARTNER_NEXT_PAGE_STATUS (bit 0, OFFSET 16)。
 - 设置 link_status 为 LINKUP(1)/LINKDOWN(0)，若变化设置 NEGOTIATING(2)。
 
+## DMA测试用例
+
+### 测试原理与目的
+
+本次 DMA 和 GIC 测试通过“UART 回环测试”验证：DMA 能否通过 UART 接口完成数据传输，且传输完成后 GIC 能否正确触发中断通知 CPU，确保 DMA 驱动的传输功能与 GIC 驱动的中断管理功能协同工作正常。
+
+### 测试前准备
+
+```sh
+# 在测试机上执行
+sudo apt install libudev-dev
+cargo install ostool    # 安装辅助工具
+git clone https://github.com/chenlongos/arceos-driver.git arceos -b phytium-camp
+cd arceos
+```
+
+### 执行测试命令
+
+1. **配置测试项目**
+
+   复制 DMA 测试的项目配置模板，如有需要可修改环境配置。
+
+```sh
+cp phytium/app/test-ddma/.project.toml-example ./project.toml
+```
+
+2. **启动测试并加载Arceos**
+
+   使用 `ostool` 工具启动测试，并在 U-Boot 中加载 Arceos。
+
+```
+ostool run uboot
+```
+
+### 测试结果验证
+
+测试程序运行结果，需确认以下关键信息：
+
+- `DDMA controller reset done`：DMA 控制器初始化成功。
+- `UART initialized`：UART 驱动初始化成功。
+- `IRQ set enable: true`：GIC 成功启用 DMA 传输完成中断（IRQ 编号可能因硬件不同而变化）。
+- `Input buffer: [65, 0, ..., 66]` 与 `Output buffer: [65, 0, ..., 66]`：发送数据与接收数据一致（UART 回环传输成功）。
+- `DMA transfer completed successfully!`：DMA 传输完成，测试成功。

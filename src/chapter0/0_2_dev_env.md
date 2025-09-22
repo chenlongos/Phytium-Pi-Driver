@@ -111,3 +111,49 @@ go 0x90000000
 ```
 
 ![运行Arceos](../resource/img/0_2_2_3_start_Arceos.png)
+
+## 0.2.3 飞腾派上驱动的测试
+
+本次测试旨在全面验证 Arceos 操作系统在飞腾派开发板上各类驱动的功能正确性、稳定性及兼容性，覆盖基本外设驱动与复杂功能驱动，为后续 Arceos 系统在飞腾派平台的应用与优化提供可靠的测试依据，确保驱动程序能够满足实际嵌入式应用场景的需求。
+
+整个测试环境由两个部分组成，一个作为测试机，其上运行Linux，另一个是飞腾派（被测试开发板），其上运行Arceos。
+
+测试机需通过 **USB 转 TTL 模块** 与飞腾派的 12 针调试串口连接，实现数据交互与测试控制，具体接线对应关系如下：
+
+- 飞腾派12针接口：12pin为GND，接USB转TTL的GND
+- 飞腾派12针接口：10pin为RX，接USB转TTL的TX
+- 飞腾派12针接口：8pin为TX，接USB转TTL的RX
+
+连接完成后，可通过测试机的 `ls /dev/ttyUSB*` 命令确认串口设备是否正常识别。
+
+### 测试机上的准备
+
+```sh
+# 在测试机上运行
+git clone --recursive https://github.com/shzhxh/driver-test.git
+cd driver-test
+make build  # 编译测试镜像，生成的镜像在shell目录下
+
+# 安装测试依赖
+python3 -m venv ~/.venv
+source ~/.venv/bin/activate
+pip3 install -r ./scripts/requests.txt
+deactivate
+```
+
+### 飞腾派上的准备
+
+```sh
+# 在测试机上运行。要求：飞腾派上已运行Linux，且与测试机在同一局域网。
+scp shell/shell*.bin user@192.168.1.100:arceos.bin
+
+# 在飞腾派上运行  
+sudo shutdown -r now  # 重启飞腾派，按任意键进入uboot
+# 在uboot下执行如下命令
+ext4load mmc 0:1 0x90100000 /home/user/arceos.bin
+dcache flush
+go 0x90100000   # 启动Arceos
+```
+
+
+

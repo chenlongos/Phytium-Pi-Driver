@@ -101,3 +101,60 @@ MMC_INTR_EN 寄存器位域：
 - **TX_COMPLETE_EN** (bit 0)：使能发送完成中断。
 - **RX_COMPLETE_EN** (bit 1)：使能接收完成中断。
 - **ERR_INTR_EN** (bit 2)：使能错误中断（如 CRC 错误）。
+
+## SD卡测试用例
+
+### 测试原理与目的
+
+通过对sd卡上的ext4文件系统读写sd卡，来验证mmc驱动的功能。
+
+### 硬件准备
+
+把包含ext4文件系统的启动镜像刻录到一个SD卡上，并把SD卡插入飞腾派的卡槽。
+
+### 执行测试命令
+
+1. 切换分支
+
+   ```sh
+   git switch 45-动态plat-make-脚本接口适配
+   ```
+
+2. 创建`.project.toml`文件，并输入如下内容：
+
+```sh
+[compile]
+target = "aarch64-unknown-none"
+
+[compile.build.Custom]
+shell = ["make PLATFORM=aarch64-dyn SMP=1 A=examples/shell  FEATURES=irq,driver-phytium-sdcard,ext4fs,fs"]
+kernel = "./examples/shell/shell_aarch64-dyn.bin"
+
+[qemu]
+machine = "virt"
+cpu = "cortex-a57"
+graphic = false
+args = ""
+
+[uboot]
+serial = "/dev/ttyUSB0" // 根据具体情况修改
+baud_rate = 115200
+dtb_file = "./tools/phytium_pi/phytiumpi_firefly.dtb"
+
+[uboot.net]
+interface = "wlp0s20f3" // 根据具体情况修改
+```
+
+3. 启动测试并加载Arceos
+
+   ```sh
+   ostool run uboot
+   ```
+
+### 测试结果验证
+
+测试程序运行结果，从日志输出中可见：
+
+1. 在文件系统中创建了文件`./test.txt`
+2. 向文件中写了字符串并把文件的内容打印出来：`mmctest`
+3. 在文件系统中删除了文件`./test.txt`

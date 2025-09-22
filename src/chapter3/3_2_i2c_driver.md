@@ -454,3 +454,28 @@ sequenceDiagram
 | ------ | -------------------------- | ------------------------------------- |
 | x_reg0 | 0x00D0 (SCL), 0x00D4 (SDA) | 功能选择（值5=I2C），驱动强度，上下拉 |
 | x_reg1 | 0x00D0 (SCL), 0x00D4 (SDA) | 输入/输出延迟，粒度100ps/366ps        |
+
+## 飞腾派 I2C 测试用例
+
+本次 I2C 测试的目的：通过向 I2C OLED 屏写入显示数据，验证 I2C 驱动能否正常初始化、与外设建立连接，并正确传输数据，确保驱动的通信功能正常。
+
+1. **硬件准备**
+
+需要准备一个I2C oled屏，与飞腾派的40pin接口连接，接线方式如下：
+
+- 飞腾派40pin接口：1pin为3V3，接OLED屏的VCC
+- 飞腾派40pin接口：9pin为GND，接OLED屏的GND
+- 飞腾派40pin接口：3pin为SDA，接OLED屏的SDA
+- 飞腾派40pin接口：5pin为SCL，接OLED屏的SCL
+
+2. **执行测试命令**
+
+```sh
+source ~/.venv/bin/activate
+pytest -vs -m i2c # 日志记录在output目录下
+deactivate
+```
+
+3. **测试结果验证**
+
+I2C屏幕测试结果：I2C屏幕亮起。此时应按提示输入OK。最后会输出PASSED字样。
