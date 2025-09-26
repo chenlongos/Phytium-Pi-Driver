@@ -41,3 +41,5 @@ sequenceDiagram
     CPU->>CPU: 处理中断 (EOIR)
 ```
 
+### 飞腾派 PCIe 测试用例
+

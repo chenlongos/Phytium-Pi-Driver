@@ -280,3 +280,20 @@ pub fn FClockGetFreq(instance_p: &mut FClockCtrl) -> u32 {
 
 **硬件关联**：CRU 时钟控制器（基址 0x2800_0000），50MHz 主时钟分频（如 DIV=2 得到 25MHz），支持 PWM/Tacho 等外设。
 
+## 测试用例
+
+本次 clock 测试的目的：验证 Arceos 的 Clock 驱动能否正常初始化 CRU 模块，并将指定外设的时钟频率精确设置为 50MHz，确保时钟信号的稳定性与准确性。
+
+1. **执行测试命令**
+
+   在测试机虚拟环境中运行 clock 测试：
+
+```sh
+source ~/.venv/bin/activate
+pytest -v -m clock # 日志记录在output目录下
+deactivate
+```
+
+2. **测试结果验证**
+
+   测试日志应显示两条测例都输出PASSED。

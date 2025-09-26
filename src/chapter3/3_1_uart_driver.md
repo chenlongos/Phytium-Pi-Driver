@@ -352,14 +352,14 @@ fn main() {
     d88P   888 888     888      88888888 888     888       "888
     d8888888888 888     Y88b.    Y8b.     Y88b. .d88P Y88b  d88P
     d88P     888 888      "Y8888P  "Y8888   "Y88888P"   "Y8888P"
-
+    
     arch = aarch64
     platform = aarch64-phytium-pi
     target = aarch64-unknown-none-softfloat
     build_mode = release
     log_level = trace
     smp = 1
-
+    
     [ 13.466610 0 axruntime:130] Logging is enabled.
     [ 13.472338 0 axruntime:131] Primary CPU 0 started, dtb = 0xf9c29000.
     [ 13.479890 0 axruntime:133] Found physcial memory regions:
@@ -464,3 +464,49 @@ qemu模拟的qemu-virt机器使用串口为 *pl011* 模块，寄存器作用以�
 <https://github.com/elliott10/dev-hw-driver/blob/main/phytiumpi/docs/飞腾派软件编程手册V1.0.pdf>
 ### 飞腾派硬件原理图
 <https://github.com/elliott10/dev-hw-driver/blob/main/phytiumpi/docs/%E9%A3%9E%E8%85%BE%E6%B4%BEv3%E5%8E%9F%E7%90%86%E5%9B%BE%20cek8903_piq_v3_sch20240506.pdf>
+
+## 7. 测试用例
+
+### 硬件准备
+
+飞腾派需通过 **USB 转 TTL 模块** 与测试机连接，接线方式如下：
+
+- 飞腾派40pin接口：10pin为RX，接USB转TTL的TX
+- 飞腾派40pin接口：8pin为TX，接USB转TTL的RX
+- 飞腾派40pin接口：6pin为GND，接USB转TTL的GND
+
+### arceos上的测试程序
+
+uart驱动实现的是uart2，无中断，poll模式，单次收发1字节的功能。可调节波特率。
+
+本次 UART 测试的目的：在不同波特率下，通过 UART 接口发送测试数据，验证驱动能否正确配置波特率、稳定传输数据，确保 UART 通信的兼容性与可靠性。
+
+开发板上`uart_set_baud`命令用于设置波特率。`uart_test`命令收发10个字符，先收后发。
+
+```rust
+    // 在loop循环里接收字符
+	loop {
+        let read = uart.read_byte_poll();
+        if read == 0x0 {
+            break;
+        }
+        println!("arceos receive : {}", read as char);
+        data.push(read);
+    }
+    println!("receive terminated, start send.");
+	// for循环里发送字符
+    for &byte in data.iter() {
+        uart.put_byte_poll(byte);
+        println!("arceos send : {}", byte as char);
+    }
+```
+
+在测试机上执行测试命令，测试脚本通过收发的字符是否一致自动判断测试通过与否。
+
+```sh
+source ~/.venv/bin/activate
+pytest -v -m uart # 日志记录在output目录下
+deactivate
+```
+
+测试日志应显示 6 个测试用例全部 PASSED。

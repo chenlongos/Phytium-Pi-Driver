@@ -275,3 +275,9 @@ pub(crate) fn init_secondary() {
 
 - 调用 GICC.init()，配置从核的 CPU 接口（GICC_CTLR, GICC_PMR）。
 - 不涉及 GICD（由主核初始化）。
+
+## GIC 测试用例
+
+### DMA测试里的GIC
+
+DMA传输完成后会通过GIC触发中断来通知CPU传输完成。详见DMA测试。
