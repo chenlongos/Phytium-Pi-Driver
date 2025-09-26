@@ -1,0 +1,101 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <!-- 定义样式 -->
+  <style>
+    .clock-node { fill: #e3f2fd; stroke: #1e88e5; stroke-width: 2; }
+    .pll-node { fill: #bbdefb; stroke: #0d47a1; stroke-width: 2; }
+    .divider-node { fill: #fff8e1; stroke: #ff8f00; stroke-width: 2; }
+    .hw-node { fill: #c8e6c9; stroke: #2e7d32; stroke-width: 2; }
+    .control-node { fill: #f5f5f5; stroke: #9e9e9e; stroke-width: 2; }
+    .text-label { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; font-weight: bold; fill: #333; text-anchor: middle; }
+    .connector { stroke: #616161; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    .branch { stroke: #9e9e9e; stroke-width: 1.5; stroke-dasharray: 5,2; }
+  </defs>
+  
+  <!-- 箭头标记 -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#616161"/>
+    </marker>
+  </defs>
+  
+  <!-- 顶层时钟源 -->
+  <rect x="300" y="30" width="120" height="40" rx="5" class="clock-node"/>
+  <text x="360" y="55" class="text-label">Crystal/Oscillator</text>
+  
+  <!-- 主时钟树 -->
+  <path d="M360 70 L360 100" class="connector"/>
+  
+  <!-- PLL1分支 -->
+  <rect x="200" y="100" width="120" height="40" rx="5" class="pll-node"/>
+  <text x="260" y="125" class="text-label">PLL1</text>
+  <path d="M260 140 L260 170" class="connector"/>
+  
+  <rect x="200" y="170" width="120" height="40" rx="5" class="divider-node"/>
+  <text x="260" y="190" class="text-label">Divider</text>
+  <text x="260" y="205" class="text-label" font-size="10">(/1, /2, /3)</text>
+  <path d="M260 210 L260 240" class="connector"/>
+  
+  <rect x="200" y="240" width="120" height="40" rx="5" class="hw-node"/>
+  <text x="260" y="265" class="text-label">hw1_clk</text>
+  
+  <!-- PLL2分支 -->
+  <rect x="400" y="100" width="120" height="40" rx="5" class="pll-node"/>
+  <text x="460" y="125" class="text-label">PLL2</text>
+  <path d="M460 140 L460 170" class="connector"/>
+  
+  <rect x="400" y="170" width="120" height="40" rx="5" class="divider-node"/>
+  <text x="460" y="190" class="text-label">Divider</text>
+  <text x="460" y="205" class="text-label" font-size="10">(/1, /2, /3)</text>
+  <path d="M460 210 L460 240" class="connector"/>
+  
+  <rect x="400" y="240" width="120" height="40" rx="5" class="hw-node"/>
+  <text x="460" y="265" class="text-label">hw2_clk</text>
+  
+  <!-- 连接线 -->
+  <path d="M360 70 L260 100" class="connector"/>
+  <path d="M360 70 L460 100" class="connector"/>
+  
+  <!-- PLL3分支 -->
+  <path d="M460 280 L460 310" class="connector"/>
+  
+  <rect x="400" y="310" width="120" height="40" rx="5" class="control-node"/>
+  <text x="460" y="335" class="text-label">hw2_clk_en</text>
+  <path d="M460 350 L460 380" class="connector"/>
+  
+  <rect x="400" y="380" width="120" height="40" rx="5" class="clock-node"/>
+  <text x="460" y="405" class="text-label">pll3_clk</text>
+  <path d="M460 420 L460 450" class="connector"/>
+  
+  <rect x="400" y="450" width="120" height="40" rx="5" class="pll-node"/>
+  <text x="460" y="475" class="text-label">PLL3</text>
+  <path d="M460 490 L460 520" class="connector"/>
+  
+  <rect x="400" y="520" width="120" height="40" rx="5" class="divider-node"/>
+  <text x="460" y="540" class="text-label">Divider</text>
+  <text x="460" y="555" class="text-label" font-size="10">(/1, /2, /3)</text>
+  <path d="M460 560 L460 590" class="connector"/>
+  
+  <rect x="400" y="590" width="120" height="40" rx="5" class="hw-node"/>
+  <text x="460" y="615" class="text-label">hw3_clk</text>
+  
+  <!-- 树状连接线 -->
+  <path d="M360 70 Q360 150 260 100" class="branch"/>
+  <path d="M360 70 Q360 150 460 100" class="branch"/>
+  <path d="M460 280 Q460 300 460 310" class="branch"/>
+  
+  <!-- 图例 -->
+  <rect x="20" y="20" width="20" height="20" class="clock-node"/>
+  <text x="50" y="35" class="text-label" font-size="10">Clock Source</text>
+  
+  <rect x="20" y="50" width="20" height="20" class="pll-node"/>
+  <text x="50" y="65" class="text-label" font-size="10">PLL</text>
+  
+  <rect x="20" y="80" width="20" height="20" class="divider-node"/>
+  <text x="50" y="95" class="text-label" font-size="10">Divider</text>
+  
+  <rect x="20" y="110" width="20" height="20" class="hw-node"/>
+  <text x="50" y="125" class="text-label" font-size="10">Hardware Clock</text>
+  
+  <rect x="20" y="140" width="20" height="20" class="control-node"/>
+  <text x="50" y="155" class="text-label" font-size="10">Control Signal</text>
+</svg>

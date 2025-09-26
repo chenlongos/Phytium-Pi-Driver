@@ -1,0 +1,646 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>YT8521驱动实现 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="65-yt8521-驱动"><a class="header" href="#65-yt8521-驱动">6.5 YT8521 驱动</a></h1>
+<p>YT8521 是由 <strong>Motorcomm</strong> 公司开发的一款高集成度千兆以太网 PHY（物理层）芯片，广泛应用于嵌入式系统、工业设备和消费电子中，提供 10/100/1000 Mbps 以太网连接。以下从芯片原理、飞腾派（Phytium Pi）开发板中的应用、关键特性、寄存器配置、时序图等方面详细介绍 YT8521，结合飞腾派 Fxmac（以太网 MAC 控制器）上下文，基于搜索结果（Web ID: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 17, 18）。</p>
+<hr />
+<h2 id="1-yt8521-原理"><a class="header" href="#1-yt8521-原理">1. YT8521 原理</a></h2>
+<p>YT8521 作为以太网 PHY 芯片，负责 OSI 模型物理层的功能，连接 MAC 控制器（如飞腾派 Fxmac）与物理介质（如 CAT.5E UTP 电缆）。它处理信号调制/解调、编码/解码、链路管理等任务，支持 IEEE 802.3 标准（10BASE-Te, 100BASE-TX, 1000BASE-T）。YT8521 通过 RGMII（Reduced Gigabit Media Independent Interface）或 SGMII（Serial Gigabit Media Independent Interface）与 MAC 交互，通过 MDIO（Management Data Input/Output）接口配置 PHY 参数。</p>
+<h3 id="工作流程"><a class="header" href="#工作流程">工作流程</a></h3>
+<ul>
+<li><strong>发送</strong>：接收 MAC 的数字信号（RGMII/SGMII），编码为模拟信号（如 1000BASE-T 的 PAM-5），通过 CAT.5E 电缆发送。</li>
+<li><strong>接收</strong>：从电缆接收模拟信号，解码为数字信号，传输到 MAC。</li>
+<li><strong>链路管理</strong>：通过 Auto-Negotiation（自协商）确定速率（10/100/1000 Mbps）和双工模式（全/半双工），使用 MDIO 查询链路状态。</li>
+<li><strong>中断</strong>：支持中断信号（如链路状态变化），通过 GIC 路由到 CPU。</li>
+</ul>
+<p>YT8521 使用先进的 DSP（数字信号处理）和 AFE（模拟前端）技术，确保高速数据传输的稳定性和低功耗，支持 Wake-on-LAN（WOL）功能。</p>
+<hr />
+<h2 id="2-飞腾派中的-yt8521-设备"><a class="header" href="#2-飞腾派中的-yt8521-设备">2. 飞腾派中的 YT8521 设备</a></h2>
+<p>飞腾派（Phytium Pi）基于飞腾 D2000 处理器（ARMv8-A），其网卡设备使用 Fxmac 控制器（基址 0x3200_C000 和 0x3200_E000），通过 SGMII 接口连接 YT8521 PHY 芯片（替代文档中的 RTL8211F），支持双千兆以太网接口（1Gbps）。YT8521 负责物理层信号处理，Fxmac 实现 MAC 层功能，二者协作提供网络通信。设备树（phytium_pi.dts）定义 ethernet 节点，配置文件（aarch64-phytium-pi.toml）包含 MMIO 区域 [0x3200_C000, 0x2000] 和 [0x3200_E000, 0x2000]。</p>
+<h3 id="硬件特性"><a class="header" href="#硬件特性">硬件特性</a></h3>
+<ul>
+<li><strong>接口</strong>：SGMII，连接 Fxmac，支持 10/100/1000 Mbps 自适应。</li>
+<li><strong>引脚</strong>：通过 PAD（基址 0x32B30000）配置 MIO 引脚（如 MIO0~3），x_reg0=0 选择以太网功能。</li>
+<li><strong>中断</strong>：YT8521 支持中断信号（如 LINK_INTR 链路状态变化），通过 GIC 路由（IRQ 未知）。</li>
+<li><strong>MDIO</strong>：通过 Fxmac 的 PHY_MGMT 寄存器（偏移 0x024）配置 YT8521 的寄存器。</li>
+<li><strong>功耗</strong>：支持低功耗模式（如 Energy Efficient Ethernet, EEE）。</li>
+</ul>
+<h3 id="驱动支持"><a class="header" href="#驱动支持">驱动支持</a></h3>
+<p>在 ArceOS 中，YT8521 驱动基于 axdriver_net，通过 FxmacInit 初始化 Fxmac 和 PHY：</p>
+<ul>
+<li>配置 NET_CFG（SPEED=10 for 1Gbps, DUPLEX=1, MDIO_EN=1）。</li>
+<li>设置 DMA_CFG（TX/RX BUF_SIZE=8, DMA_EN=1）。</li>
+<li>通过 MDIO 初始化 YT8521（如设置速率、双工模式）。 驱动使用 motorcomm 模块（Web ID: 9, 11），已在 Linux 6.2 主线支持（StarFive VisionFive 验证），飞腾派通过 axdriver_net 适配。</li>
+</ul>
+<hr />
+<h2 id="3-yt8521-关键特性"><a class="header" href="#3-yt8521-关键特性">3. YT8521 关键特性</a></h2>
+<p>YT8521 提供以下功能，适配飞腾派双网口需求：</p>
+<ul>
+<li><strong>速率支持</strong>：10BASE-Te, 100BASE-TX, 1000BASE-T，自动协商速率和双工模式。</li>
+<li><strong>接口</strong>：RGMII/SGMII，支持飞腾派 Fxmac 的 SGMII 连接。</li>
+<li><strong>中断</strong>：支持链路状态变化、传输错误中断，通过 GIC SPI（如 IRQ 32~1019）。</li>
+<li><strong>低功耗</strong>：EEE 模式，动态调整功耗，适合嵌入式应用。</li>
+<li><strong>WOL</strong>：支持 Magic Packet 唤醒（Web ID: 11）。</li>
+<li><strong>DSP 和 AFE</strong>：高性能信号处理，确保 CAT.5E 电缆上 100 米传输。</li>
+</ul>
+<h4 id="yt8521-关键寄存器"><a class="header" href="#yt8521-关键寄存器">YT8521 关键寄存器</a></h4>
+<div class="table-wrapper"><table><thead><tr><th><strong>寄存器</strong></th><th><strong>地址</strong></th><th><strong>功能</strong></th><th><strong>关键位域</strong></th></tr></thead><tbody>
+<tr><td>Control</td><td>0x00</td><td>PHY 控制（复位、速率、双工）</td><td>SPEED_SEL (bit 6,13), DUPLEX (bit 8)</td></tr>
+<tr><td>Status</td><td>0x01</td><td>链路状态</td><td>LINK_UP (bit 2)</td></tr>
+<tr><td>PHY Identifier</td><td>0x02~0x03</td><td>标识 PHY 型号</td><td>OUI (bit 3-24), MODEL (bit 25-30)</td></tr>
+<tr><td>Auto-Negotiation</td><td>0x04</td><td>自协商配置</td><td>AN_EN (bit 12), AN_CAP (bit 5-8)</td></tr>
+<tr><td>Interrupt Enable</td><td>0x1D</td><td>中断使能</td><td>LINK_CHANGE (bit 1)</td></tr>
+<tr><td>Interrupt Status</td><td>0x1E</td><td>中断状态</td><td>LINK_INT (bit 1)</td></tr>
+</tbody></table>
+</div>
+<h2 id="4-飞腾派-yt8521-设备时序图"><a class="header" href="#4-飞腾派-yt8521-设备时序图">4. 飞腾派 YT8521 设备时序图</a></h2>
+<p>YT8521 数据发送时序涉及 E2000 CPU、Fxmac 控制器（0x3200_C000）、DMA 引擎、YT8521 PHY 和以太网链路。CPU 配置 Fxmac 的 NET_CFG（SPEED=10, DUPLEX=1, MDIO_EN=1）和 DMA_CFG（TX_BUF_SIZE=8, DMA_EN=1），写入 TX FIFO，DMA 搬移数据到 YT8521，PHY 编码为 PAM-5 信号发送到链路。传输完成触发 TX_INTR 中断，CPU 检查 TX_STATUS（TX_COMPLETE=1），清除 INTR_STATUS。总延迟约 100ns~1µs（100 MHz 时钟），依赖 SGMII TXVALID/TXDATA 握手。</p>
+<pre class="mermaid">sequenceDiagram
+    participant CPU as E2000 CPU Core
+    participant Fxmac as Fxmac 控制器 (0x3200_C000)
+    participant DMA as DMA 引擎
+    participant PHY as YT8521 PHY (SGMII)
+    participant EthLink as 以太网链路
+
+    CPU-&gt;&gt;Fxmac: 写 NET_CFG (SPEED=10, DUPLEX=1, MDIO_EN=1)
+    CPU-&gt;&gt;Fxmac: 通过 PHY_MGMT 写 Control (0x00, AN_EN=1)
+    CPU-&gt;&gt;DMA: 写 DMA_CFG (TX_BUF_SIZE=8, DMA_EN=1)
+    CPU-&gt;&gt;Fxmac: 写 TX 数据到 FIFO
+    Fxmac-&gt;&gt;DMA: 请求传输 (源/目的地址)
+    DMA-&gt;&gt;PHY: 搬移数据 (TXVALID/TXDATA)
+    PHY-&gt;&gt;EthLink: 发送 PAM-5 编码帧
+    EthLink-&gt;&gt;PHY: ACK 返回
+    PHY-&gt;&gt;DMA: 传输完成
+    DMA-&gt;&gt;Fxmac: 更新 TX_STATUS (TX_COMPLETE=1)
+    Fxmac-&gt;&gt;CPU: 触发 TX_INTR (INTR_STATUS bit 0=1)
+    CPU-&gt;&gt;Fxmac: 检查 TX_STATUS, 清状态
+    CPU-&gt;&gt;Fxmac: 清 INTR_STATUS (写 1)
+</pre>
+<h2 id="api-调用表"><a class="header" href="#api-调用表">API 调用表</a></h2>
+<p>YT8521 驱动提供以下 API，用于初始化 PHY、配置速率/双工、读取链路状态和处理中断。这些函数在 fxmac_phy.rs 中定义，通过 FXmac 结构体（fxmac.rs）调用，操作 YT8521 的 MII 寄存器。</p>
+<div class="table-wrapper"><table><thead><tr><th><strong>函数名</strong></th><th><strong>参数</strong></th><th><strong>返回值</strong></th><th><strong>功能描述</strong></th></tr></thead><tbody>
+<tr><td><code>FXmacPhyInit</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例指针。 <code>phy_addr: u32</code> - PHY 地址。</td><td><code>u32</code> - 返回 <code>FT_SUCCESS</code>（0）表示成功，非 0 表示失败。</td><td>初始化 YT8521 PHY，配置速率、双工和自协商，设置 MDIO 通信。</td></tr>
+<tr><td><code>FXmacPhyRead</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。 <code>phy_addr: u32</code> - PHY 地址。 <code>reg_addr: u32</code> - 寄存器地址。 <code>data: &amp;mut u16</code> - 读取数据指针。</td><td><code>u32</code> - 返回 <code>FT_SUCCESS</code>（0）表示成功，非 0 表示失败。</td><td>通过 MDIO 读取 YT8521 寄存器（如 Control 0x00, Status 0x01）。</td></tr>
+<tr><td><code>FXmacPhyWrite</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。 <code>phy_addr: u32</code> - PHY 地址。 <code>reg_addr: u32</code> - 寄存器地址。 <code>data: u16</code> - 写入数据。</td><td><code>u32</code> - 返回 <code>FT_SUCCESS</code>（0）表示成功，非 0 表示失败。</td><td>通过 MDIO 写入 YT8521 寄存器，配置参数（如速率、双工）。</td></tr>
+<tr><td><code>phy_link_detect</code></td><td><code>xmac_p: &amp;mut FXmac</code> - Fxmac 实例。 <code>phy_addr: u32</code> - PHY 地址。</td><td><code>u32</code> - 返回 1（链路连接），0（断开）。</td><td>读取 Status 寄存器（0x01）检测链路状态（LINK_UP bit 2）。</td></tr>
+<tr><td><code>phy_autoneg_status</code></td><td><code>xmac_p: &amp;mut FXmac</code> - Fxmac 实例。 <code>phy_addr: u32</code> - PHY 地址。</td><td><code>u32</code> - 返回 1（自协商完成），0（未完成）。</td><td>读取 Status 寄存器（0x01）检查自协商状态（AN_COMPLETE bit 5）。</td></tr>
+<tr><td><code>FXmacConfigureIeeePhySpeed</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。 <code>phy_addr: u32</code> - PHY 地址。 <code>speed: u32</code> - 速率（10/100/1000）。 <code>duplex_mode: u32</code> - 双工模式（0=半双工，1=全双工）。</td><td><code>u32</code> - 返回 <code>FT_SUCCESS</code>（0）表示成功，非 0 表示失败。</td><td>配置 YT8521 速率和双工模式，更新 Control 寄存器（0x00）和 Auto-Negotiation 寄存器（0x04）。</td></tr>
+</tbody></table>
+</div>
+<h2 id="代码实现讲解"><a class="header" href="#代码实现讲解">代码实现讲解</a></h2>
+<p>YT8521 驱动实现位于 fxmac_phy.rs，与 Fxmac 控制器（fxmac.rs）和中断处理（fxmac_intr.rs）协同工作，基于 fxmac_const.rs 和 mii_const.rs 定义的常量。代码通过 MDIO 接口（PHY_MGMT 寄存器，偏移 0x034）操作 YT8521 的 MII 寄存器（如 Control 0x00，Status 0x01），支持初始化、速率配置和链路状态检测。以下从依赖、寄存器到每个 API 的实现逐一讲解。</p>
+<h3 id="关键依赖与寄存器"><a class="header" href="#关键依赖与寄存器">关键依赖与寄存器</a></h3>
+<ul>
+<li>依赖：
+<ul>
+<li>fxmac.rs：定义 FXmac 结构体（包含 config, phy_address, link_status）和寄存器操作（如 write_reg, read_reg）。</li>
+<li>fxmac_const.rs：定义 Fxmac 寄存器偏移（如 FXMAC_NWCFG_OFFSET=0x004, FXMAC_PHYMNTNC_OFFSET=0x034）和常量（如 FXMAC_SPEED_1000=1000）。</li>
+<li>mii_const.rs：定义 MII 寄存器地址（如 MII_BMCR=0x00, MII_BMSR=0x01）和位域（如 ADVERTISED_1000baseT_Full=1&lt;&lt;5）。</li>
+<li>log：提供调试日志（info!, error!），通过 UART2（基址 0x2800_E000，Pin 7/8，115200 波特率）输出。</li>
+</ul>
+</li>
+<li><strong>关键寄存器</strong>（YT8521 MII 寄存器，MDIO 访问）：</li>
+</ul>
+<div class="table-wrapper"><table><thead><tr><th><strong>寄存器</strong></th><th><strong>地址</strong></th><th><strong>功能</strong></th><th><strong>关键位域</strong></th></tr></thead><tbody>
+<tr><td>Control</td><td>0x00</td><td>PHY 控制（速率、双工、自协商）</td><td>SPEED_SEL (bit 6,13: 01=100M, 10=1G), DUPLEX (bit 8), AN_EN (bit 12)</td></tr>
+<tr><td>Status</td><td>0x01</td><td>链路状态</td><td>LINK_UP (bit 2), AN_COMPLETE (bit 5)</td></tr>
+<tr><td>Auto-Negotiation</td><td>0x04</td><td>自协商配置</td><td>AN_EN (bit 12), AN_CAP (bit 5-8: 10/100/1000 Mbps)</td></tr>
+<tr><td>Interrupt Enable</td><td>0x1D</td><td>中断使能</td><td>LINK_CHANGE (bit 1)</td></tr>
+<tr><td>Interrupt Status</td><td>0x1E</td><td>中断状态</td><td>LINK_INT (bit 1)</td></tr>
+<tr><td>Specific Status</td><td>0x11</td><td>专用状态</td><td>DUPLEX (bit 13), SPEED_MODE (bit 14-15: 0=10M, 1=100M, 2=1G)</td></tr>
+</tbody></table>
+</div>
+<p><strong>Fxmac 寄存器</strong>（fxmac_const.rs）：</p>
+<div class="table-wrapper"><table><thead><tr><th><strong>寄存器</strong></th><th><strong>偏移</strong></th><th><strong>功能</strong></th><th><strong>关键位域</strong></th></tr></thead><tbody>
+<tr><td>NET_CFG</td><td>0x004</td><td>配置速率、双工、MDIO 使能</td><td>SPEED (bit 0-1: 00=10M, 01=100M, 10=1G), DUPLEX (bit 2), MDIO_EN (bit 3)</td></tr>
+<tr><td>PHY_MGMT</td><td>0x034</td><td>MDIO 接口</td><td>PHY_ADDR (bit 0-4), REG_ADDR (bit 5-9)</td></tr>
+<tr><td>INTR_EN</td><td>0x01C</td><td>中断使能</td><td>TX_INTR_EN (bit 0), RX_INTR_EN (bit 1)</td></tr>
+<tr><td>INTR_STATUS</td><td>0x020</td><td>中断状态</td><td>TX_INTR (bit 0), RX_INTR (bit 1)</td></tr>
+</tbody></table>
+</div>
+<p><strong>飞腾派上下文</strong>：</p>
+<ul>
+<li><strong>硬件</strong>：YT8521 通过 SGMII 连接 Fxmac（基址 0x3200_C000/0x3200_E000），支持双网口（Ethernet1/Ethernet2）。引脚通过 PAD（0x32B30000）配置（x_reg0=0）。</li>
+<li><strong>中断</strong>：YT8521 的链路状态中断（LINK_INT）通过 GIC SPI（如 IRQ 83~89，FXMAC0_HOTPLUG_IRQ_NUM=83）路由。</li>
+<li><strong>设备树</strong>（phytium_pi.dts）：</li>
+</ul>
+<pre><code class="language-shell">ethernet@3200c000 {
+    compatible = "phytium,fxmac";
+    reg = &lt;0x0 0x3200C000 0x0 0x2000&gt;;
+    phy-mode = "sgmii";
+    phy-handle = &lt;&amp;phy0&gt;;
+};
+</code></pre>
+<h3 id="api-实现讲解"><a class="header" href="#api-实现讲解">API 实现讲解</a></h3>
+<p><strong>FXmacPhyInit</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacPhyInit(
+    instance_p: &amp;mut FXmac,
+    reset_flag: u32,
+) -&gt; u32 {
+    let speed = instance_p.config.speed;
+    let duplex_mode = instance_p.config.duplex;
+    let autonegotiation_en = instance_p.config.auto_neg;
+    info!("FXmacPhyInit, speed={}, duplex_mode={}, autonegotiation_en={}, reset_flag={}",
+    speed,
+        duplex_mode,
+        autonegotiation_en,
+        reset_flag
+    );
+    let mut ret: u32 = 0;
+    let mut phy_addr: u32 = 0;
+    if FXmacDetect(instance_p, &amp;mut phy_addr) != 0 {
+        error!("Phy is not found.");
+        return 7; //FXMAC_PHY_IS_NOT_FOUND;
+    }
+    info!("Setting phy addr is {}", phy_addr);
+    instance_p.phy_address = phy_addr;
+    if reset_flag != 0 {
+        FXmacPhyReset(instance_p, phy_addr);
+    }
+    if autonegotiation_en != 0 {
+        ret = FXmacGetIeeePhySpeed(instance_p, phy_addr);
+        if ret != 0 {
+            return ret;
+        }
+    } else {
+        info!("Set the communication speed manually.");
+    assert!(speed != FXMAC_SPEED_1000, "The speed must be 100M or 10M!");
+
+        ret = FXmacConfigureIeeePhySpeed(instance_p, phy_addr, speed, duplex_mode);
+        if ret != 0 {
+            error!("Failed to manually set the phy.");
+            return ret;
+        }
+    }
+    instance_p.link_status = FXMAC_LINKUP;
+
+    0 //FT_SUCCESS
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：初始化 YT8521 PHY，配置默认速率（1000 Mbps）、双工模式（全双工）和自协商。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>调用 FXmacConfigureIeeePhySpeed 配置 PHY Control 寄存器（0x00）和 Auto-Negotiation 寄存器（0x04）。</li>
+<li>设置 instance_p.phy_address 为 phy_addr（如 0x0），通过 PHY_MGMT（偏移 0x034）进行 MDIO 通信。</li>
+<li>配置 NET_CFG（Fxmac 寄存器，0x004）匹配 PHY 速率和双工。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：初始化 Ethernet1（0x3200_C000）的 YT8521，设置 SGMII 接口为 1Gbps 全双工，开启自协商（AN_EN=1）。</p>
+<p><strong>FXmacPhyRead</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacPhyRead(instance_p: &amp;mut FXmac, phy_address: u32, register_num: u32, phydat_aptr: &amp;mut u16) -&gt; u32
+{
+    let mut mgtcr: u32 = 0;
+    let mut ipisr: u32 = 0;
+    let mut IpReadTemp: u32 = 0;
+    let mut status: u32 = 0;
+
+    /* Make sure no other PHY operation is currently in progress */
+    if (read_reg((instance_p.config.base_address + FXMAC_NWSR_OFFSET) as *const u32) &amp; FXMAC_NWSR_MDIOIDLE_MASK) == 0
+    {   
+        status = 6;
+        error!("FXmacPhyRead error: PHY busy!");
+    }else{   
+        /* Construct mgtcr mask for the operation */
+        mgtcr = FXMAC_PHYMNTNC_OP_MASK | FXMAC_PHYMNTNC_OP_R_MASK |
+        (phy_address &lt;&lt; FXMAC_PHYMNTNC_PHAD_SHFT_MSK) |
+        (register_num &lt;&lt; FXMAC_PHYMNTNC_PREG_SHFT_MSK);
+
+        /* Write mgtcr and wait for completion */
+        write_reg((instance_p.config.base_address + FXMAC_PHYMNTNC_OFFSET) as *mut u32, mgtcr);
+
+        loop{
+            ipisr = read_reg((instance_p.config.base_address + FXMAC_NWSR_OFFSET) as *const u32);
+            IpReadTemp = ipisr;
+
+            if (IpReadTemp &amp; FXMAC_NWSR_MDIOIDLE_MASK) != 0 {
+                break;
+            }
+        }
+
+        // Read data
+        *phydat_aptr = read_reg((instance_p.config.base_address + FXMAC_PHYMNTNC_OFFSET) as *const u32) as u16;
+
+    debug!("FXmacPhyRead, phy_address={:#x}, register_num={}, phydat_aptr={:#x}", phy_address, register_num, phydat_aptr);
+
+        status = 0;
+    }
+    
+    status
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：通过 MDIO 接口读取 YT8521 寄存器（如 Control 0x00, Status 0x01）。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>使用 PHY_MGMT 寄存器（偏移 0x034）设置 PHY 地址（phy_addr）和寄存器地址（reg_addr）。</li>
+<li>读取数据存入 data（u16），返回 FT_SUCCESS（0）表示成功。</li>
+<li>使用 read_reg（fxmac.rs）访问 Fxmac 的 MMIO（基址 0x3200_C000）。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：读取 Status 寄存器（0x01）检查链路状态（LINK_UP bit 2）或自协商状态（AN_COMPLETE bit 5）。</p>
+<p><strong>FXmacPhyWrite</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacPhyWrite(instance_p: &amp;mut FXmac, phy_address: u32, register_num: u32, phy_data: u16) -&gt; u32
+{
+    let mut mgtcr: u32 = 0;
+    let mut ipisr: u32 = 0;
+    let mut ip_write_temp: u32 = 0;
+    let mut status: u32 = 0;
+
+    debug!("FXmacPhyWrite, phy_address={:#x}, register_num={}, phy_data={:#x}", phy_address, register_num, phy_data);
+
+    /* Make sure no other PHY operation is currently in progress */
+    if (read_reg((instance_p.config.base_address + FXMAC_NWSR_OFFSET) as *const u32) &amp;
+           FXMAC_NWSR_MDIOIDLE_MASK) == 0
+    {   
+        status = 6; // FXMAC_ERR_PHY_BUSY;
+        error!("FXmacPhyRead error: PHY busy!");
+    }else{   
+        /* Construct mgtcr mask for the operation */
+        mgtcr = FXMAC_PHYMNTNC_OP_MASK | FXMAC_PHYMNTNC_OP_W_MASK |
+                (phy_address &lt;&lt; FXMAC_PHYMNTNC_PHAD_SHFT_MSK) |
+                (register_num &lt;&lt; FXMAC_PHYMNTNC_PREG_SHFT_MSK) | phy_data as u32;
+
+        /* Write mgtcr and wait for completion */
+        write_reg((instance_p.config.base_address + FXMAC_PHYMNTNC_OFFSET) as *mut u32, mgtcr);
+
+        loop{
+            ipisr = read_reg((instance_p.config.base_address + FXMAC_NWSR_OFFSET) as *const u32);
+            ip_write_temp = ipisr;
+
+            if (ip_write_temp &amp; FXMAC_NWSR_MDIOIDLE_MASK) != 0 {
+                break;
+            }
+        }
+
+        status = 0; // FT_SUCCESS;
+    }
+
+    status
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：通过 MDIO 接口写入 YT8521 寄存器，配置参数（如速率、双工）。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>使用 PHY_MGMT 寄存器设置 PHY 地址和寄存器地址，写入 data（u16）。</li>
+<li>使用 write_reg（fxmac.rs）操作 Fxmac MMIO，返回 FT_SUCCESS（0）表示成功。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：写入 Control 寄存器（0x00）设置 SPEED_SEL（bit 6,13=10 for 1Gbps）和 DUPLEX（bit 8=1）。</p>
+<p><strong>phy_link_detect</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn phy_link_detect(xmac_p: &amp;mut FXmac, phy_addr: u32) -&gt; u32 {
+    let mut status: u16 = 0;
+    let mut ret: u32 = FXmacPhyRead(xmac_p, phy_addr, PHY_STATUS_REG_OFFSET, &amp;mut status);
+    if status &amp; PHY_STAT_LINK_STATUS != 0 {
+        return 1;
+    }
+    0
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：检测 YT8521 链路状态，返回 1（连接）或 0（断开）。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>调用 FXmacPhyRead 读取 Status 寄存器（0x01，PHY_STATUS_REG_OFFSET）。</li>
+<li>检查 PHY_STAT_LINK_STATUS（bit 2），若为 1，返回 1（链路连接）。</li>
+<li>日志通过 info! 输出（UART2，0x2800_E000）。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：周期性调用检测 Ethernet1 链路状态，触发 LINK_CHANGE 中断（IRQ 83）。</p>
+<p><strong>phy_autoneg_status</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn phy_autoneg_status(xmac_p: &amp;mut FXmac, phy_addr: u32) -&gt; u32 {
+    let mut status: u16 = 0;
+    FXmacPhyRead(xmac_p, phy_addr, PHY_STATUS_REG_OFFSET, &amp;mut status);
+    if status &amp; PHY_STATUS_AUTONEGOTIATE_COMPLETE != 0 {
+        return 1;
+    }
+    0
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：检查 YT8521 自协商状态，返回 1（完成）或 0（未完成）。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>调用 FXmacPhyRead 读取 Status 寄存器（0x01）。</li>
+<li>检查 PHY_STATUS_AUTONEGOTIATE_COMPLETE（bit 5），若为 1，返回 1。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：验证自协商是否完成，确保 1Gbps 全双工配置生效。</p>
+<p><strong>FXmacConfigureIeeePhySpeed</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn FXmacConfigureIeeePhySpeed(instance_p: &amp;mut FXmac, phy_addr: u32, speed: u32, duplex_mode: u32) -&gt; u32 {
+    let mut control: u16 = 0;
+    let mut autonereg: u16 = PHY_AUTOADVERTISE_100FULL | PHY_AUTOADVERTISE_100HALF |
+                             PHY_AUTOADVERTISE_10FULL | PHY_AUTOADVERTISE_10HALF;
+    let mut specific_reg: u16 = 0;
+
+    let ret = FXmacPhyWrite(instance_p, phy_addr, PHY_AUTONEGO_ADVERTISE_REG, autonereg);
+    if ret != FT_SUCCESS {
+        error!("FXmacConfigureIeeePhySpeed, write PHY_AUTONEGO_ADVERTISE_REG is error.");
+        return ret;
+    }
+
+    let ret = FXmacPhyRead(instance_p, phy_addr, PHY_CONTROL_REG_OFFSET, &amp;mut control);
+    if ret != FT_SUCCESS {
+        error!("FXmacConfigureIeeePhySpeed, read PHY_AUTONEGO_ADVERTISE_REG is error.");
+        return ret;
+    }
+    info!("PHY_CONTROL_REG_OFFSET is {:#x}.", control);
+
+    control &amp;= !PHY_CONTROL_LINKSPEED_1000M;
+    control &amp;= !PHY_CONTROL_LINKSPEED_100M;
+    control &amp;= !PHY_CONTROL_LINKSPEED_10M;
+
+    if speed == 100 {
+        control |= PHY_CONTROL_LINKSPEED_100M;
+    } else if speed == 10 {
+        control |= PHY_CONTROL_LINKSPEED_10M;
+    }
+
+    if duplex_mode == 1 {
+        control |= PHY_CONTROL_FULL_DUPLEX_MASK;
+    } else {
+        control &amp;= !PHY_CONTROL_FULL_DUPLEX_MASK;
+    }
+
+    control &amp;= !PHY_CONTROL_AUTONEGOTIATE_ENABLE;
+    control &amp;= !PHY_CONTROL_AUTONEGOTIATE_RESTART;
+
+    let ret = FXmacPhyWrite(instance_p, phy_addr, PHY_CONTROL_REG_OFFSET, control);
+    if ret != FT_SUCCESS {
+        error!("FXmacConfigureIeeePhySpeed, write PHY_AUTONEGO_ADVERTISE_REG is error.");
+        return ret;
+    }
+
+    super::utils::msdelay(1500);
+
+    let ret = FXmacPhyRead(instance_p, phy_addr, PHY_SPECIFIC_STATUS_REG, &amp;mut specific_reg);
+    if ret != FT_SUCCESS {
+        error!("FXmacConfigureIeeePhySpeed, read PHY_SPECIFIC_STATUS_REG is error.");
+        return ret;
+    }
+
+    info!("Specific reg is {:#x}", specific_reg);
+
+    if (specific_reg &amp; (1 &lt;&lt; 13)) != 0 {
+        info!("Duplex is full.");
+        instance_p.config.duplex = 1;
+    } else {
+        info!("Duplex is half.");
+        instance_p.config.duplex = 0;
+    }
+
+    if (specific_reg &amp; 0xC000) == PHY_SPECIFIC_STATUS_SPEED_100M {
+        info!("Speed is 100M.");
+        instance_p.config.speed = 100;
+    } else {
+        info!("Speed is 10M.");
+        instance_p.config.speed = 10;
+    }
+
+    FT_SUCCESS
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>功能</strong>：配置 YT8521 的速率（10/100/1000 Mbps）和双工模式（全/半双工），禁用自协商。</p>
+<p><strong>实现</strong>：</p>
+<ul>
+<li>写入 Auto-Negotiation 寄存器（0x04，PHY_AUTONEGO_ADVERTISE_REG），设置支持 10/100 Mbps 全/半双工（PHY_AUTOADVERTISE_100FULL 等）。</li>
+<li>读取 Control 寄存器（0x00，PHY_CONTROL_REG_OFFSET），清除速率（PHY_CONTROL_LINKSPEED_1000M 等）和自协商（PHY_CONTROL_AUTONEGOTIATE_ENABLE）。</li>
+<li>根据 speed（10/100）和 duplex_mode（0/1）设置 Control 寄存器，写入新值。</li>
+<li>延迟 1500ms（msdelay）等待 PHY 稳定。</li>
+<li>读取 Specific Status 寄存器（0x11，PHY_SPECIFIC_STATUS_REG），更新 instance_p.config.duplex（bit 13）和 instance_p.config.speed（bit 14-15）。</li>
+<li>返回 FT_SUCCESS（0）表示成功，错误时记录日志并返回非 0。</li>
+</ul>
+<p><strong>飞腾派应用</strong>：强制设置 Ethernet1 的 YT8521 为 100 Mbps 全双工，适配低速设备。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter6/6_2_gmac_ethernet.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter6/6_4_net_device.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter6/6_2_gmac_ethernet.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter6/6_4_net_device.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

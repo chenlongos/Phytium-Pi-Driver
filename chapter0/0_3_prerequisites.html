@@ -1,0 +1,335 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>前置知识引导 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="03-前置知识引导"><a class="header" href="#03-前置知识引导">0.3 前置知识引导</a></h1>
+<p>本章节主要针对在飞腾派上对arceos开发驱动所需的一些前置知识进行简单的介绍</p>
+<h2 id="what-is-arceos"><a class="header" href="#what-is-arceos">What is Arceos?</a></h2>
+<p>Arceos是基于组件化思想构造、以 Rust 为主要开发语言、Unikernel 形态的操作系统。与传统操作系统的构建方式不同，组件是构成 ArceOS 的基本元素。</p>
+<h3 id="what-is-rust"><a class="header" href="#what-is-rust">What is Rust？</a></h3>
+<p>Rust 最早是 Mozilla 雇员 Graydon Hoare 的个人项目。从 2009 年开始，得到了 Mozilla 研究院的资助，2010 年项目对外公布，2010 ～ 2011 年间实现自举。自此以后，Rust 在部分重构 -&gt; 崩溃的边缘反复横跳（历程极其艰辛），终于，在 2015 年 5 月 15 日发布 1.0 版。</p>
+<ul>
+<li>
+<p>相比 Go 语言，Rust 语言表达能力更强，性能更高。同时线程安全方面 Rust 也更强，不容易写出错误的代码。包管理 Rust 也更好，Go 虽然在 1.10 版本后提供了包管理，但是目前还比不上 Rust 。</p>
+</li>
+<li>
+<p>相比 C++ 语言，Rust 与 C++ 的性能旗鼓相当，但是在安全性方面 Rust 会更优，特别是使用第三方库时，Rust 的严格要求会让三方库的质量明显高很多。</p>
+</li>
+<li>
+<p>相比 Java 语言，除了极少数纯粹的数字计算性能，Rust 的性能全面领先于 Java 。同时 Rust 占用内存小的多，因此实现同等规模的服务，Rust 所需的硬件成本会显著降低。</p>
+</li>
+</ul>
+<p>这里是部分 Rust 学习相关资料的链接：</p>
+<ul>
+<li>Rust程序设计语言中文版（https://www.rustwiki.org.cn/zh-CN/book/ch01-02-hello-world.html）</li>
+<li>Rust语言圣经（https://course.rs/into-rust.html）</li>
+<li>Rustling（编程题库，可以在实践中对照学习具体用法，具体练习方法在仓库文档中）（https://github.com/LearningOS/rustling-25S-template）</li>
+</ul>
+<h3 id="what-is-unikernel"><a class="header" href="#what-is-unikernel">What is Unikernel？</a></h3>
+<p>Unikernel 是操作系统内核设计的一种架构（或称形态），从下图对比可以看出它与其它内核架构的显著区别：
+<img src="./img/0_3_Unikernel(1).png" alt="" />
+Unikernel 相对其它内核架构有三个特点：</p>
+<p>单特权级：应用与内核都处于同一特权级 - 即内核态，这使得应用在访问内核时，不需要特权级的切换。
+单地址空间：应用没有单独的地址空间，而是共享内核的地址空间，所以在运行中，也不存在应用与内核地址空间切换的问题。
+单应用：整个操作系统有且仅有一个应用，所以没有多应用之间隔离、共享及切换的问题。
+所以相对于其它内核架构，Unikernel 设计实现的复杂度更低，运行效率相对较高，但在安全隔离方面，它的能力最弱。Unikernel 有它适合的特定的应用领域和场景。</p>
+<p>ArceOS 选择 Unikernel 作为起步，希望为将来支持其它的内核架构建立基础。本实验指导正是对应这一阶段，从零开始一步一步的构建 Unikernel 形态的操作系统。Unikernel 本身这种简化的设计，可以让我们暂时忽略那些复杂的方面，把精力集中到最核心的问题上。
+<img src="./img/0_3_Arceos.png" alt="" /></p>
+<p>上图就是 ArceOS 的整体架构，由apps、crates、modules组成</p>
+<ul>
+<li>apps: 应用程序。它的运行需要依赖于modules组件库。</li>
+<li>modules: ArceOS的组件库。</li>
+<li>crates: 通用的基础库。为modules实现提供支持。</li>
+</ul>
+<p>本开发手册主要针对 ArceOS 在 Phytium-Pi上开发驱动进行辅助说明，因此对于apps部分不作过多说明，主要对于目前已实现的crates和modules进行说明以辅助开发人员查询</p>
+<h3 id="crates"><a class="header" href="#crates">Crates</a></h3>
+<ul>
+<li>allocator: 内存分配算法，包括：bitmap、buddy、slab、tlsf。</li>
+<li>arm_gic: ARM通用中断控制器 (GICv2) 。</li>
+<li>arm_pl011: ARM串行通信接口，用于处理器和外部设备之间的串行通信 。</li>
+<li>axerrno: ArceOS的错误码定义。</li>
+<li>axfs_devfs: ArceOS的设备（Device）文件系统，是axfs_vfs一种实现。</li>
+<li>axfs_ramfs: ArceOS的内存（RAM）文件系统，是axfs_vfs一种实现。</li>
+<li>axfs_vfs: ArceOS的虚拟文件系统接口。</li>
+<li>axio: no_std环境下的I/O traits 。</li>
+<li>capability: Capability-based security 通过设置访问权限控制对系统资源的访问。</li>
+<li>crate_interface: 提供一种在 crate 中定义接口（特征）的方法，其目的是解决循环依赖。</li>
+<li>driver_block: 通用的块存储（磁盘）驱动程序的接口定义。</li>
+<li>driver_common: ArceOS的通用设备驱动接口定义，包括：disk、serial port、 ethernet card、GPU。</li>
+<li>driver_display: 通用的图形设备驱动程序接口定义。</li>
+<li>driver_net: 通用的网络设备 (NIC) 驱动程序定义。</li>
+<li>driver_pci: 定义对PCI总线操作。</li>
+<li>driver_virtio: 实现在driver_common定义的驱动。</li>
+<li>flatten_objects: 为每个存储对象分配一个唯一的ID。</li>
+<li>handler_table: 无锁的事件处理程序表。</li>
+<li>kernel_guard: 利用RAII创建具有本地IRQ或禁用抢占的临界区，用于在内核中实现自旋锁。</li>
+<li>lazy_init: 延迟初始化。</li>
+<li>linked_list: 链表。</li>
+<li>memory_addr: 提供理物理和虚拟地址操作的辅助函数。</li>
+<li>page_table: 页表。</li>
+<li>page_table_entry: 页表项。</li>
+<li>percpu: per-CPU的数据结构。</li>
+<li>percpu_macros: per-CPU的数据结构的宏实现。</li>
+<li>ratio: 比率相关计算。</li>
+<li>scheduler: 统一的调度算法接口，包括：cfs、fifo、round_robin。</li>
+<li>slab_allocator: no_std 环境下的 Slab 分配器（一种内存管理算法）。</li>
+<li>spinlock: no_std 环境下的自旋锁实现。</li>
+<li>timer_list: 定时器，在计时器到期时触发。</li>
+<li>tuple_for_each: 提供遍历tuple字段的宏和方法。</li>
+</ul>
+<p>crates可以在 https://crates.io/ 进行具体查询</p>
+<h3 id="modules"><a class="header" href="#modules">Modules</a></h3>
+<ul>
+<li>axalloc: ArceOS 的全局内存分配器.</li>
+<li>axconfig: ArceOS 特定平台编译的常量和参数配置。</li>
+<li>axdisplay: ArceOS 的图形化模块。</li>
+<li>axdma: ArceOS 中为需要直接内存访问的设备驱动提供DMA支持。</li>
+<li>axdriver: ArceOS 的设备驱动模块。</li>
+<li>axfs: ArceOS 的文件系统模块。</li>
+<li>axhal: ArceOS硬件抽象层，为特定平台的操作提供统一的API。</li>
+<li>axlog: ArceOS 多个级别日志记录宏，包括：error、warn、info、debug、trace。</li>
+<li>axmm: ArceOS 的内存管理模块，提供虚拟内存地址空间抽象，支持线性映射和按需分配映射</li>
+<li>axnet: ArceOS 的网络模块，包括：IpAddr、TcpSocket、UdpSocket、DnsSocket等。</li>
+<li>axns: ArceOS 中用于命名空间管理功能的模块</li>
+<li>axruntime: ArceOS 的运行时库，负责系统启动和初始化序列，协调其他模块的初始化过程,是应用程序运行的基础环境。</li>
+<li>axsync: ArceOS 提供的同步操作模块，包括：Mutex、spin。</li>
+<li>axtask: ArceOS 的任务调度管理模块，包括：任务创建、调度、休眠、销毁等。</li>
+</ul>
+<p>值得注意的是，并非所有模块都是必需的，其中axruntime、axhal、axconfig、axlog在所有构建中都会被启用并编译，而其他模块则会根据启动的功能特性进行选择性的编译，使得ArceOS可以根据不同的需求进行定制化构建</p>
+<p>ArceOS最新主线仓库（https://github.com/arceos-org/arceos）</p>
+<h2 id="phytium-pi"><a class="header" href="#phytium-pi">Phytium-Pi</a></h2>
+<ul>
+<li>顶层接口视图与说明
+<img src="./img/0_3_Phytium-Pi.png" alt="" /></li>
+<li>底层接口视图与说明
+<img src="./img/0_3_Phytium-Pi(bottom).png.png" alt="" /></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter0/0_2_dev_env.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter1/chapter_1.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter0/0_2_dev_env.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter1/chapter_1.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

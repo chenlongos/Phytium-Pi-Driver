@@ -1,0 +1,271 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>net_device实现 - 飞腾派驱动开发实验指导书</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">飞腾派驱动开发实验指导书</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="66-net_device-实现"><a class="header" href="#66-net_device-实现">6.6 net_device 实现</a></h1>
+<h3 id="飞腾派-net_device-api-调用表"><a class="header" href="#飞腾派-net_device-api-调用表">飞腾派 net_device API 调用表</a></h3>
+<p>飞腾派（Phytium Pi）网卡设备驱动（Fxmac）提供以下 API，用于初始化、配置 PHY、处理中断和数据传输。API 基于 fxmac.rs、fxmac_phy.rs、fxmac_intr.rs 等文件，适配 Fxmac 控制器（基址 0x3200_C000/0x3200_E000）和 YT8521 PHY（SGMII 接口）。表中列出函数名、参数、返回值和功能描述。</p>
+<div class="table-wrapper"><table><thead><tr><th><strong>函数名</strong></th><th><strong>参数</strong></th><th><strong>返回值</strong></th><th><strong>功能描述</strong></th></tr></thead><tbody>
+<tr><td><code>FXmacPhyInit</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。 <code>phy_addr: u32</code> - PHY 地址。</td><td><code>u32</code> - 0（成功），非 0（失败）。</td><td>初始化 YT8521 PHY，配置默认速率和自协商，通过 MDIO 接口设置寄存器。</td></tr>
+<tr><td><code>FXmacPhyRead</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。 <code>phy_addr: u32</code> - PHY 地址。 <code>reg_addr: u32</code> - 寄存器地址。 <code>data: &amp;mut u16</code> - 数据指针。</td><td><code>u32</code> - 0（成功），非 0（失败）。</td><td>通过 MDIO 接口读取 YT8521 寄存器（如 Status 0x01）。</td></tr>
+<tr><td><code>FXmacPhyWrite</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。 <code>phy_addr: u32</code> - PHY 地址。 <code>reg_addr: u32</code> - 寄存器地址。 <code>data: u16</code> - 写入数据。</td><td><code>u32</code> - 0（成功），非 0（失败）。</td><td>通过 MDIO 接口写入 YT8521 寄存器（如 Control 0x00）。</td></tr>
+<tr><td><code>phy_link_detect</code></td><td><code>xmac_p: &amp;mut FXmac</code> - Fxmac 实例。 <code>phy_addr: u32</code> - PHY 地址。</td><td><code>u32</code> - 1（连接），0（断开）。</td><td>读取 Status 寄存器（0x01）检测链路状态（bit 2）。</td></tr>
+<tr><td><code>phy_autoneg_status</code></td><td><code>xmac_p: &amp;mut FXmac</code> - Fxmac 实例。 <code>phy_addr: u32</code> - PHY 地址。</td><td><code>u32</code> - 1（完成），0（未完成）。</td><td>读取 Status 寄存器（0x01）检查自协商状态（bit 5）。</td></tr>
+<tr><td><code>FXmacConfigureIeeePhySpeed</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。 <code>phy_addr: u32</code> - PHY 地址。 <code>speed: u32</code> - 速率（10/100/1000）。 <code>duplex_mode: u32</code> - 双工模式（0=半双工，1=全双工）。</td><td><code>u32</code> - 0（成功），非 0（失败）。</td><td>配置 YT8521 速率和双工模式，禁用自协商，更新 Control 寄存器和 NET_CFG。</td></tr>
+<tr><td><code>FXmacSetupIsr</code></td><td><code>instance: &amp;mut FXmac</code> - Fxmac 实例。</td><td>无</td><td>设置中断处理程序，注册 TX/RX/Error/LinkChange 处理函数，通过 <code>dma_request_irq</code> 分配 IRQ。</td></tr>
+<tr><td><code>FXmacRecvIsrHandler</code></td><td><code>instance: &amp;mut FXmac</code> - Fxmac 实例。</td><td>无</td><td>处理接收中断，更新 <code>recv_flg</code>，调用 <code>ethernetif_input_to_recv_packets</code> 处理数据。</td></tr>
+<tr><td><code>FXmacHandleDmaTxError</code></td><td><code>instance_p: &amp;mut FXmac</code> - Fxmac 实例。</td><td>无</td><td>处理 DMA 发送错误，重置 TX 队列和描述符。</td></tr>
+</tbody></table>
+</div>
+<h2 id="代码实现讲解"><a class="header" href="#代码实现讲解">代码实现讲解</a></h2>
+<p>YT8521 驱动实现位于 fxmac_phy.rs，与 Fxmac 控制器（fxmac.rs）协同，通过 MDIO 接口操作 YT8521 的 MII 寄存器（如 Control 0x00, Status 0x01）。代码依赖 fxmac_const.rs 和 mii_const.rs 的常量，支持初始化、速率配置和中断处理。以下从初始化、MDIO 操作到中断逻辑逐一讲解，结合飞腾派 D2000 硬件（双网口，SGMII 接口）。</p>
+<h3 id="初始化与配置实现"><a class="header" href="#初始化与配置实现">初始化与配置实现</a></h3>
+<p>初始化通过 FXmacPhyInit 启动，配置默认参数，并调用 FXmacConfigureIeeePhySpeed 设置速率和双工。</p>
+<ul>
+<li><strong>FXmacPhyInit</strong>：设置 PHY 地址（phy_addr），调用 FXmacConfigureIeeePhySpeed 配置 1000 Mbps 全双工和自协商。更新 instance_p.config.speed 和 instance_p.config.duplex，返回 FT_SUCCESS（0）。</li>
+<li><strong>FXmacConfigureIeeePhySpeed</strong>：写入 Auto-Negotiation 寄存器（0x04），设置支持 10/100 Mbps 全/半双工。读取/修改 Control 寄存器（0x00），清除速率位（PHY_CONTROL_LINKSPEED_1000M 等）和自协商位（PHY_CONTROL_AUTONEGOTIATE_ENABLE），根据 speed 和 duplex_mode 设置新值。延迟 1500 ms 稳定 PHY，读取 Specific Status 寄存器（0x11）更新配置，返回 FT_SUCCESS。飞腾派应用：配置 YT8521 为 100 Mbps 全双工，匹配 SGMII 接口。</li>
+</ul>
+<h3 id="mdio-操作实现"><a class="header" href="#mdio-操作实现">MDIO 操作实现</a></h3>
+<p>MDIO 接口通过 PHY_MGMT 寄存器（偏移 0x034）访问 YT8521 寄存器，支持读写操作。</p>
+<ul>
+<li><strong>FXmacPhyRead</strong>：使用 PHY_MGMT 设置 PHY 地址（phy_addr）和寄存器地址（reg_addr），读取数据存入 data（u16）。返回 FT_SUCCESS（0）。</li>
+<li><strong>FXmacPhyWrite</strong>：类似读操作，设置地址并写入 data。返回 FT_SUCCESS（0）。</li>
+<li><strong>细节</strong>：操作基于 read_reg/write_reg（fxmac.rs），访问 Fxmac MMIO（基址 0x3200_C000）。飞腾派应用：读取 Status 寄存器（0x01）检查 LINK_UP (bit 2)。</li>
+</ul>
+<h3 id="中断与状态检测实现"><a class="header" href="#中断与状态检测实现">中断与状态检测实现</a></h3>
+<p>中断处理在 fxmac_intr.rs 中实现，FXmacSetupIsr 注册回调函数。</p>
+<ul>
+<li><strong>phy_link_detect</strong>：调用 FXmacPhyRead 读取 Status 寄存器（0x01），检查 PHY_STAT_LINK_STATUS（bit 2），返回 1（连接）或 0（断开）。</li>
+<li><strong>phy_autoneg_status</strong>：读取 Status 寄存器，检查 PHY_STATUS_AUTONEGOTIATE_COMPLETE（bit 5），返回 1（完成）或 0（未完成）。</li>
+<li><strong>FXmacSetupIsr</strong>：注册中断处理程序（如 FXmacRecvIsrHandler 处理 RX_INTR），通过 dma_request_irq 分配 IRQ（如 FXMAC0_QUEUE0_IRQ_NUM=87）。飞腾派应用：处理 YT8521 的 LINK_CHANGE 中断（bit 1），更新 link_status（FXMAC_LINKUP=1）。</li>
+<li><strong>FXmacRecvIsrHandler</strong>：清除中断（FXMAC_IDR_OFFSET），更新 recv_flg，调用 ethernetif_input_to_recv_packets 处理接收数据。</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter6/6_3_yt8521_driver.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter7/chapter_7.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter6/6_3_yt8521_driver.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter7/chapter_7.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>
